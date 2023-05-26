@@ -22,6 +22,7 @@ def format_code(context):
     context.run("black . ", pty=True)
     context.run("isort --profile black .", pty=True)
 
+
 @task
 def test(context, args="", path=""):
     """execute pytest with coverage
@@ -35,6 +36,7 @@ def test(context, args="", path=""):
             f"../tests{'/' + path if path else ''}",
             pty=True,
         )
+
 
 @task
 def generate_xml_report(context):
