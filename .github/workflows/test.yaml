@@ -1,0 +1,29 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  check-qa:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+
+      - name: Setup dependencies.
+        working-directory: backend
+        run: |
+          pip install --upgrade pipenv
+          pipenv sync --dev
+
+      - name: Run tests
+        working-directory: backend
+        run: |
+          pipenv run invoke test --args "-v"
+          pipenv run invoke generate-xml-report
+          pwd
+
