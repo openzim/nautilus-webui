@@ -9,18 +9,18 @@ def check_format(context):
 
 @task
 def check_black(context):
-    context.run("black . --check")
+    context.run("black . --check", pty=True)
 
 
 @task
 def check_isort(context):
-    context.run("isort --profile black --check .")
+    context.run("isort --profile black --check .", pty=True)
 
 
 @task
 def format_code(context):
-    context.run("black . ")
-    context.run("isort --profile black .")
+    context.run("black . ", pty=True)
+    context.run("isort --profile black .", pty=True)
 
 @task
 def test(context, args="", path=""):
@@ -35,4 +35,8 @@ def test(context, args="", path=""):
             f"../tests{'/' + path if path else ''}",
             pty=True,
         )
+
+@task
+def generate_xml_report(context):
+    with context.cd("src"):
         context.run("coverage xml", pty=True)

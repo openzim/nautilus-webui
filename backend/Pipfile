@@ -21,6 +21,6 @@ python_version = "3.11"
 
 [scripts]
 start = "uvicorn src.backend.main:app --reload"
-tests = "pytest --cov=src/backend test"
+tests = "invoke test"
 check = "invoke check-format"
 format = "invoke format-code"
