@@ -39,16 +39,14 @@ def test(context, args="", path=""):
 
     args: additional pytest args to pass. ex: -x -v
     path: sub-folder or test file to test to limit scope"""
-    with context.cd("src"):
-        context.run(
-            "pytest --cov=backend "
-            f"--cov-report term-missing {args} "
-            f"../tests{'/' + path if path else ''}",
-            pty=True,
-        )
+    context.run(
+        "pytest --cov=src/backend "
+        f"--cov-report term-missing {args} "
+        f"./tests{'/' + path if path else ''}",
+        pty=True,
+    )
 
 
 @task
 def generate_xml_report(context):
-    with context.cd("src"):
-        context.run("coverage xml", pty=True)
+    context.run("coverage xml", pty=True)
