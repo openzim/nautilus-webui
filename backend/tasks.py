@@ -4,17 +4,27 @@ from invoke.tasks import task
 @task
 def check_format(context):
     check_black(context)
+    check_flake8(context)
     check_isort(context)
 
 
 @task
 def check_black(context):
+    print("### Black ###")
     context.run("black . --check", pty=True)
 
 
 @task
 def check_isort(context):
+    print("### isort ###")
     context.run("isort --profile black --check .", pty=True)
+
+
+@task
+def check_flake8(context):
+    print("### Flake8 ###")
+    context.run("flake8 --version", pty=True)
+    context.run("flake8 . --count --statistics", pty=True)
 
 
 @task

@@ -3,7 +3,7 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  check-qa:
+  tests:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +18,7 @@ jobs:
         working-directory: backend
         run: |
           pip install --upgrade pipenv
-          pipenv sync --dev
+          pipenv sync
 
       - name: Run tests
         working-directory: backend
@@ -26,4 +26,3 @@ jobs:
           pipenv run invoke test --args "-v"
           pipenv run invoke generate-xml-report
           pwd
-

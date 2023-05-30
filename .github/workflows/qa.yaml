@@ -3,7 +3,7 @@ name: QA
 on: [push, pull_request]
 
 jobs:
-  check-qa:
+  qa:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -18,11 +18,15 @@ jobs:
         working-directory: backend
         run: |
           pip install --upgrade pipenv
-          pipenv sync --dev
+          pipenv sync
 
       - name: Check black formatting
         working-directory: backend
         run: pipenv run invoke check-black
+
+      - name: Check flake8 formatting
+        working-directory: backend
+        run: pipenv run invoke check-flake8
 
       - name: Check import order with isort
         working-directory: backend
