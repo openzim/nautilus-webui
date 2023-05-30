@@ -1,6 +1,9 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: [main]
 
 jobs:
   tests:
@@ -31,4 +34,3 @@ jobs:
         with:
           working-directory: backend
           fail_ci_if_error: true
-          verbose: true
