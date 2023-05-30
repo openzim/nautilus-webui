@@ -16,4 +16,6 @@ pipenv run start
 pipenv run tests
 # Format code
 pipenv run format
+# Check format.
+pipenv run format:check
 ```
