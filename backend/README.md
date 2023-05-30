@@ -2,7 +2,10 @@
 
 ## Dependencies
 ```bash
-pipenv sync --dev
+# Install all the dependencies.
+pipenv sync
+# Update dependencies.
+pipenv install
 ```
 
 ## Development
