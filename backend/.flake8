@@ -1,0 +1,4 @@
+# At the moment falke8 does not support the pyproject.toml. So we have to keep this file.
+[flake8]
+max-line-length = 88
+extend-ignore = E203

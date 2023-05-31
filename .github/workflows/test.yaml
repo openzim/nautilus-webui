@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+
+      - name: Setup dependencies.
+        working-directory: backend
+        run: |
+          pip install --upgrade pipenv
+          pipenv sync
+
+      - name: Run tests
+        working-directory: backend
+        run: |
+          pipenv run invoke test --args "-v"
+          pipenv run invoke generate-xml-report
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          working-directory: backend
+          fail_ci_if_error: true
