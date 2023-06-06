@@ -12,7 +12,7 @@ nautilus-webui = {editable = true, extras = ["dev"], path = "."}
 python_version = "3.11"
 
 [scripts]
-start = "uvicorn src.backend.main:app --reload"
+start = "uvicorn src.backend.entrypoint:app --reload"
 tests = "invoke test"
 format = "invoke format-code"
 "format:check" = "invoke check-format"
