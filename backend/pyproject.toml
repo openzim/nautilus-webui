@@ -10,9 +10,12 @@ description = "SaaS Web UI for nautilus"
 readme = "README.md"
 license = {text = "GPL-3.0-or-later"}
 dependencies = [
-    "fastapi <1.0.0,>=0.95.2",
+    "fastapi <1.0.0,>=0.96.0",
     "uvicorn[standard] <1.0.0,>=0.22.0",
     "httpx <1.0.0,>=0.24.1",
+    "SQLAlchemy <3.0.0,>=2.0.15",
+    "alembic <2.0.0,>=1.11.1",
+    "psycopg2 <3.0.0,>=2.9.6",
 ]
 
 [project.optional-dependencies]
