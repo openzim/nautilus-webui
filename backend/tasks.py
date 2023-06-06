@@ -1,9 +1,11 @@
 from invoke.tasks import task
 
+
 @task
 def init_database(context):
     with context.cd("src"):
         context.run("alembic upgrade head", pty=True)
+
 
 @task
 def check_format(context):
