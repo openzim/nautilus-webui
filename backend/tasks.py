@@ -30,7 +30,8 @@ def check_flake8(context):
 @task
 def format_code(context):
     context.run("black . ", pty=True)
-    context.run("isort --profile black .", pty=True)
+    context.run("isort --profile black . --filter-files", pty=True)
+    context.run("flake8 .", pty=True)
 
 
 @task
