@@ -20,6 +20,8 @@ DATABASE_URL=postgresql+psycopg2://username:password@host/database
 
 Dev commands:
 ```bash
+# Init database
+pipenv run init
 # Start FastAPI
 pipenv run start
 # Run tests
