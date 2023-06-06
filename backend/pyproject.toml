@@ -16,6 +16,7 @@ dependencies = [
     "SQLAlchemy <3.0.0,>=2.0.15",
     "alembic <2.0.0,>=1.11.1",
     "psycopg2 <3.0.0,>=2.9.6",
+    "SQLAlchemy-Utils <1.0.0,>=0.41.1",
 ]
 
 [project.optional-dependencies]
