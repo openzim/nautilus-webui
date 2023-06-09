@@ -1,8 +1,8 @@
 """First revision
 
-Revision ID: aef702526f6c
-Revises:
-Create Date: 2023-06-08 22:42:36.681523
+Revision ID: 774f52cdfeac
+Revises: 
+Create Date: 2023-06-08 23:35:43.347022
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlalchemy_utils
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "aef702526f6c"
+revision = "774f52cdfeac"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
             "id", sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False
         ),
         sa.Column("name", sa.String(), nullable=False),
-        sa.Column("created_on", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("created_on", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_users_id"), "users", ["id"], unique=False)
@@ -41,10 +41,10 @@ def upgrade() -> None:
         ),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column(
-            "email", sqlalchemy_utils.types.email.EmailType(length=255), nullable=True
+            "email", sqlalchemy_utils.types.email.EmailType(length=255), nullable=False
         ),
-        sa.Column("created_on", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("expire_on", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("created_on", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("expire_on", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["users.id"],
@@ -63,8 +63,8 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("filename", sa.String(), nullable=False),
-        sa.Column("created_on", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("requested_on", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("created_on", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("requested_on", sa.DateTime(timezone=True), nullable=False),
         sa.Column("download_url", sa.String(), nullable=False),
         sa.Column("collection_json_path", sa.String(), nullable=False),
         sa.Column("status", sa.String(), nullable=False),
