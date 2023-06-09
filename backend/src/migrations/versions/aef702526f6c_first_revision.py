@@ -1,8 +1,8 @@
-"""Fist revision
+"""First revision
 
-Revision ID: 3a52e666ee27
+Revision ID: aef702526f6c
 Revises:
-Create Date: 2023-06-06 14:01:32.093678
+Create Date: 2023-06-08 22:42:36.681523
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlalchemy_utils
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "3a52e666ee27"
+revision = "aef702526f6c"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,12 +43,7 @@ def upgrade() -> None:
         sa.Column(
             "email", sqlalchemy_utils.types.email.EmailType(length=255), nullable=True
         ),
-        sa.Column(
-            "created_on",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=True,
-        ),
+        sa.Column("created_on", sa.DateTime(timezone=True), nullable=True),
         sa.Column("expire_on", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(
             ["user_id"],
@@ -95,6 +90,7 @@ def upgrade() -> None:
         sa.Column("filename", sa.String(), nullable=False),
         sa.Column("title", sa.String(), nullable=False),
         sa.Column("authors", sa.String(), nullable=False),
+        sa.Column("description", sa.String(), nullable=False),
         sa.Column("hash", sa.String(), nullable=False),
         sa.Column("path", sa.String(), nullable=False),
         sa.Column("type", sa.String(), nullable=False),
