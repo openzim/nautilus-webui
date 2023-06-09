@@ -135,5 +135,5 @@ class Archive(Base):
     download_url: Mapped[str]
     collection_json_path: Mapped[str]
     status: Mapped[str]
-    zimfarm_task_id: Mapped[str]
+    zimfarm_task_id: Mapped[UUID]
     config: Mapped[Dict[str, Any]]
