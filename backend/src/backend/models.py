@@ -1,16 +1,50 @@
-import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from uuid import UUID
+
+from sqlalchemy import DateTime, ForeignKey, String, text
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.ext.mutable import MutableDict, MutableList
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    MappedAsDataclass,
+    mapped_column,
+    relationship,
+)
+from sqlalchemy.sql.schema import MetaData
 
 
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy import UUID, DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy_utils import EmailType, JSONType, UUIDType
+class Base(MappedAsDataclass, DeclarativeBase):
+    # This map details the specific transformation of types between Python and
+    # PostgreSQL. This is only needed for the case where a specific PostgreSQL
+    # type has to be used or when we want to ensure a specific setting (like the
+    # timezone below)
+    type_annotation_map = {
+        Dict[str, Any]: MutableDict.as_mutable(
+            JSONB
+        ),  # transform Python Dict[str, Any] into PostgreSQL JSONB
+        List[Dict[str, Any]]: MutableList.as_mutable(JSONB),
+        datetime: DateTime(
+            timezone=False
+        ),  # transform Python datetime into PostgreSQL Datetime without timezone
+        List[str]: ARRAY(
+            item_type=String
+        ),  # transform Python List[str] into PostgreSQL Array of strings
+    }
 
-from backend.constants import COLLECTION_EXPIRE_AFTER
-
-from .database import Base
+    # This metadata specifies some naming conventions that will be used by
+    # alembic to generate constraints names (indexes, unique constraints, ...)
+    metadata = MetaData(
+        naming_convention={
+            "ix": "ix_%(column_0_label)s",
+            "uq": "uq_%(table_name)s_%(column_0_name)s",
+            "ck": "ck_%(table_name)s_%(constraint_name)s",
+            "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+            "pk": "pk_%(table_name)s",
+        }
+    )
+    pass
 
 
 class User(Base):
@@ -21,16 +55,13 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(
-        UUIDType(binary=False), primary_key=True, default=uuid.uuid4, index=True
+        init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    name: Mapped[str] = mapped_column(
-        String, unique=True, index=True, nullable=False, default=""
-    )
-    created_on: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True), default=datetime.utcnow()
-    )
+    created_on: Mapped[datetime]
 
-    collections: Mapped[List["Collection"]] = relationship(back_populates="user")
+    collections: Mapped[List["Collection"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", init=False
+    )
 
 
 class Collection(Base):
@@ -43,20 +74,15 @@ class Collection(Base):
     __tablename__ = "collections"
 
     id: Mapped[UUID] = mapped_column(
-        UUIDType(binary=False), primary_key=True, default=uuid.uuid4, index=True
+        init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    name: Mapped[str] = mapped_column(String, nullable=False, default="")
-    email: Mapped[EmailType] = mapped_column(EmailType)
-    created_on: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True), default=datetime.utcnow()
-    )
-    expire_on: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True),
-        default=datetime.utcnow() + COLLECTION_EXPIRE_AFTER,
-    )
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+    name: Mapped[str]
+    email: Mapped[Optional[str]]
+    created_on: Mapped[datetime]
+    expire_on: Mapped[datetime]
 
-    user: Mapped[User] = relationship(back_populates="collections")
+    user: Mapped[User] = relationship(back_populates="collections", init=False)
 
     files: Mapped[List["File"]] = relationship()
     archives: Mapped[List["Archive"]] = relationship()
@@ -72,17 +98,19 @@ class File(Base):
     __tablename__ = "files"
 
     id: Mapped[UUID] = mapped_column(
-        UUIDType(binary=False), primary_key=True, default=uuid.uuid4, index=True
+        init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    collection_id: Mapped[UUID] = mapped_column(ForeignKey("collections.id"))
+    collection_id: Mapped[UUID] = mapped_column(
+        ForeignKey("collections.id"), init=False
+    )
 
-    filename: Mapped[str] = mapped_column(String)
-    title: Mapped[str] = mapped_column(String)
-    authors: Mapped[Optional[List[str]]] = mapped_column(ARRAY(String))
-    description: Mapped[Optional[str]] = mapped_column(String)
-    hash: Mapped[str] = mapped_column(String)
-    path: Mapped[str] = mapped_column(String)
-    type: Mapped[str] = mapped_column(String)
+    filename: Mapped[str]
+    title: Mapped[str]
+    authors: Mapped[Optional[List[str]]]
+    description: Mapped[Optional[str]]
+    hash: Mapped[str]
+    path: Mapped[str]
+    type: Mapped[str]
 
 
 class Archive(Base):
@@ -95,17 +123,17 @@ class Archive(Base):
     __tablename__ = "archives"
 
     id: Mapped[UUID] = mapped_column(
-        UUIDType(binary=False), primary_key=True, default=uuid.uuid4, index=True
+        init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    collection_id: Mapped[UUID] = mapped_column(ForeignKey("collections.id"))
+    collection_id: Mapped[UUID] = mapped_column(
+        ForeignKey("collections.id"), init=False
+    )
 
-    filename: Mapped[str] = mapped_column(String, nullable=False, default="")
-    created_on: Mapped[DateTime] = mapped_column(DateTime(timezone=True))
-    requested_on: Mapped[DateTime] = mapped_column(DateTime(timezone=True))
-    download_url: Mapped[str] = mapped_column(String, nullable=False, default="")
-    collection_json_path: Mapped[str] = mapped_column(
-        String, nullable=False, default=""
-    )
-    status: Mapped[str] = mapped_column(String, nullable=False, default="")
-    zimfarm_task_id: Mapped[str] = mapped_column(String, nullable=False, default="")
-    config: Mapped[Dict[str, Any]] = mapped_column(JSONType, nullable=False)
+    filename: Mapped[str]
+    created_on: Mapped[datetime]
+    requested_on: Mapped[datetime]
+    download_url: Mapped[str]
+    collection_json_path: Mapped[str]
+    status: Mapped[str]
+    zimfarm_task_id: Mapped[str]
+    config: Mapped[Dict[str, Any]]
