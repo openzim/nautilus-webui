@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import UUID, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import EmailType, JSONType, UUIDType
@@ -74,13 +76,13 @@ class File(Base):
     )
     collection_id: Mapped[UUID] = mapped_column(ForeignKey("collections.id"))
 
-    filename: Mapped[str] = mapped_column(String, nullable=False)
-    title: Mapped[str] = mapped_column(String, nullable=False)
-    authors: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[str] = mapped_column(String, nullable=False)
-    hash: Mapped[str] = mapped_column(String, nullable=False)
-    path: Mapped[str] = mapped_column(String, nullable=False)
-    type: Mapped[str] = mapped_column(String, nullable=False)
+    filename: Mapped[str] = mapped_column(String)
+    title: Mapped[str] = mapped_column(String)
+    authors: Mapped[Optional[List[str]]] = mapped_column(ARRAY(String))
+    description: Mapped[Optional[str]] = mapped_column(String)
+    hash: Mapped[str] = mapped_column(String)
+    path: Mapped[str] = mapped_column(String)
+    type: Mapped[str] = mapped_column(String)
 
 
 class Archive(Base):
