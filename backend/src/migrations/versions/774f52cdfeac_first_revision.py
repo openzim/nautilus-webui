@@ -1,7 +1,7 @@
 """First revision
 
 Revision ID: 774f52cdfeac
-Revises: 
+Revises:
 Create Date: 2023-06-08 23:35:43.347022
 
 """

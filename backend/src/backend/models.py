@@ -24,7 +24,9 @@ class User(Base):
     name: Mapped[str] = mapped_column(
         String, unique=True, index=True, nullable=False, default=""
     )
-    created_on: Mapped[DateTime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow())
+    created_on: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow()
+    )
 
     collections: Mapped[List["Collection"]] = relationship(back_populates="user")
 
@@ -43,8 +45,10 @@ class Collection(Base):
     )
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     name: Mapped[str] = mapped_column(String, nullable=False, default="")
-    email: Mapped[EmailType]  = mapped_column(EmailType)
-    created_on: Mapped[DateTime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow())
+    email: Mapped[EmailType] = mapped_column(EmailType)
+    created_on: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow()
+    )
     expire_on: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True),
         default=datetime.utcnow() + COLLECTION_EXPIRE_AFTER,
