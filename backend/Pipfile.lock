@@ -641,14 +641,6 @@
             "markers": "python_version >= '3.7'",
             "version": "==2.0.15"
         },
-        "sqlalchemy-utils": {
-            "hashes": [
-                "sha256:6c96b0768ea3f15c0dc56b363d386138c562752b84f647fb8d31a2223aaab801",
-                "sha256:a2181bff01eeb84479e38571d2c0718eb52042f9afd8c194d0d02877e84b7d74"
-            ],
-            "markers": "python_version >= '3.6'",
-            "version": "==0.41.1"
-        },
         "starlette": {
             "hashes": [
                 "sha256:6a6b0d042acb8d469a01eba54e9cda6cbd24ac602c4cd016723117d6a7e73b75",
