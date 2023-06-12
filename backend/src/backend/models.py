@@ -108,6 +108,8 @@ class File(Base):
     title: Mapped[str]
     authors: Mapped[Optional[List[str]]]
     description: Mapped[Optional[str]]
+    uploaded_on: Mapped[datetime]
+    size: Mapped[int]
     hash: Mapped[str]
     path: Mapped[str]
     type: Mapped[str]

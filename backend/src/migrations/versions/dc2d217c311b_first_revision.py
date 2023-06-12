@@ -1,8 +1,8 @@
 """First revision
 
-Revision ID: 86507d5d5a07
-Revises:
-Create Date: 2023-06-09 00:49:46.620946
+Revision ID: dc2d217c311b
+Revises: 
+Create Date: 2023-06-12 10:30:15.911643
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "86507d5d5a07"
+revision = "dc2d217c311b"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -63,7 +63,7 @@ def upgrade() -> None:
         sa.Column("download_url", sa.String(), nullable=False),
         sa.Column("collection_json_path", sa.String(), nullable=False),
         sa.Column("status", sa.String(), nullable=False),
-        sa.Column("zimfarm_task_id", sa.String(), nullable=False),
+        sa.Column("zimfarm_task_id", sa.Uuid(), nullable=False),
         sa.Column("config", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.ForeignKeyConstraint(
             ["collection_id"],
@@ -85,6 +85,8 @@ def upgrade() -> None:
         sa.Column("title", sa.String(), nullable=False),
         sa.Column("authors", postgresql.ARRAY(sa.String()), nullable=True),
         sa.Column("description", sa.String(), nullable=True),
+        sa.Column("uploaded_on", sa.DateTime(), nullable=False),
+        sa.Column("size", sa.Integer(), nullable=False),
         sa.Column("hash", sa.String(), nullable=False),
         sa.Column("path", sa.String(), nullable=False),
         sa.Column("type", sa.String(), nullable=False),
