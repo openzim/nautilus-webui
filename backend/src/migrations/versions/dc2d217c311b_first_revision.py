@@ -1,7 +1,7 @@
 """First revision
 
 Revision ID: dc2d217c311b
-Revises: 
+Revises:
 Create Date: 2023-06-12 10:30:15.911643
 
 """
