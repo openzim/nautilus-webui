@@ -15,7 +15,7 @@ jobs:
           POSTGRES_PASSWORD: nautilus 
           POSTGRES_DB: nautilus
         options: >-
-          --health-cmd pg_isready -U postgres
+          --health-cmd "pg_isready --username postgres"
           --health-interval 10s
         ports:
           # Maps tcp port 5432 on service container to the host
