@@ -15,7 +15,7 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: nautilus
         options: >-
-          --health-cmd pg_isready -U postgres
+          --health-cmd pg_isready
           --health-interval 1s
     steps:
       - uses: actions/checkout@v3
