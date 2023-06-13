@@ -12,7 +12,7 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: nautilus 
+          POSTGRES_PASSWORD: nautilus
           POSTGRES_DB: nautilus
         options: >-
           --health-cmd "pg_isready --username postgres"
