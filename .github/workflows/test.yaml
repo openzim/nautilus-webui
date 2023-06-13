@@ -8,6 +8,15 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-22.04
+    services:
+      database:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: nautilus
+        options: >-
+          --health-cmd pg_isready -U postgres
+          --health-interval 1s
     steps:
       - uses: actions/checkout@v3
 
@@ -23,11 +32,20 @@ jobs:
           pip install --upgrade pipenv
           pipenv sync
 
+      - name: Setup database.
+        working-directory: backend
+        run: |
+          pipenv run init
+        env:
+          POSTGRES_URI: postgresql+psycopg://postgres:password@database/nautilus
+
       - name: Run tests
         working-directory: backend
         run: |
           pipenv run invoke test --args "-v"
           pipenv run invoke generate-xml-report
+        env:
+          POSTGRES_URI: postgresql+psycopg://postgres:password@database/nautilus
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
