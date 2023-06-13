@@ -16,6 +16,7 @@ dependencies = [
     "SQLAlchemy <3.0.0,>=2.0.15",
     "alembic <2.0.0,>=1.11.1",
     "psycopg[binary,pool] <3.2,>=3.1",
+    "pymongo <5.0.0,>=4.3.3",
 ]
 
 [project.optional-dependencies]

@@ -9,6 +9,11 @@ src_dir = pathlib.Path(__file__).parent.resolve()
 
 COLLECTION_EXPIRE_AFTER = datetime.timedelta(days=7)
 
+if not os.getenv("POSTGRES_URI"):
+    raise EnvironmentError("Please set the POSTGRES_URI environment variable")
+else:
+    POSTGRES_URI = os.getenv("POSTGRES_URI")
+
 
 @dataclass
 class BackendConf:
@@ -16,7 +21,6 @@ class BackendConf:
     Backend configuration, read from environment variables and set default values.
     """
 
-    database_url: str = os.getenv("POSTGRES_URI", f"sqlite:////{src_dir}/dev.sqlite")
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
         "http://localhost|http://localhost:8000|http://localhost:8080",

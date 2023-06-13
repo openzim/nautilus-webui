@@ -78,7 +78,6 @@ class Collection(Base):
     )
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
     name: Mapped[str]
-    email: Mapped[Optional[str]]
     created_on: Mapped[datetime]
     expire_on: Mapped[datetime]
 
@@ -105,14 +104,15 @@ class File(Base):
     )
 
     filename: Mapped[str]
+    filesize: Mapped[int]
     title: Mapped[str]
     authors: Mapped[Optional[List[str]]]
     description: Mapped[Optional[str]]
     uploaded_on: Mapped[datetime]
-    size: Mapped[int]
     hash: Mapped[str]
     path: Mapped[str]
     type: Mapped[str]
+    status: Mapped[str]
 
 
 class Archive(Base):
@@ -132,10 +132,12 @@ class Archive(Base):
     )
 
     filename: Mapped[str]
+    filesize: Mapped[int]
     created_on: Mapped[datetime]
     requested_on: Mapped[datetime]
     download_url: Mapped[str]
     collection_json_path: Mapped[str]
     status: Mapped[str]
     zimfarm_task_id: Mapped[UUID]
+    email: Mapped[Optional[str]]
     config: Mapped[Dict[str, Any]]

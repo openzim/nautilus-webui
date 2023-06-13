@@ -1,8 +1,8 @@
 """First revision
 
-Revision ID: dc2d217c311b
+Revision ID: f81b9b792705
 Revises:
-Create Date: 2023-06-12 10:30:15.911643
+Create Date: 2023-06-13 13:49:22.338938
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "dc2d217c311b"
+revision = "f81b9b792705"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,7 +40,6 @@ def upgrade() -> None:
         ),
         sa.Column("user_id", sa.Uuid(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
-        sa.Column("email", sa.String(), nullable=True),
         sa.Column("created_on", sa.DateTime(), nullable=False),
         sa.Column("expire_on", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -58,12 +57,14 @@ def upgrade() -> None:
         ),
         sa.Column("collection_id", sa.Uuid(), nullable=False),
         sa.Column("filename", sa.String(), nullable=False),
+        sa.Column("filesize", sa.Integer(), nullable=False),
         sa.Column("created_on", sa.DateTime(), nullable=False),
         sa.Column("requested_on", sa.DateTime(), nullable=False),
         sa.Column("download_url", sa.String(), nullable=False),
         sa.Column("collection_json_path", sa.String(), nullable=False),
         sa.Column("status", sa.String(), nullable=False),
         sa.Column("zimfarm_task_id", sa.Uuid(), nullable=False),
+        sa.Column("email", sa.String(), nullable=True),
         sa.Column("config", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.ForeignKeyConstraint(
             ["collection_id"],
@@ -82,14 +83,15 @@ def upgrade() -> None:
         ),
         sa.Column("collection_id", sa.Uuid(), nullable=False),
         sa.Column("filename", sa.String(), nullable=False),
+        sa.Column("filesize", sa.Integer(), nullable=False),
         sa.Column("title", sa.String(), nullable=False),
         sa.Column("authors", postgresql.ARRAY(sa.String()), nullable=True),
         sa.Column("description", sa.String(), nullable=True),
         sa.Column("uploaded_on", sa.DateTime(), nullable=False),
-        sa.Column("size", sa.Integer(), nullable=False),
         sa.Column("hash", sa.String(), nullable=False),
         sa.Column("path", sa.String(), nullable=False),
         sa.Column("type", sa.String(), nullable=False),
+        sa.Column("status", sa.String(), nullable=False),
         sa.ForeignKeyConstraint(
             ["collection_id"],
             ["collections.id"],
