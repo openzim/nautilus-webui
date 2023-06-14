@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+
+  database:
+    image: postgres:15.3-bullseye
+    restart: always
+    environment:
+      - POSTGRES_USER=nautilus
+      - POSTGRES_PASSWORD=nautilus
+      - POSTGRES_DB=nautilus
+      - POSTGRES_PORT=5432
+    healthcheck:
+      test: pg_isready -U nautilus
+      interval: 1s
+  backend:
+    build: .
+    environment:
+      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database/nautilus
+    depends_on: 
+      database:
+        condition: service_healthy
+    links:
+      - database
+    ports:
+      - 8080:80
