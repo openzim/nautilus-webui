@@ -29,3 +29,8 @@ pipenv run format
 # Check format.
 pipenv run format:check
 ```
+
+Test Docker:
+```
+docker compose up
+```
