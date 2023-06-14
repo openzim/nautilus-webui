@@ -10,10 +10,10 @@ pipenv install
 
 ## Development
 
-If you want to link to Postgresql, create the `.env` file and set the `DATABASE_URL` environment variable in it, example:
+If you want to link to Postgresql, create the `.env` file and set the `POSTGRES_URI` environment variable in it, example:
 
 ```env
-DATABASE_URL=postgresql+psycopg://username:password@host/database
+POSTGRES_URI=postgresql+psycopg://username:password@host/database
 ```
 
 Dev commands:
