@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 # to set to your clients' origins
 ENV ALLOWED_ORIGINS http://localhost
-ENV POSTGRES_URI sqlite:///local.db
+ENV POSTGRES_URI nodb
 
 # internal
 ENV APP_MODULE "backend.entrypoint:app"
