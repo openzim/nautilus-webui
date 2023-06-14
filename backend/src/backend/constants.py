@@ -8,7 +8,8 @@ API_VERSION_PREFIX = "/v1"
 src_dir = pathlib.Path(__file__).parent.resolve()
 
 COLLECTION_EXPIRE_AFTER = datetime.timedelta(days=7)
-
+if not os.getenv("POSTGRES_URI"):
+    raise EnvironmentError("Please set the POSTGRES_URI environment variable")
 
 
 @dataclass
@@ -16,10 +17,8 @@ class BackendConf:
     """
     Backend configuration, read from environment variables and set default values.
     """
-    if not os.getenv("POSTGRES_URI"):
-        raise EnvironmentError("Please set the POSTGRES_URI environment variable")
-    else:
-        POSTGRES_URI = os.getenv("POSTGRES_URI")
+
+    postgres_uri = os.getenv("POSTGRES_URI")
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
