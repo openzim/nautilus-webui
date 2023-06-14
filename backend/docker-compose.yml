@@ -20,7 +20,5 @@ services:
     depends_on: 
       database:
         condition: service_healthy
-    links:
-      - database
     ports:
       - 8080:80
