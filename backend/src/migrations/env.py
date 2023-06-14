@@ -4,7 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine
 
-from backend.constants import POSTGRES_URI
+from backend.constants import BackendConf
 from backend.databse.models import Base
 
 # this is the Alembic Config object, which provides
@@ -40,7 +40,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = POSTGRES_URI
+    url = BackendConf.POSTGRES_URI
     context.configure(
         url=url,
         target_metadata=target_metadata,

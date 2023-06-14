@@ -3,7 +3,7 @@ from sqlalchemy import SelectBase, create_engine, func, select
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
-from backend.constants import POSTGRES_URI
+from backend.constants import BackendConf
 
 
 # custom overload of bson deserializer to make naive datetime
@@ -19,13 +19,13 @@ def my_loads(s, *args, **kwargs):
 
 
 if (
-    POSTGRES_URI == "nodb"
+    BackendConf.POSTGRES_URI == "nodb"
 ):  # this is a hack for cases where we do not need the DB, e.g. unit tests
     Session = None
 else:
     Session = sessionmaker(
         bind=create_engine(
-            POSTGRES_URI,
+            BackendConf.POSTGRES_URI,
             echo=False,
             json_serializer=dumps,  # use bson serializer to handle datetime naively
             json_deserializer=my_loads,  # use custom bson deserializer for same reason
