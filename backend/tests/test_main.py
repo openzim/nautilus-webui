@@ -1,12 +1,18 @@
 import httpx
 from fastapi.testclient import TestClient
 
-from src.backend.main import app
+from src.backend.constants import API_VERSION_PREFIX
+from src.backend.entrypoint import app
 
 client = TestClient(app)
 
 
+def test_root():
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == httpx.codes.PERMANENT_REDIRECT
+
+
 def test_ping():
-    response = client.get("/ping")
+    response = client.get(f"{API_VERSION_PREFIX}/ping")
     assert response.status_code == httpx.codes.OK
-    assert response.text == '"pong"'
+    assert response.json() == {"message": "pong"}
