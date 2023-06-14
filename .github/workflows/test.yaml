@@ -10,13 +10,12 @@ jobs:
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres
+        image: postgres:15.3-bullseye
         env:
           POSTGRES_PASSWORD: nautilus
           POSTGRES_DB: nautilus
-        options: >-
-          --health-cmd "pg_isready --username postgres"
-          --health-interval 1s
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: nautilus
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -40,7 +39,7 @@ jobs:
         run: |
           pipenv run init
         env:
-          POSTGRES_URI: "postgresql+psycopg://postgres:nautilus@localhost/nautilus"
+          POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
 
       - name: Run tests
         working-directory: backend
@@ -48,7 +47,7 @@ jobs:
           pipenv run invoke test --args "-v"
           pipenv run invoke generate-xml-report
         env:
-          POSTGRES_URI: "postgresql+psycopg://postgres:nautilus@localhost/nautilus"
+          POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
