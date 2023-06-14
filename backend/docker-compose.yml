@@ -17,7 +17,7 @@ services:
     build: .
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database/nautilus
-    depends_on: 
+    depends_on:
       database:
         condition: service_healthy
     ports:
