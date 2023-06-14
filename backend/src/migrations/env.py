@@ -40,7 +40,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = BackendConf.POSTGRES_URI
+    url = BackendConf.postgres_uri
     context.configure(
         url=url,
         target_metadata=target_metadata,
