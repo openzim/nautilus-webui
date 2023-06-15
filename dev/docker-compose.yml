@@ -1,0 +1,61 @@
+version: '3.1'
+
+services:
+
+  database:
+    image: postgres:15.3-bullseye
+    container_name: nautilus-database
+    restart: always
+    environment:
+      - POSTGRES_USER=nautilus
+      - POSTGRES_PASSWORD=nautilus
+      - POSTGRES_DB=nautilus
+      - POSTGRES_PORT=5432
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: pg_isready -U nautilus
+      interval: 1s
+  backend:
+    build: ../backend
+    container_name: nautilus-backend
+    environment:
+      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+    ports:
+      - 8080:80
+    depends_on:
+      database:
+        condition: service_healthy
+  frontend:
+    build: ../frontend
+    container_name: nautilus-frontend
+    ports:
+      - 8081:80
+    environment:
+      - NAUTILUS_WEBUI_API=https://localhost:8080/v1
+    depends_on:
+      - database
+  backend-tools:
+    build:
+      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      context: ../backend
+    container_name: nautilus-backend-tools
+    ports:
+      - 8082:80
+    command: tail -f /dev/null
+    environment:
+      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+    depends_on:
+      - database
+  backend-tests:
+    build:
+      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      context: ../backend
+    container_name: nautilus-backend-tests
+    ports:
+      - 8083:80
+    command: tail -f /dev/null
+    environment:
+      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+    depends_on:
+      - database
