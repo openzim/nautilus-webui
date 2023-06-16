@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 ENV ALLOWED_ORIGINS http://localhost
 ENV POSTGRES_URI nodb
-ENV ALLOW_ORIGINS http://localhost
+ENV ALLOWED_ORIGINS http://localhost
 
 COPY pyproject.toml README.md tasks.py entrypoint.sh Pipfile Pipfile.lock /app/
 RUN pip install --no-cache-dir pip pipenv && \
