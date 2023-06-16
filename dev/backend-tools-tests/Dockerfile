@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn:python3.11
+FROM python:3.11-slim
 LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 WORKDIR /app

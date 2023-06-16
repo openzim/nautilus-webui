@@ -22,7 +22,7 @@ services:
     container_name: nautilus-backend
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
-      - ALLOW_ORIGINS=*
+      - ALLOWED_ORIGINS=*
     ports:
       - 8080:80
     depends_on:
