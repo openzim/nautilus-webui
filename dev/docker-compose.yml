@@ -15,12 +15,14 @@ services:
       - 5432:5432
     healthcheck:
       test: pg_isready -U nautilus
-      interval: 1s
+      interval: 3s
+      retries: 10
   backend:
     build: ../backend
     container_name: nautilus-backend
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+      - ALLOW_ORIGINS=*
     ports:
       - 8080:80
     depends_on:
@@ -40,9 +42,7 @@ services:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
     container_name: nautilus-backend-tools
-    ports:
-      - 8082:80
-    command: tail -f /dev/null
+    command: /bin/sh -c "sleep Infinity"
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
     depends_on:
@@ -52,9 +52,7 @@ services:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
     container_name: nautilus-backend-tests
-    ports:
-      - 8083:80
-    command: tail -f /dev/null
+    command: /bin/sh -c "sleep Infinity"
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
     depends_on:
