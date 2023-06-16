@@ -1,21 +1,16 @@
 FROM node:18-alpine as builder
 
 RUN apk --no-cache add yarn
-WORKDIR /app
-COPY package.json yarn.lock /app/
-RUN yarn install
-COPY *.html /app/
-COPY *.json /app/
-COPY *.ts /app/
-COPY *.cjs /app/
-COPY public /app/public
-COPY src /app/src
-RUN yarn build
+COPY . /src/
+WORKDIR /src
+RUN yarn install --frozen-lockfile && yarn build
+RUN ls /src/dist
 
 FROM library/nginx:mainline-alpine
 LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /src/dist /user/share/nginx/html
+RUN ls /user/share/nginx/html
 COPY nginx-default.conf /etc/nginx/conf.d/default.conf
 
 ENV NAUTILUS_WEBUI_API https://localhost:8080/v1
