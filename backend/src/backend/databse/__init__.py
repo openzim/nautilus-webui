@@ -1,5 +1,5 @@
 from bson.json_util import DEFAULT_JSON_OPTIONS, dumps, loads
-from sqlalchemy import SelectBase, create_engine, func, select
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
@@ -33,24 +33,11 @@ else:
     )
 
 
-def dbsession(func):
-    """Decorator to create an SQLAlchemy ORM session object and wrap the function
-    inside the session. A `session` argument is automatically set. Commit is
-    automatically performed when the function finish (and before returning to
-    the caller). Should any exception arise, rollback of the transaction is also
-    automatic.
+def get_session() -> OrmSession:
+    """The get_session() function is a utility designed to facilitate working with
+    an Object-Relational Mapping (ORM) system.
+    It allows users to obtain a session object that is essential for performing various
+    database operations using the ORM framework.
     """
-
-    def inner(*args, **kwargs):
-        with Session.begin() as session:
-            kwargs["session"] = session
-            return func(*args, **kwargs)
-
-    return inner
-
-
-def count_from_stmt(session: OrmSession, stmt: SelectBase) -> int:
-    """Count all records returned by any statement `stmt` passed as parameter"""
-    return session.execute(
-        select(func.count()).select_from(stmt.subquery())
-    ).scalar_one()
+    with Session.begin() as session:
+        yield session
