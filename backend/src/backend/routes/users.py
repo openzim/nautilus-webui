@@ -22,6 +22,7 @@ class UserModel(BaseModel):
 
 @router.post("/user", response_model=UserModel, status_code=codes.CREATED)
 async def create_user(session: Session = Depends(get_session)) -> UserModel:
+    """Post this endpoint to create a user."""
     new_user = User(created_on=datetime.utcnow())
     session.add(new_user)
     session.flush()
