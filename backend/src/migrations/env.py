@@ -5,7 +5,7 @@ from alembic import context
 from sqlalchemy import create_engine
 
 from backend.constants import BackendConf
-from backend.databse.models import Base
+from backend.database.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
