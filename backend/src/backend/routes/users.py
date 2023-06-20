@@ -6,10 +6,12 @@ from httpx import codes
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from backend.databse import get_session
-from backend.databse.models import User
+from backend.database import gen_session
+from backend.database.models import User
 
 router = APIRouter()
+
+PREFIX = "/user"
 
 
 class UserModel(BaseModel):
@@ -20,8 +22,8 @@ class UserModel(BaseModel):
         orm_mode = True
 
 
-@router.post("/user", response_model=UserModel, status_code=codes.CREATED)
-async def create_user(session: Session = Depends(get_session)) -> UserModel:
+@router.post(PREFIX, response_model=UserModel, status_code=codes.CREATED)
+async def create_user(session: Session = Depends(gen_session)) -> UserModel:
     """Post this endpoint to create a user."""
     new_user = User(created_on=datetime.utcnow())
     session.add(new_user)
