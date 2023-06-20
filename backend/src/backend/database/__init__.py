@@ -36,17 +36,10 @@ else:
 
 
 def gen_session() -> Generator[OrmSession, None, None]:
-    """The gen_session() function is a utility designed to facilitate working with
-    an Object-Relational Mapping (ORM) system.
-    It allows users to obtain a session object that is essential for performing various
-    database operations using the ORM framework.
-    """
+    """FastAPI's Depends() compatible helper to provide a began DB Session"""
     with Session.begin() as session:
         try:
             yield session
-            session.commit()
-        except Exception as e:
-            logger.info(e)
+        except Exception as exc:
+            logger.exception(exc)
             session.rollback()
-        finally:
-            session.close()
