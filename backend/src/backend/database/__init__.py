@@ -36,7 +36,7 @@ else:
 
 
 def gen_session() -> Generator[OrmSession, None, None]:
-    """The get_session() function is a utility designed to facilitate working with
+    """The gen_session() function is a utility designed to facilitate working with
     an Object-Relational Mapping (ORM) system.
     It allows users to obtain a session object that is essential for performing various
     database operations using the ORM framework.
