@@ -9,9 +9,7 @@ from sqlalchemy.orm import Session
 from backend.database import gen_session
 from backend.database.models import User
 
-router = APIRouter()
-
-PREFIX = "/user"
+router = APIRouter(prefix="/user")
 
 
 class UserModel(BaseModel):
@@ -22,7 +20,7 @@ class UserModel(BaseModel):
         orm_mode = True
 
 
-@router.post(PREFIX, response_model=UserModel, status_code=codes.CREATED)
+@router.post("", response_model=UserModel, status_code=codes.CREATED)
 async def create_user(session: Session = Depends(gen_session)) -> UserModel:
     """Post this endpoint to create a user."""
     new_user = User(created_on=datetime.utcnow())
