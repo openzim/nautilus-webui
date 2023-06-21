@@ -42,4 +42,4 @@ def gen_session() -> Generator[OrmSession, None, None]:
             yield session
         except Exception as exc:
             logger.exception(exc)
-            session.rollback()
+            raise exc
