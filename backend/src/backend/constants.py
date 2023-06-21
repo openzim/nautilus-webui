@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import pathlib
 from dataclasses import dataclass
@@ -10,6 +11,8 @@ src_dir = pathlib.Path(__file__).parent.resolve()
 COLLECTION_EXPIRE_AFTER = datetime.timedelta(days=7)
 if not os.getenv("POSTGRES_URI"):
     raise EnvironmentError("Please set the POSTGRES_URI environment variable")
+
+logger = logging.getLogger(src_dir.name)
 
 
 @dataclass

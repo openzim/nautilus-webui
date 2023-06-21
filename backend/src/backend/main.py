@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 
 from backend import __description__, __titile__, __version__
 from backend.constants import API_VERSION_PREFIX, BackendConf
-from backend.routes import utils
+from backend.routes import users, utils
 
 
 def create_app() -> FastAPI:
@@ -47,5 +47,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     api.include_router(utils.router)
+    api.include_router(users.router)
     app.mount(API_VERSION_PREFIX, api)
     return app
