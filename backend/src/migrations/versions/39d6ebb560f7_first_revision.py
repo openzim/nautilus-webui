@@ -1,8 +1,8 @@
 """First revision
 
-Revision ID: 9c3d9522e4cf
+Revision ID: 39d6ebb560f7
 Revises:
-Create Date: 2023-06-21 11:10:45.305606
+Create Date: 2023-06-22 08:51:13.400193
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "9c3d9522e4cf"
+revision = "39d6ebb560f7"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -81,7 +81,7 @@ def upgrade() -> None:
             server_default=sa.text("uuid_generate_v4()"),
             nullable=False,
         ),
-        sa.Column("Project_id", sa.Uuid(), nullable=False),
+        sa.Column("project_id", sa.Uuid(), nullable=False),
         sa.Column("filename", sa.String(), nullable=False),
         sa.Column("filesize", sa.Integer(), nullable=False),
         sa.Column("title", sa.String(), nullable=False),
@@ -93,7 +93,7 @@ def upgrade() -> None:
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("status", sa.String(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["Project_id"], ["projects.id"], name=op.f("fk_files_Project_id_projects")
+            ["project_id"], ["projects.id"], name=op.f("fk_files_project_id_projects")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_files")),
     )
