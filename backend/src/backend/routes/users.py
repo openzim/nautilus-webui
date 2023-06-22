@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from backend.database import gen_session
 from backend.database.models import User
 
-router = APIRouter(prefix="/user")
+router = APIRouter(prefix="/users")
 
 
 class UserModel(BaseModel):
