@@ -59,19 +59,19 @@ class User(Base):
     )
     created_on: Mapped[datetime]
 
-    collections: Mapped[List["Collection"]] = relationship(
+    projects: Mapped[List["Project"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", init=False
     )
 
 
-class Collection(Base):
+class Project(Base):
     """
-    Collection model, used for managing collections.
-    A collection is a group of files and archives.
-    collection will be deleted after certain time.
+    Project model, used for managing projects.
+    A Project is a group of files and archives.
+    Project will be deleted after certain time.
     """
 
-    __tablename__ = "collections"
+    __tablename__ = "projects"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
@@ -81,7 +81,7 @@ class Collection(Base):
     created_on: Mapped[datetime]
     expire_on: Mapped[datetime]
 
-    user: Mapped[User] = relationship(back_populates="collections", init=False)
+    user: Mapped[User] = relationship(back_populates="projects", init=False)
 
     files: Mapped[List["File"]] = relationship()
     archives: Mapped[List["Archive"]] = relationship()
@@ -99,9 +99,7 @@ class File(Base):
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    collection_id: Mapped[UUID] = mapped_column(
-        ForeignKey("collections.id"), init=False
-    )
+    Project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
@@ -127,9 +125,7 @@ class Archive(Base):
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    collection_id: Mapped[UUID] = mapped_column(
-        ForeignKey("collections.id"), init=False
-    )
+    projects_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
