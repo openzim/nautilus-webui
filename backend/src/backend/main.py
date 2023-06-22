@@ -47,7 +47,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     api.include_router(utils.router)
-    users.router.include_router(projects.router)
     api.include_router(users.router)
+    api.include_router(projects.router)
     app.mount(API_VERSION_PREFIX, api)
     return app

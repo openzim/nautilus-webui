@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException
@@ -8,53 +8,63 @@ from pydantic import BaseModel, parse_obj_as
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from backend.constants import PROJECT_EXPIRE_AFTER
 from backend.database import gen_session
 from backend.database.models import Project, User
 
 router = APIRouter(prefix="/projects")
 
 
-class ProjectModal(BaseModel):
-    id: UUID
-    user_id: UUID
+class ProjectBaseModel(BaseModel):
     name: str
+
+
+class ProjectModel(ProjectBaseModel):
+    id: UUID
     created_on: datetime
-    expire_on: datetime
+    expire_on: Optional[datetime]
 
     class Config:
         orm_mode = True
 
 
 async def validated_user(
-    user_id: Annotated[UUID | None, Cookie] = None,
+    user_id: Annotated[UUID | None, Cookie()] = None,
     session: Session = Depends(gen_session),
 ) -> User:
-    """Utility function to verify the existence of a user"""
+    """Depends()-able User from request, ensuring it exists"""
     if not user_id:
+        raise HTTPException(status_code=codes.UNAUTHORIZED, detail="Missing User ID.")
+    user = session.get(User, user_id)
+    if not user:
         raise HTTPException(
-            status_code=codes.UNAUTHORIZED, detail="Did not offer the User ID."
+            status_code=codes.UNAUTHORIZED, detail=f"User Not Found, ID: {user_id}."
         )
-    queried_user = session.get(User, user_id)
-    if not queried_user:
-        raise HTTPException(
-            status_code=codes.UNAUTHORIZED, detail="User does not exit."
-        )
-    return queried_user
+    return user
 
 
-@router.post("", response_model=ProjectModal, status_code=codes.CREATED)
+async def validated_project(
+    project_id: UUID, user=Depends(validated_user), session=Depends(gen_session)
+) -> Project:
+    """Depends()-able Project from request, ensuring it exists"""
+    stmt = select(Project).filter_by(id=project_id).filter_by(user_id=user.id)
+    project = session.execute(stmt).scalar()
+    if not project:
+        raise HTTPException(codes.NOT_FOUND, f"Project not found: {project_id}")
+    return project
+
+
+@router.post("", response_model=ProjectModel, status_code=codes.CREATED)
 async def create_project(
-    name: str,
+    project: ProjectBaseModel,
     user: User = Depends(validated_user),
     session: Session = Depends(gen_session),
 ):
-    """Post this endpoint to create a project."""
+    """Creates a new Project"""
     now = datetime.utcnow()
     new_project = Project(
-        name=name,
+        name=project.name,
         created_on=now,
-        expire_on=(now + PROJECT_EXPIRE_AFTER),
+        expire_on=None,
         files=[],
         archives=[],
     )
@@ -62,40 +72,34 @@ async def create_project(
     session.add(new_project)
     session.flush()
     session.refresh(new_project)
-    return ProjectModal.from_orm(new_project)
+    return ProjectModel.from_orm(new_project)
 
 
-@router.get("", response_model=List[ProjectModal])
+@router.get("", response_model=List[ProjectModel])
 async def get_all_projects(
     user: User = Depends(validated_user),
-) -> List[ProjectModal]:
+) -> List[ProjectModel]:
     """Get all projects of a user."""
-    return parse_obj_as(List[ProjectModal], user.projects)
+    return parse_obj_as(List[ProjectModel], user.projects)
 
 
-@router.get("/", response_model=ProjectModal)
-async def get_project(
-    id: UUID,
-    user: User = Depends(validated_user),
-    session: Session = Depends(gen_session),
-) -> ProjectModal:
+@router.get("/{project_id}", response_model=ProjectModel)
+async def get_project(project=Depends(validated_project)) -> ProjectModel:
     """Get a specific project by its id."""
-    statement = select(Project).filter_by(user_id=user.id).filter_by(id=id)
-    queried_project = session.execute(statement).scalar()
-    if not queried_project:
-        raise HTTPException(codes.NOT_FOUND, "Not found project.")
-    return ProjectModal.from_orm(queried_project)
+    return ProjectModel.from_orm(project)
 
 
-@router.put("")
+@router.put("/{project_id}")
 async def update_project(
-    name: str,
-    id: UUID,
-    user: User = Depends(validated_user),
-    session: Session = Depends(gen_session),
+    new_project: ProjectBaseModel,
+    project=Depends(validated_project),
+    session=Depends(gen_session),
 ):
     """Update a specific project by its id."""
-    statement = (
-        update(Project).filter_by(user_id=user.id).filter_by(id=id).values(name=name)
+    stmt = (
+        update(Project)
+        .filter_by(id=project.id)
+        .filter_by(user_id=project.user_id)
+        .values(name=new_project.name)
     )
-    session.execute(statement)
+    session.execute(stmt)
