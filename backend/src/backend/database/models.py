@@ -79,7 +79,7 @@ class Project(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
     name: Mapped[str]
     created_on: Mapped[datetime]
-    expire_on: Mapped[datetime]
+    expire_on: Mapped[Optional[datetime]]
 
     user: Mapped[User] = relationship(back_populates="projects", init=False)
 
@@ -99,7 +99,7 @@ class File(Base):
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
+    projects_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
