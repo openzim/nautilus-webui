@@ -12,13 +12,18 @@ def test_client():
 
 
 @pytest.fixture
-def non_existent_uuid():
+def non_existent_project_uuid():
     return "94e430c6-8888-456a-9440-c10e4a04627c"
 
 
 @pytest.fixture
-def fake_cookies(non_existent_uuid):
-    return {"user_id": non_existent_uuid}
+def missing_user_id():
+    return "5c2ad919-4e85-48ff-b9a4-2066f4da3d58"
+
+
+@pytest.fixture
+def missing_user_cookie(non_existent_project_uuid):
+    return {"user_id": non_existent_project_uuid}
 
 
 @pytest.fixture
@@ -34,8 +39,14 @@ def logged_in_client(test_client) -> str:
 
 
 @pytest.fixture()
-def test_project_id(logged_in_client, test_project_name):
+def created_project_id(logged_in_client, test_project_name):
     data = {"name": test_project_name}
     response = logged_in_client.post(f"{API_VERSION_PREFIX}/projects", json=data)
     json_result = response.json()
     return json_result.get("id")
+
+
+@pytest.fixture()
+def test_project_id(logged_in_client, created_project_id):
+    yield created_project_id
+    logged_in_client.delete(f"{API_VERSION_PREFIX}/projects/{created_project_id}")
