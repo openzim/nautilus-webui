@@ -100,10 +100,10 @@ async def delete_project(
 
 @router.patch("/{project_id}")
 async def update_project(
-    updated_project: ProjectRequest,
+    project_request: ProjectRequest,
     project=Depends(validated_project),
     session=Depends(gen_session),
 ):
     """Update a specific project by its id."""
-    stmt = update(Project).filter_by(id=project.id).values(name=updated_project.name)
+    stmt = update(Project).filter_by(id=project.id).values(name=project_request.name)
     session.execute(stmt)
