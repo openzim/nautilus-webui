@@ -96,9 +96,5 @@ async def update_project(
     session=Depends(gen_session),
 ):
     """Update a specific project by its id."""
-    stmt = (
-        update(Project)
-        .filter_by(id=project.id)
-        .values(name=new_project.name)
-    )
+    stmt = update(Project).filter_by(id=project.id).values(name=new_project.name)
     session.execute(stmt)
