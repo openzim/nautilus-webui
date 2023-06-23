@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Cookie, Depends, HTTPException
 from httpx import codes
 from pydantic import BaseModel, parse_obj_as
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from backend.database import gen_session
@@ -14,11 +14,12 @@ from backend.database.models import Project, User
 router = APIRouter(prefix="/projects")
 
 
-class ProjectBaseModel(BaseModel):
+class ProjectRequest(BaseModel):
     name: str
 
 
-class ProjectModel(ProjectBaseModel):
+class ProjectModel(BaseModel):
+    name: str
     id: UUID
     created_on: datetime
     expire_on: Optional[datetime]
@@ -55,7 +56,7 @@ async def validated_project(
 
 @router.post("", response_model=ProjectModel, status_code=codes.CREATED)
 async def create_project(
-    project: ProjectBaseModel,
+    project: ProjectRequest,
     user: User = Depends(validated_user),
     session: Session = Depends(gen_session),
 ):
@@ -89,12 +90,20 @@ async def get_project(project=Depends(validated_project)) -> ProjectModel:
     return ProjectModel.from_orm(project)
 
 
-@router.put("/{project_id}")
+@router.delete("/{project_id}", response_model=ProjectModel)
+async def delete_project(
+    project=Depends(validated_project), session=Depends(gen_session)
+):
+    """Delete a specific project by its id."""
+    session.delete(project)
+
+
+@router.patch("/{project_id}")
 async def update_project(
-    new_project: ProjectBaseModel,
+    updated_project: ProjectRequest,
     project=Depends(validated_project),
     session=Depends(gen_session),
 ):
     """Update a specific project by its id."""
-    stmt = update(Project).filter_by(id=project.id).values(name=new_project.name)
+    stmt = update(Project).filter_by(id=project.id).values(name=updated_project.name)
     session.execute(stmt)
