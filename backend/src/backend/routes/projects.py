@@ -99,7 +99,6 @@ async def update_project(
     stmt = (
         update(Project)
         .filter_by(id=project.id)
-        .filter_by(user_id=project.user_id)
         .values(name=new_project.name)
     )
     session.execute(stmt)
