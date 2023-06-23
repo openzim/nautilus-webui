@@ -99,7 +99,7 @@ class File(Base):
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    projects_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
@@ -125,7 +125,7 @@ class Archive(Base):
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    projects_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
