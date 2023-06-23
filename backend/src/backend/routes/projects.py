@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Cookie, Depends, HTTPException
 from httpx import codes
 from pydantic import BaseModel, parse_obj_as
-from sqlalchemy import delete, select, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from backend.database import gen_session
@@ -90,7 +90,7 @@ async def get_project(project=Depends(validated_project)) -> ProjectModel:
     return ProjectModel.from_orm(project)
 
 
-@router.delete("/{project_id}", response_model=ProjectModel)
+@router.delete("/{project_id}")
 async def delete_project(
     project=Depends(validated_project), session=Depends(gen_session)
 ):
