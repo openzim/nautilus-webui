@@ -52,7 +52,7 @@ class User(Base):
     User model, used for managing users.
     """
 
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
@@ -60,7 +60,7 @@ class User(Base):
     created_on: Mapped[datetime]
 
     projects: Mapped[List["Project"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan", init=False
+        back_populates="user", cascade="all, delete-orphan"
     )
 
 
@@ -71,20 +71,20 @@ class Project(Base):
     Project will be deleted after certain time.
     """
 
-    __tablename__ = "projects"
+    __tablename__ = "project"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), init=False)
     name: Mapped[str]
     created_on: Mapped[datetime]
     expire_on: Mapped[Optional[datetime]]
 
     user: Mapped[User] = relationship(back_populates="projects", init=False)
 
-    files: Mapped[List["File"]] = relationship()
-    archives: Mapped[List["Archive"]] = relationship()
+    files: Mapped[List["File"]] = relationship(cascade="all, delete-orphan")
+    archives: Mapped[List["Archive"]] = relationship(cascade="all, delete-orphan")
 
 
 class File(Base):
@@ -94,12 +94,12 @@ class File(Base):
     The files will be saved as hash values to save space.
     """
 
-    __tablename__ = "files"
+    __tablename__ = "file"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("project.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
@@ -120,12 +120,12 @@ class Archive(Base):
     All of the archives will be deleted after certain time.
     """
 
-    __tablename__ = "archives"
+    __tablename__ = "archive"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), init=False)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("project.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
