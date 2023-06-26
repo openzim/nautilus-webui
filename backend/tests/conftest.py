@@ -1,12 +1,27 @@
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import scoped_session
 
-from backend.constants import API_VERSION_PREFIX
+from backend.database import Session
+from backend.database.models import Project, User
 from src.backend.entrypoint import app
 
 
 @pytest.fixture()
-def test_client():
+def mock_user_id():
+    new_user = User(created_on=datetime.utcnow(), projects=[])
+    with scoped_session(Session)() as session:
+        session.add(new_user)
+        session.flush()
+        session.refresh(new_user)
+        session.commit()
+        return new_user.id
+
+
+@pytest.fixture()
+def mock_client():
     client = TestClient(app)
     return client
 
@@ -32,21 +47,33 @@ def test_project_name():
 
 
 @pytest.fixture()
-def logged_in_client(test_client) -> str:
-    response = test_client.post(f"{API_VERSION_PREFIX}/users")
-    test_client.cookies = response.cookies
-    return test_client
+def logged_in_client(mock_client, mock_user_id) -> str:
+    cookie = {"user_id": str(mock_user_id)}
+    mock_client.cookies = cookie
+    return mock_client
 
 
 @pytest.fixture()
-def created_project_id(logged_in_client, test_project_name):
-    data = {"name": test_project_name}
-    response = logged_in_client.post(f"{API_VERSION_PREFIX}/projects", json=data)
-    json_result = response.json()
-    return json_result.get("id")
+def created_project_id(test_project_name, mock_user_id):
+    now = datetime.utcnow()
+    new_project = Project(
+        name=test_project_name, created_on=now, expire_on=None, files=[], archives=[]
+    )
+    with scoped_session(Session)() as session:
+        user = session.get(User, mock_user_id)
+        if user:
+            user.projects.append(new_project)
+        session.add(new_project)
+        session.flush()
+        session.refresh(new_project)
+        session.commit()
+        return new_project.id
 
 
 @pytest.fixture()
-def test_project_id(logged_in_client, created_project_id):
+def mock_project_id(created_project_id):
     yield created_project_id
-    logged_in_client.delete(f"{API_VERSION_PREFIX}/projects/{created_project_id}")
+    with scoped_session(Session)() as session:
+        project = session.get(Project, created_project_id)
+        session.delete(project)
+        session.commit()
