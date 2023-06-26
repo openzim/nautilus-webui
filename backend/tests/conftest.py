@@ -27,7 +27,7 @@ def mock_client():
 
 
 @pytest.fixture
-def non_existent_project_uuid():
+def non_existent_project_id():
     return "94e430c6-8888-456a-9440-c10e4a04627c"
 
 
@@ -37,8 +37,8 @@ def missing_user_id():
 
 
 @pytest.fixture
-def missing_user_cookie(non_existent_project_uuid):
-    return {"user_id": non_existent_project_uuid}
+def missing_user_cookie(non_existent_project_id):
+    return {"user_id": non_existent_project_id}
 
 
 @pytest.fixture

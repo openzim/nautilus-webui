@@ -54,24 +54,24 @@ def test_get_project_correct_id(logged_in_client, mock_project_id, test_project_
     assert not json_result.get("expire_on")
 
 
-def test_get_project_wrong_id(logged_in_client, non_existent_project_uuid):
+def test_get_project_wrong_id(logged_in_client, non_existent_project_id):
     response = logged_in_client.get(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.NOT_FOUND
 
 
 def test_get_project_wrong_authorization(
-    mock_client, missing_user_cookie, non_existent_project_uuid
+    mock_client, missing_user_cookie, non_existent_project_id
 ):
     response = mock_client.get(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.UNAUTHORIZED
 
     mock_client.cookies = missing_user_cookie
     response = mock_client.get(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.UNAUTHORIZED
 
@@ -83,24 +83,24 @@ def test_delete_project_correct_id(logged_in_client, created_project_id):
     assert response.status_code == codes.NO_CONTENT
 
 
-def test_delete_project_wrong_id(logged_in_client, non_existent_project_uuid):
+def test_delete_project_wrong_id(logged_in_client, non_existent_project_id):
     response = logged_in_client.delete(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.NOT_FOUND
 
 
 def test_delete_project_wrong_authorization(
-    mock_client, missing_user_cookie, non_existent_project_uuid
+    mock_client, missing_user_cookie, non_existent_project_id
 ):
     response = mock_client.delete(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.UNAUTHORIZED
 
     mock_client.cookies = missing_user_cookie
     response = mock_client.delete(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.UNAUTHORIZED
 
@@ -120,27 +120,27 @@ def test_update_project_correct_data(logged_in_client, mock_project_id):
     assert json_result.get("name") == "updated_name"
 
 
-def test_update_project_wrong_data(logged_in_client, non_existent_project_uuid):
+def test_update_project_wrong_data(logged_in_client, non_existent_project_id):
     data = {
         "name": "updated_name",
     }
     response = logged_in_client.patch(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}", json=data
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}", json=data
     )
 
     assert response.status_code == codes.NOT_FOUND
 
 
 def test_update_project_wrong_authorization(
-    mock_client, missing_user_cookie, non_existent_project_uuid
+    mock_client, missing_user_cookie, non_existent_project_id
 ):
     response = mock_client.patch(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.UNAUTHORIZED
 
     mock_client.cookies = missing_user_cookie
     response = mock_client.patch(
-        f"{API_VERSION_PREFIX}/projects/{non_existent_project_uuid}"
+        f"{API_VERSION_PREFIX}/projects/{non_existent_project_id}"
     )
     assert response.status_code == codes.UNAUTHORIZED
