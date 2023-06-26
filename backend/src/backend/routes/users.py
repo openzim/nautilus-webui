@@ -25,7 +25,7 @@ async def create_user(
     response: Response, session: Session = Depends(gen_session)
 ) -> UserModel:
     """Post this endpoint to create a user."""
-    new_user = User(created_on=datetime.utcnow())
+    new_user = User(created_on=datetime.utcnow(), projects=[])
     session.add(new_user)
     session.flush()
     session.refresh(new_user)

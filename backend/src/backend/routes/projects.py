@@ -35,7 +35,8 @@ async def validated_user(
     """Depends()-able User from request, ensuring it exists"""
     if not user_id:
         raise HTTPException(status_code=codes.UNAUTHORIZED, detail="Missing User ID.")
-    user = session.get(User, user_id)
+    stmt = select(User).filter_by(id=user_id)
+    user = session.execute(stmt).scalar()
     if not user:
         raise HTTPException(
             status_code=codes.UNAUTHORIZED, detail=f"User Not Found, ID: {user_id}."
@@ -90,7 +91,7 @@ async def get_project(project=Depends(validated_project)) -> ProjectModel:
     return ProjectModel.from_orm(project)
 
 
-@router.delete("/{project_id}")
+@router.delete("/{project_id}", status_code=codes.NO_CONTENT)
 async def delete_project(
     project=Depends(validated_project), session=Depends(gen_session)
 ):
@@ -98,7 +99,7 @@ async def delete_project(
     session.delete(project)
 
 
-@router.patch("/{project_id}")
+@router.patch("/{project_id}", status_code=codes.NO_CONTENT)
 async def update_project(
     project_request: ProjectRequest,
     project=Depends(validated_project),
