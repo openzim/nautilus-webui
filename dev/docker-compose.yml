@@ -6,6 +6,8 @@ services:
     image: postgres:15.3-bullseye
     container_name: nautilus-database
     restart: always
+    volumes:
+      - pg_data_nautilus:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=nautilus
       - POSTGRES_PASSWORD=nautilus
@@ -57,3 +59,5 @@ services:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
     depends_on:
       - database
+volumes:
+  pg_data_nautilus:
