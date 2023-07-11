@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,20 +10,18 @@ from src.backend.entrypoint import app
 
 
 @pytest.fixture()
-def mock_user_id():
-    new_user = User(created_on=datetime.utcnow(), projects=[])
-    with scoped_session(Session)() as session:
+def user_id():
+    new_user = User(created_on=datetime.datetime.utcnow(), projects=[])
+    with Session.begin() as session:
         session.add(new_user)
         session.flush()
         session.refresh(new_user)
-        session.commit()
         return new_user.id
 
 
 @pytest.fixture()
-def mock_client():
-    client = TestClient(app)
-    return client
+def client():
+    return TestClient(app)
 
 
 @pytest.fixture
@@ -37,8 +35,8 @@ def missing_user_id():
 
 
 @pytest.fixture
-def missing_user_cookie(non_existent_project_id):
-    return {"user_id": non_existent_project_id}
+def missing_user_cookie(missing_user_id):
+    return {"user_id": missing_user_id}
 
 
 @pytest.fixture
@@ -47,33 +45,23 @@ def test_project_name():
 
 
 @pytest.fixture()
-def logged_in_client(mock_client, mock_user_id) -> str:
-    cookie = {"user_id": str(mock_user_id)}
-    mock_client.cookies = cookie
-    return mock_client
+def logged_in_client(client, user_id) -> str:
+    cookie = {"user_id": str(user_id)}
+    client.cookies = cookie
+    return client
 
 
 @pytest.fixture()
-def created_project_id(test_project_name, mock_user_id):
-    now = datetime.utcnow()
+def project_id(test_project_name, user_id):
+    now = datetime.datetime.utcnow()
     new_project = Project(
         name=test_project_name, created_on=now, expire_on=None, files=[], archives=[]
     )
-    with scoped_session(Session)() as session:
-        user = session.get(User, mock_user_id)
+    with Session.begin() as session:
+        user = session.get(User, user_id)
         if user:
             user.projects.append(new_project)
         session.add(new_project)
         session.flush()
         session.refresh(new_project)
-        session.commit()
         return new_project.id
-
-
-@pytest.fixture()
-def mock_project_id(created_project_id):
-    yield created_project_id
-    with scoped_session(Session)() as session:
-        project = session.get(Project, created_project_id)
-        session.delete(project)
-        session.commit()
