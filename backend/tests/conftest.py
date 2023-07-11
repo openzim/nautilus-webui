@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import scoped_session
 
 from backend.database import Session
 from backend.database.models import Project, User
