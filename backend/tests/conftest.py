@@ -2,15 +2,15 @@ import datetime
 
 import pytest
 from fastapi.testclient import TestClient
+from src.backend.entrypoint import app
 
 from backend.database import Session
 from backend.database.models import Project, User
-from src.backend.entrypoint import app
 
 
 @pytest.fixture()
 def user_id():
-    new_user = User(created_on=datetime.datetime.utcnow(), projects=[])
+    new_user = User(created_on=datetime.datetime.now(datetime.UTC), projects=[])
     with Session.begin() as session:
         session.add(new_user)
         session.flush()
@@ -57,7 +57,7 @@ def logged_in_client(client, user_id) -> str:
 
 @pytest.fixture()
 def project_id(test_project_name, user_id):
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     new_project = Project(
         name=test_project_name, created_on=now, expire_on=None, files=[], archives=[]
     )
