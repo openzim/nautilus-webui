@@ -8,7 +8,7 @@ API_VERSION_PREFIX = "/v1"
 
 src_dir = pathlib.Path(__file__).parent.resolve()
 
-COLLECTION_EXPIRE_AFTER = datetime.timedelta(days=7)
+PROJECT_EXPIRE_AFTER = datetime.timedelta(days=7)
 if not os.getenv("POSTGRES_URI"):
     raise EnvironmentError("Please set the POSTGRES_URI environment variable")
 

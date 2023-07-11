@@ -52,39 +52,39 @@ class User(Base):
     User model, used for managing users.
     """
 
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
     created_on: Mapped[datetime]
 
-    collections: Mapped[List["Collection"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan", init=False
+    projects: Mapped[List["Project"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
     )
 
 
-class Collection(Base):
+class Project(Base):
     """
-    Collection model, used for managing collections.
-    A collection is a group of files and archives.
-    collection will be deleted after certain time.
+    Project model, used for managing projects.
+    A Project is a group of files and archives.
+    Project will be deleted after certain time.
     """
 
-    __tablename__ = "collections"
+    __tablename__ = "project"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), init=False)
     name: Mapped[str]
     created_on: Mapped[datetime]
-    expire_on: Mapped[datetime]
+    expire_on: Mapped[Optional[datetime]]
 
-    user: Mapped[User] = relationship(back_populates="collections", init=False)
+    user: Mapped[User] = relationship(back_populates="projects", init=False)
 
-    files: Mapped[List["File"]] = relationship()
-    archives: Mapped[List["Archive"]] = relationship()
+    files: Mapped[List["File"]] = relationship(cascade="all, delete-orphan")
+    archives: Mapped[List["Archive"]] = relationship(cascade="all, delete-orphan")
 
 
 class File(Base):
@@ -94,14 +94,12 @@ class File(Base):
     The files will be saved as hash values to save space.
     """
 
-    __tablename__ = "files"
+    __tablename__ = "file"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    collection_id: Mapped[UUID] = mapped_column(
-        ForeignKey("collections.id"), init=False
-    )
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("project.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
@@ -122,14 +120,12 @@ class Archive(Base):
     All of the archives will be deleted after certain time.
     """
 
-    __tablename__ = "archives"
+    __tablename__ = "archive"
 
     id: Mapped[UUID] = mapped_column(
         init=False, primary_key=True, server_default=text("uuid_generate_v4()")
     )
-    collection_id: Mapped[UUID] = mapped_column(
-        ForeignKey("collections.id"), init=False
-    )
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("project.id"), init=False)
 
     filename: Mapped[str]
     filesize: Mapped[int]
