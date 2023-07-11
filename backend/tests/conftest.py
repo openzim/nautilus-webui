@@ -15,7 +15,12 @@ def user_id():
         session.add(new_user)
         session.flush()
         session.refresh(new_user)
-        return new_user.id
+        created_id = new_user.id
+    yield created_id
+    with Session.begin() as session:
+        user = session.get(User, created_id)
+        if user:
+            session.delete(user)
 
 
 @pytest.fixture()
@@ -63,4 +68,9 @@ def project_id(test_project_name, user_id):
         session.add(new_project)
         session.flush()
         session.refresh(new_project)
-        return new_project.id
+        created_id = new_project.id
+    yield created_id
+    with Session.begin() as session:
+        user = session.get(User, created_id)
+        if user:
+            session.delete(user)
