@@ -9,8 +9,8 @@ COPY src/ /app/src
 
 RUN cd /app && \
     chmod +x /app/entrypoint.sh && \
-    pip install -U pip && \
-    cd /app && pip install -e .
+    pip install --no-cache-dir -U pip && \
+    cd /app && pip install --no-cache-dir -e .
 
 WORKDIR /app/src
 

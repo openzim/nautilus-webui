@@ -5,8 +5,8 @@ COPY pyproject.toml README.md tasks.py /app/
 COPY src/ /app/src
 
 RUN cd /app && \
-    pip install -U pip && \
-    cd /app && pip install -e .[dev]
+    pip install --no-cache-dir -U pip && \
+    cd /app && pip install --no-cache-dir -e .[dev]
 
 WORKDIR /app
 COPY README.md /app
