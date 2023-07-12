@@ -31,7 +31,12 @@ dynamic = ["version"]
 scripts = ["invoke==2.1.3"]
 lint = ["black==23.3.0", "ruff==0.0.272"]
 test = ["pytest==7.3.1", "coverage==7.2.7"]
-dev = ["nautilus-webui[scripts]", "nautilus-webui[lint]", "nautilus-webui[test]"]
+dev = [
+    "debugpy",
+    "nautilus-webui[scripts]",
+    "nautilus-webui[lint]",
+    "nautilus-webui[test]",
+]
 
 [project.urls]
 Homepage = "https://github.com/openzim/nautilus-webui/blob/main/backend/pyproject.toml"
@@ -45,6 +50,9 @@ path = "src/backend/__about__.py"
 
 [tool.hatch.build]
 exclude = ["/.github"]
+
+[tool.hatch.envs.default]
+features = ["dev"]
 
 [tool.hatch.envs.test]
 features = ["scripts", "test"]
@@ -180,8 +188,7 @@ testpaths = ["tests"]
 pythonpath = [".", "src"]
 
 [tool.coverage.paths]
-backend = ["src/backend"]
-tests = ["tests"]
+source = ["src/backend"]
 
 [tool.coverage.run]
 source_pkgs = ["backend"]
