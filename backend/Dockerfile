@@ -4,12 +4,14 @@ LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 ENV ALLOWED_ORIGINS http://localhost
 ENV POSTGRES_URI nodb
 
-COPY pyproject.toml README.md tasks.py entrypoint.sh Pipfile Pipfile.lock /app/
-RUN pip install --no-cache-dir pip pipenv && \
-    chmod +x /app/entrypoint.sh && \
-    cd /app && \
-    pipenv sync --system
+COPY pyproject.toml README.md tasks.py entrypoint.sh /app/
 COPY src/ /app/src
+
+RUN cd /app && \
+    chmod +x /app/entrypoint.sh && \
+    pip install -U pip && \
+    cd /app && pip install -e .
+
 WORKDIR /app/src
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
