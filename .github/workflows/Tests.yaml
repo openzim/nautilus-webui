@@ -32,6 +32,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           architecture: x64
+          cache: 'pip'
 
       - name: Install dependencies (and project)
         working-directory: backend
