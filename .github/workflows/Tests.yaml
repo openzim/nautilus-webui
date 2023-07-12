@@ -3,11 +3,16 @@ name: Tests
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
-  tests:
-    runs-on: ubuntu-22.04
+  run-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04 ]
+        python: [ "3.11" ]
+    runs-on: ${{ matrix.os }}
+
     services:
       postgres:
         image: postgres:15.3-bullseye
@@ -25,32 +30,32 @@ jobs:
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
-          cache: "pipenv"
+          python-version: ${{ matrix.python }}
+          architecture: x64
 
-      - name: Setup dependencies.
+      - name: Install dependencies (and project)
         working-directory: backend
         run: |
-          pip install --upgrade pipenv
-          pipenv sync
+          pip install -U pip
+          pip install -e .[test,scripts]
 
-      - name: Setup database.
+      - name: Run the tests
         working-directory: backend
-        run: |
-          pipenv run init
         env:
           POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
-
-      - name: Run tests
-        working-directory: backend
-        run: |
-          pipenv run invoke test --args "-v"
-          pipenv run invoke generate-xml-report
-        env:
-          POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
+        run: inv coverage --args "-vvv"
 
       - name: Upload coverage to Codecov
+        if: matrix.python == '3.11'
         uses: codecov/codecov-action@v3
         with:
           working-directory: backend
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Ensure we can build targets
+        if: matrix.python == '3.11'
+        working-directory: backend
+        run: |
+          pip install build
+          python3 -m build

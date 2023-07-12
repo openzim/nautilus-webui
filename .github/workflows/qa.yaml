@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  qa:
+  check-qa:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -15,22 +15,18 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          cache: "pipenv"
+          architecture: x64
 
-      - name: Setup dependencies.
+      - name: Install dependencies (and project)
         working-directory: backend
         run: |
-          pip install --upgrade pipenv
-          pipenv sync
+          pip install -U pip
+          pip install -e .[lint,scripts,test]
 
       - name: Check black formatting
         working-directory: backend
-        run: pipenv run invoke check-black
+        run: inv lint-black
 
-      - name: Check flake8 formatting
+      - name: Check ruff
         working-directory: backend
-        run: pipenv run invoke check-flake8
-
-      - name: Check import order with isort
-        working-directory: backend
-        run: pipenv run invoke check-isort
+        run: inv lint-ruff
