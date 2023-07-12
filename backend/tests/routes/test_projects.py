@@ -73,9 +73,7 @@ def test_get_project_wrong_authorization(
 
 
 def test_delete_project_correct_id(logged_in_client, project_id):
-    response = logged_in_client.delete(
-        f"{API_VERSION_PREFIX}/projects/{str(project_id)}"
-    )
+    response = logged_in_client.delete(f"{API_VERSION_PREFIX}/projects/{project_id!s}")
     assert response.status_code == codes.NO_CONTENT
 
 

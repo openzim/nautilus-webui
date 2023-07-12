@@ -56,7 +56,7 @@ services:
     container_name: nautilus-backend-tests
     command: /bin/sh -c "sleep Infinity"
     environment:
-      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus-test
     depends_on:
       - database
 volumes:

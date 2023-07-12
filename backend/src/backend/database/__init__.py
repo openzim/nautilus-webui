@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Generator
 
 from bson.json_util import DEFAULT_JSON_OPTIONS, dumps, loads
 from sqlalchemy import create_engine
