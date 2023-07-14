@@ -10,8 +10,7 @@ src_dir = pathlib.Path(__file__).parent.resolve()
 
 PROJECT_EXPIRE_AFTER = datetime.timedelta(days=7)
 if not os.getenv("POSTGRES_URI"):
-    msg = "Please set the POSTGRES_URI environment variable"
-    raise OSError(msg)
+    raise OSError("Please set the POSTGRES_URI environment variable")
 
 logger = logging.getLogger(src_dir.name)
 
