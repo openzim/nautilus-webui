@@ -6,8 +6,8 @@ from httpx import codes
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
-from backend.database import gen_session
-from backend.database.models import User
+from api.database import gen_session
+from api.database.models import User
 
 router = APIRouter(prefix="/users")
 

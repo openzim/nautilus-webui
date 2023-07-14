@@ -2,10 +2,10 @@ import datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from src.backend.entrypoint import app
 
-from backend.database import Session
-from backend.database.models import Project, User
+from api.database import Session
+from api.database.models import Project, User
+from api.entrypoint import app
 
 
 @pytest.fixture()

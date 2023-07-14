@@ -1,7 +1,8 @@
 import httpx
 from fastapi.testclient import TestClient
-from src.backend.constants import API_VERSION_PREFIX
-from src.backend.entrypoint import app
+
+from api.constants import API_VERSION_PREFIX
+from api.entrypoint import app
 
 client = TestClient(app)
 

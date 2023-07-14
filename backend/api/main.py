@@ -3,9 +3,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from backend import __description__, __titile__, __version__
-from backend.constants import API_VERSION_PREFIX, BackendConf
-from backend.routes import projects, users, utils
+from api import __description__, __titile__, __version__
+from api.constants import API_VERSION_PREFIX, BackendConf
+from api.routes import projects, users, utils
 
 
 def create_app() -> FastAPI:

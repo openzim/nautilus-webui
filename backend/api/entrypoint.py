@@ -1,8 +1,13 @@
 import uvicorn
 
-from backend.main import create_app  # pragma: no cover
+from api.main import create_app  # pragma: no cover
 
 app = create_app()  # pragma: no cover
 
-if __name__ == "__main__":
+
+def run():
     uvicorn.run(app, host="localhost", port=8000)
+
+
+if __name__ == "__main__":
+    run()

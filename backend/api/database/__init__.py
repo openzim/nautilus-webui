@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
-from backend.constants import BackendConf, logger
+from api.constants import BackendConf, logger
 
 
 # custom overload of bson deserializer to make naive datetime

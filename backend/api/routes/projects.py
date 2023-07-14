@@ -8,8 +8,8 @@ from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from backend.database import gen_session
-from backend.database.models import Project, User
+from api.database import gen_session
+from api.database.models import Project, User
 
 router = APIRouter(prefix="/projects")
 
