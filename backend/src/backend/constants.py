@@ -9,10 +9,16 @@ API_VERSION_PREFIX = "/v1"
 src_dir = pathlib.Path(__file__).parent.resolve()
 
 PROJECT_EXPIRE_AFTER = datetime.timedelta(days=7)
-if not os.getenv("POSTGRES_URI"):
-    raise OSError("Please set the POSTGRES_URI environment variable")
 
 logger = logging.getLogger(src_dir.name)
+
+
+def postgres_uri():
+    uri = os.getenv("POSTGRES_URI")
+    if not uri:
+        msg = "Please set the POSTGRES_URI environment variable"
+        raise OSError(msg)
+    return uri
 
 
 @dataclass
@@ -21,7 +27,7 @@ class BackendConf:
     Backend configuration, read from environment variables and set default values.
     """
 
-    postgres_uri = os.getenv("POSTGRES_URI")
+    postgres_uri = postgres_uri()
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",

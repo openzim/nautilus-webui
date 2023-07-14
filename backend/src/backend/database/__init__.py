@@ -20,19 +20,14 @@ def my_loads(s, *args, **kwargs):
     )
 
 
-if (
-    BackendConf.postgres_uri == "nodb"
-):  # this is a hack for cases where we do not need the DB, e.g. unit tests
-    Session = None
-else:
-    Session = sessionmaker(
-        bind=create_engine(
-            BackendConf.postgres_uri,
-            echo=False,
-            json_serializer=dumps,  # use bson serializer to handle datetime naively
-            json_deserializer=my_loads,  # use custom bson deserializer for same reason
-        )
+Session = sessionmaker(
+    bind=create_engine(
+        BackendConf.postgres_uri,
+        echo=False,
+        json_serializer=dumps,  # use bson serializer to handle datetime naively
+        json_deserializer=my_loads,  # use custom bson deserializer for same reason
     )
+)
 
 
 def gen_session() -> Generator[OrmSession, None, None]:

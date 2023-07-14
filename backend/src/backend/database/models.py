@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 from uuid import UUID
 
 from sqlalchemy import DateTime, ForeignKey, String, text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -20,11 +19,9 @@ class Base(MappedAsDataclass, DeclarativeBase):
     # PostgreSQL. This is only needed for the case where a specific PostgreSQL
     # type has to be used or when we want to ensure a specific setting (like the
     # timezone below)
-    type_annotation_map = {
-        dict[str, Any]: MutableDict.as_mutable(
-            JSONB
-        ),  # transform Python Dict[str, Any] into PostgreSQL JSONB
-        list[dict[str, Any]]: MutableList.as_mutable(JSONB),
+    type_annotation_map: ClassVar = {
+        dict[str, Any]: JSONB,  # transform Python Dict[str, Any] into PostgreSQL JSONB
+        list[dict[str, Any]]: JSONB,
         datetime: DateTime(
             timezone=False
         ),  # transform Python datetime into PostgreSQL Datetime without timezone
