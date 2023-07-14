@@ -37,7 +37,7 @@ jobs:
           pip install -e .[test,scripts]
 
       - name: Initialize the database
-        working-directory: backend/src
+        working-directory: backend
         run: |
           alembic upgrade head
           alembic check
