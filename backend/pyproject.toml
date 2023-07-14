@@ -41,7 +41,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/openzim/nautilus_api"
+Homepage = "https://github.com/openzim/nautilus-webui"
 Donate = "https://www.kiwix.org/en/support-us/"
 
 [project.scripts]
