@@ -2,7 +2,7 @@ FROM python:3.11-slim
 LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 COPY pyproject.toml README.md tasks.py /app/
-COPY src/ /app/src
+COPY api/ /app/api
 
 RUN cd /app && \
     pip install --no-cache-dir -U pip && \
