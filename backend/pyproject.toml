@@ -5,8 +5,8 @@ build-backend = "hatchling.build"
 [project]
 name = "nautilus-webui"
 authors = [{ name = "Kiwix", email = "dev@kiwix.org" }]
-keywords = ["webui"]
-requires-python = ">=3.10"
+keywords = ["nautilus", "zim", "files", "webui"]
+requires-python = ">=3.11"
 description = "SaaS Web UI for nautilus"
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
@@ -31,19 +31,21 @@ dynamic = ["version"]
 scripts = ["invoke==2.1.3"]
 lint = ["black==23.3.0", "ruff==0.0.272"]
 test = ["pytest==7.3.1", "coverage==7.2.7"]
+check = ["pyright==1.1.317"]
 dev = [
-    "debugpy",
+    "debugpy==1.6.7",
     "nautilus-webui[scripts]",
     "nautilus-webui[lint]",
     "nautilus-webui[test]",
+    "nautilus-webui[check]",
 ]
 
 [project.urls]
-Homepage = "https://github.com/openzim/nautilus-webui/blob/main/backend/pyproject.toml"
+Homepage = "https://github.com/openzim/nautilus-webui"
 Donate = "https://www.kiwix.org/en/support-us/"
 
 [project.scripts]
-backend-binary = "backend:entrypoint"
+backend = "backend:entrypoint"
 
 [tool.hatch.version]
 path = "src/backend/__about__.py"
@@ -58,7 +60,7 @@ features = ["dev"]
 features = ["scripts", "test"]
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.10", "3.11"]
+python = ["3.11"]
 
 [tool.hatch.envs.test.scripts]
 run = "inv test --args '{args}'"
@@ -204,4 +206,4 @@ include = ["src", "tests", "tasks.py"]
 exclude = [".env/**", ".venv/**"]
 extraPaths = ["src"]
 pythonVersion = "3.11"
-typeCheckingMode = "strict"
+typeCheckingMode = "basic"
