@@ -100,13 +100,3 @@ def fixall(ctx: Context, args: str | None = ""):
     fix_black(ctx, args)
     fix_ruff(ctx, args)
     lintall(ctx, args)
-
-
-@task(
-    optional=["args"],
-    help={"args": "coverage additional arguments"},
-)
-def coverage_xml_report(ctx: Context, args: str | None = ""):
-    """fix everything automatically"""
-    args = args or ""
-    ctx.run(f"coverage {args} xml", pty=use_pty)

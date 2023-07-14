@@ -52,15 +52,11 @@ jobs:
           POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
         run: inv coverage --args "-vvv"
 
-      - name: Generate the coverage report
-        working-directory: backend
-        run: inv coverage-xml-report
-
       - name: Upload coverage to Codecov
         if: matrix.python == '3.11'
         uses: codecov/codecov-action@v3
         with:
-          working-directory: backend
+          root_dir: backend
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
