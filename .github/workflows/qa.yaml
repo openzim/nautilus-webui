@@ -3,7 +3,7 @@ name: QA
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   check-qa:
@@ -11,18 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python }}
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
           architecture: x64
-          cache: 'pip'
 
       - name: Install dependencies (and project)
         working-directory: backend
         run: |
           pip install -U pip
-          pip install -e .[lint,scripts,test]
+          pip install -e .[lint,scripts,test,check]
 
       - name: Check black formatting
         working-directory: backend
@@ -31,3 +30,6 @@ jobs:
       - name: Check ruff
         working-directory: backend
         run: inv lint-ruff
+
+      - name: Check pyright
+        run: inv check-pyright
