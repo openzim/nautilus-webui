@@ -193,13 +193,13 @@ testpaths = ["tests"]
 pythonpath = [".", "src"]
 
 [tool.coverage.paths]
-source = ["src/backend"]
+source = ["api"]
 
 [tool.coverage.run]
-source_pkgs = ["backend"]
+source_pkgs = ["api"]
 branch = true
 parallel = true
-omit = ["src/backend/__about__.py"]
+omit = ["api/__about__.py"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
