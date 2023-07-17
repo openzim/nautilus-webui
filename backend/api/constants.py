@@ -12,13 +12,9 @@ PROJECT_EXPIRE_AFTER = datetime.timedelta(days=7)
 
 logger = logging.getLogger(src_dir.name)
 
-
-def postgres_uri():
-    uri = os.getenv("POSTGRES_URI")
-    if not uri:
-        msg = "Please set the POSTGRES_URI environment variable"
-        raise OSError(msg)
-    return uri
+if not os.getenv("POSTGRES_URI"):
+    msg = "Please set the POSTGRES_URI environment variable"
+    raise OSError(msg)
 
 
 @dataclass
@@ -27,7 +23,7 @@ class BackendConf:
     Backend configuration, read from environment variables and set default values.
     """
 
-    postgres_uri = postgres_uri()
+    postgres_uri = os.getenv("POSTGRES_URI")
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
