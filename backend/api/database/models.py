@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import DateTime, ForeignKey, String, text
@@ -19,7 +19,7 @@ class Base(MappedAsDataclass, DeclarativeBase):
     # PostgreSQL. This is only needed for the case where a specific PostgreSQL
     # type has to be used or when we want to ensure a specific setting (like the
     # timezone below)
-    type_annotation_map: ClassVar = {
+    type_annotation_map = {
         dict[str, Any]: JSONB,  # transform Python Dict[str, Any] into PostgreSQL JSONB
         list[dict[str, Any]]: JSONB,
         datetime: DateTime(
