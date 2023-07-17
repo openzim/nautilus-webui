@@ -1,11 +1,12 @@
 FROM python:3.11-slim
 LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
-WORKDIR /app/src
+COPY pyproject.toml README.md tasks.py /app/
+COPY api/ /app/api
 
-RUN pip install --no-cache-dir --upgrade pip pipenv
-COPY pyproject.toml README.md tasks.py Pipfile Pipfile.lock /app/
-RUN pipenv sync --system
+RUN cd /app && \
+    pip install --no-cache-dir -U pip && \
+    cd /app && pip install --no-cache-dir -e .[dev]
 
-COPY src/ /app/src
+WORKDIR /app
 COPY README.md /app

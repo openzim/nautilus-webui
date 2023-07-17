@@ -3,10 +3,12 @@ name: Tests
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
+env:
+  POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
 
 jobs:
-  tests:
+  run-tests:
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -25,32 +27,36 @@ jobs:
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
-          cache: "pipenv"
+          python-version-file: 'backend/pyproject.toml'
+          architecture: x64
 
-      - name: Setup dependencies.
+      - name: Install dependencies (and project)
         working-directory: backend
         run: |
-          pip install --upgrade pipenv
-          pipenv sync
+          pip install -U pip
+          pip install -e .[test,scripts]
 
-      - name: Setup database.
+      - name: Initialize the database
         working-directory: backend
         run: |
-          pipenv run init
-        env:
-          POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
+          alembic upgrade head
+          alembic check
 
-      - name: Run tests
+      - name: Run the tests
         working-directory: backend
-        run: |
-          pipenv run invoke test --args "-v"
-          pipenv run invoke generate-xml-report
-        env:
-          POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
+        run: inv coverage --args "-vvv"
 
       - name: Upload coverage to Codecov
+        if: matrix.python == '3.11'
         uses: codecov/codecov-action@v3
         with:
+          root_dir: backend
           working-directory: backend
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Ensure we can build targets
+        working-directory: backend
+        run: |
+          pip install build
+          python3 -m build

@@ -3,7 +3,7 @@ import uuid
 from dateutil import parser
 from httpx import codes
 
-from backend.constants import API_VERSION_PREFIX
+from api.constants import API_VERSION_PREFIX
 
 
 def test_create_user(client):

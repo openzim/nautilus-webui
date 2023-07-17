@@ -1,11 +1,11 @@
-from typing import Generator
+from collections.abc import Generator
 
 from bson.json_util import DEFAULT_JSON_OPTIONS, dumps, loads
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
-from backend.constants import BackendConf, logger
+from api.constants import BackendConf, logger
 
 
 # custom overload of bson deserializer to make naive datetime
@@ -20,19 +20,14 @@ def my_loads(s, *args, **kwargs):
     )
 
 
-if (
-    BackendConf.postgres_uri == "nodb"
-):  # this is a hack for cases where we do not need the DB, e.g. unit tests
-    Session = None
-else:
-    Session = sessionmaker(
-        bind=create_engine(
-            BackendConf.postgres_uri,
-            echo=False,
-            json_serializer=dumps,  # use bson serializer to handle datetime naively
-            json_deserializer=my_loads,  # use custom bson deserializer for same reason
-        )
+Session = sessionmaker(
+    bind=create_engine(
+        BackendConf.postgres_uri,
+        echo=False,
+        json_serializer=dumps,  # use bson serializer to handle datetime naively
+        json_deserializer=my_loads,  # use custom bson deserializer for same reason
     )
+)
 
 
 def gen_session() -> Generator[OrmSession, None, None]:

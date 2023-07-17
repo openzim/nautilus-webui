@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import DateTime, ForeignKey, String, text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -21,14 +20,12 @@ class Base(MappedAsDataclass, DeclarativeBase):
     # type has to be used or when we want to ensure a specific setting (like the
     # timezone below)
     type_annotation_map = {
-        Dict[str, Any]: MutableDict.as_mutable(
-            JSONB
-        ),  # transform Python Dict[str, Any] into PostgreSQL JSONB
-        List[Dict[str, Any]]: MutableList.as_mutable(JSONB),
+        dict[str, Any]: JSONB,  # transform Python Dict[str, Any] into PostgreSQL JSONB
+        list[dict[str, Any]]: JSONB,
         datetime: DateTime(
             timezone=False
         ),  # transform Python datetime into PostgreSQL Datetime without timezone
-        List[str]: ARRAY(
+        list[str]: ARRAY(
             item_type=String
         ),  # transform Python List[str] into PostgreSQL Array of strings
     }
@@ -59,7 +56,7 @@ class User(Base):
     )
     created_on: Mapped[datetime]
 
-    projects: Mapped[List["Project"]] = relationship(
+    projects: Mapped[list["Project"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -79,12 +76,12 @@ class Project(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), init=False)
     name: Mapped[str]
     created_on: Mapped[datetime]
-    expire_on: Mapped[Optional[datetime]]
+    expire_on: Mapped[datetime | None]
 
     user: Mapped[User] = relationship(back_populates="projects", init=False)
 
-    files: Mapped[List["File"]] = relationship(cascade="all, delete-orphan")
-    archives: Mapped[List["Archive"]] = relationship(cascade="all, delete-orphan")
+    files: Mapped[list["File"]] = relationship(cascade="all, delete-orphan")
+    archives: Mapped[list["Archive"]] = relationship(cascade="all, delete-orphan")
 
 
 class File(Base):
@@ -104,8 +101,8 @@ class File(Base):
     filename: Mapped[str]
     filesize: Mapped[int]
     title: Mapped[str]
-    authors: Mapped[Optional[List[str]]]
-    description: Mapped[Optional[str]]
+    authors: Mapped[list[str] | None]
+    description: Mapped[str | None]
     uploaded_on: Mapped[datetime]
     hash: Mapped[str]
     path: Mapped[str]
@@ -135,5 +132,5 @@ class Archive(Base):
     collection_json_path: Mapped[str]
     status: Mapped[str]
     zimfarm_task_id: Mapped[UUID]
-    email: Mapped[Optional[str]]
-    config: Mapped[Dict[str, Any]]
+    email: Mapped[str | None]
+    config: Mapped[dict[str, Any]]

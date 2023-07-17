@@ -1,11 +1,10 @@
-import os
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import create_engine
 
-from backend.constants import BackendConf
-from backend.database.models import Base
+from api.constants import BackendConf
+from api.database.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -59,7 +58,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = create_engine(os.getenv("POSTGRES_URI"), echo=False)
+    connectable = create_engine(BackendConf.postgres_uri, echo=False)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
