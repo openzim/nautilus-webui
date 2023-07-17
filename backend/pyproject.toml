@@ -157,7 +157,9 @@ select = [
   "YTT", # flake8-2020
 ]
 ignore = [
+  # We will use variable names such as id in the database model. Excluding this rule prevents useless warnings
   "A003",
+  # Exclude this rule to eliminate warnings about calls to Depends in FastAPI
   "B008",
   # Allow non-abstract empty methods in abstract base classes
   "B027",
