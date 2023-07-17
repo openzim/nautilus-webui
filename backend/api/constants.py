@@ -23,7 +23,7 @@ class BackendConf:
     Backend configuration, read from environment variables and set default values.
     """
 
-    postgres_uri = os.getenv("POSTGRES_URI")
+    postgres_uri = os.getenv("POSTGRES_URI", "nodb")
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
