@@ -24,6 +24,7 @@ dependencies = [
   "psycopg[binary,pool]==3.1.9",
   "pymongo==4.4.1",
   "python-dateutil==2.8.2",
+  "kiwixstorage==0.8.3",
 ]
 dynamic = ["version"]
 
