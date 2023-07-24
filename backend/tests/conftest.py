@@ -1,11 +1,16 @@
 import datetime
+import os
+from pathlib import Path
+from _pytest.tmpdir import tmp_path_factory
 
 import pytest
 from fastapi.testclient import TestClient
 
 from api.database import Session
-from api.database.models import Project, User
+from api.database.models import Project, User, File
 from api.entrypoint import app
+from api.routes.files import upload_file
+from api.constants import BackendConf
 
 
 @pytest.fixture()
@@ -54,6 +59,54 @@ def logged_in_client(client, user_id) -> str:
     client.cookies = cookie
     return client
 
+
+@pytest.fixture()
+def file_id(project_id, test_file, test_file_hash):
+    now = datetime.datetime.now(datetime.UTC)
+    temp_file_location = BackendConf.cache_path.joinpath("files")
+    location = upload_file(temp_file_location, test_file)
+    new_file = File(
+        filename="test filename",
+        filesize=123,
+        title="test title",
+        authors=None,
+        description=None,
+        uploaded_on=now,
+        hash=test_file_hash,
+        path=str(location.resolve()),
+        type="image/png",
+        status="LOCAL",
+    )
+    with Session.begin() as session:
+        project = session.get(Project, project_id)
+        if project:
+            project.files.append(new_file)
+        session.add(new_file)
+        session.flush()
+        session.refresh(new_file)
+        created_id = new_file.id
+    yield created_id
+    with Session.begin() as session:
+        file = session.get(File, created_id)
+        if file:
+            file_location = Path(file.path)
+            if file_location.exists():
+                os.remove(file_location)
+            session.delete(file)
+
+
+@pytest.fixture
+def test_file():
+    return b"TDw\xd1\x01\xc8\xdfBE8\x80\x08;}6\xd3O9\xefm\xc5"
+
+
+@pytest.fixture
+def test_file_hash():
+    return "9e56d33da489a4ba0fe1f02ed4b0b5984854845dfd666a92e112262b8e7ea0dc"
+
+@pytest.fixture
+def non_existent_file_id():
+    return "60d5def8-1553-470d-82a8-25ec8ca3a135"
 
 @pytest.fixture()
 def project_id(test_project_name, user_id):
