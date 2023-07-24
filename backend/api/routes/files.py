@@ -80,16 +80,19 @@ async def upload_files(
         location = upload_file(temp_file_location, binary_file)
 
         now = datetime.datetime.now(tz=datetime.UTC)
+        filename = file.filename if file.filename else ""
+        size = file.size if file.size else 0
+        content_type = file.content_type if file.content_type else "text/plain"
         new_file = File(
-            filename=file.filename,
-            filesize=file.size,
-            title=file.filename,
+            filename=filename,
+            filesize=size,
+            title=filename,
             authors=None,
             description=None,
             uploaded_on=now,
             hash=hashlib.sha256(binary_file).hexdigest(),
             path=str(location.resolve()),
-            type=file.content_type,
+            type=content_type,
             status="LOCAL",
         )
         project.files.append(new_file)
