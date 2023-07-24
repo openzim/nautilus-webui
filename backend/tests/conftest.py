@@ -1,16 +1,15 @@
 import datetime
 import os
 from pathlib import Path
-from _pytest.tmpdir import tmp_path_factory
 
 import pytest
 from fastapi.testclient import TestClient
 
+from api.constants import BackendConf
 from api.database import Session
-from api.database.models import Project, User, File
+from api.database.models import File, Project, User
 from api.entrypoint import app
 from api.routes.files import upload_file
-from api.constants import BackendConf
 
 
 @pytest.fixture()
@@ -104,9 +103,11 @@ def test_file():
 def test_file_hash():
     return "9e56d33da489a4ba0fe1f02ed4b0b5984854845dfd666a92e112262b8e7ea0dc"
 
+
 @pytest.fixture
 def non_existent_file_id():
     return "60d5def8-1553-470d-82a8-25ec8ca3a135"
+
 
 @pytest.fixture()
 def project_id(test_project_name, user_id):
