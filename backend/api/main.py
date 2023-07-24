@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 
 from api import __description__, __titile__, __version__
 from api.constants import API_VERSION_PREFIX, BackendConf
-from api.routes import projects, users, utils
+from api.routes import files, projects, users, utils
 
 
 def create_app() -> FastAPI:
@@ -49,5 +49,6 @@ def create_app() -> FastAPI:
     api.include_router(utils.router)
     api.include_router(users.router)
     api.include_router(projects.router)
+    api.include_router(files.router)
     app.mount(API_VERSION_PREFIX, api)
     return app

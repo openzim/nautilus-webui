@@ -1,20 +1,20 @@
 import datetime
 import logging
 import os
-import pathlib
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 
 API_VERSION_PREFIX = "/v1"
 
-src_dir = pathlib.Path(__file__).parent.resolve()
+src_dir = Path(__file__).parent.resolve()
 
 PROJECT_EXPIRE_AFTER = datetime.timedelta(days=7)
 
 logger = logging.getLogger(src_dir.name)
 
 if not os.getenv("POSTGRES_URI"):
-    msg = "Please set the POSTGRES_URI environment variable"
-    raise OSError(msg)
+    raise OSError("Please set the POSTGRES_URI environment variable")
 
 
 @dataclass
@@ -24,6 +24,8 @@ class BackendConf:
     """
 
     postgres_uri = os.getenv("POSTGRES_URI", "nodb")
+    s3_uri = os.getenv("S3_URI")
+    cache_path = Path(os.getenv("CACHE_PATH", tempfile.gettempdir())).resolve()
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
