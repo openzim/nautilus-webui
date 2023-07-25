@@ -29,6 +29,8 @@ class BackendConf:
         os.getenv("TEMP_FILES_LOCATION", tempfile.gettempdir())
     ).resolve()
 
+    maximum_upload_file_size = int(os.getenv("MAXIMUM_UPLOAD_FILE_SIZE", "104857600"))
+
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
         "http://localhost|http://localhost:8000|http://localhost:8080",

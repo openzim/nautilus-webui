@@ -7,11 +7,13 @@ from pathlib import Path
 from typing import BinaryIO
 from uuid import UUID
 
+import magic
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from httpx import codes
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from zimscraperlib import filesystem
 
 from api.constants import BackendConf
 from api.database import gen_session
@@ -87,49 +89,68 @@ def upload_file(location: Path, file: BinaryIO) -> Path:
     return file_location
 
 
-@router.post(
-    "/{project_id}/files", response_model=list[FileModel], status_code=codes.CREATED
-)
-async def upload_files(
-    uploaded_files: list[UploadFile],
-    project: Project = Depends(validated_project),
-    session: Session = Depends(gen_session),
-) -> list[FileModel]:
-    """Upload new files"""
-    added_files = []
-    for uploaded_file_wrapper in uploaded_files:
-        location = upload_file(
-            BackendConf.temp_files_location, uploaded_file_wrapper.file
+def validate_uploaded_file(upload_file: UploadFile):
+    """
+    Validates the uploaded file to ensure it meets the requirements.
+
+    Args:
+        upload_file (UploadFile): The uploaded file object.
+
+    Returns:
+        tuple: A tuple containing filename, size, and mimetype of the file.
+
+    Raises:
+        HTTPException: If the filename is invalid, the file is empty,
+        or the file size exceeds the maximum allowed size.
+    """
+    filename = upload_file.filename
+    size = upload_file.size
+
+    if not filename:
+        raise HTTPException(
+            status_code=codes.NOT_ACCEPTABLE, detail="The filename is invalid."
         )
 
-        now = datetime.datetime.now(tz=datetime.UTC)
-        filename = (
-            uploaded_file_wrapper.filename if uploaded_file_wrapper.filename else ""
+    if not size or size == 0:
+        raise HTTPException(status_code=codes.NOT_ACCEPTABLE, detail="Emtpy file.")
+    elif size > BackendConf.maximum_upload_file_size:
+        raise HTTPException(
+            status_code=codes.REQUEST_ENTITY_TOO_LARGE,
+            detail="Upload file is too large.",
         )
-        size = uploaded_file_wrapper.size if uploaded_file_wrapper.size else 0
-        content_type = (
-            uploaded_file_wrapper.content_type
-            if uploaded_file_wrapper.content_type
-            else "text/plain"
-        )
-        new_file = File(
-            filename=filename,
-            filesize=size,
-            title=filename,
-            authors=None,
-            description=None,
-            uploaded_on=now,
-            hash=generate_file_hash(location),
-            path=str(location.resolve()),
-            type=content_type,
-            status="LOCAL",
-        )
-        project.files.append(new_file)
-        session.add(new_file)
-        session.flush()
-        session.refresh(new_file)
-        added_files.append(new_file)
-    return TypeAdapter(list[FileModel]).validate_python(added_files)
+
+    mimetype = filesystem.get_content_mimetype(upload_files.read(2048))
+
+    return (filename, size, mimetype)
+
+
+@router.post("/{project_id}/files", response_model=FileModel, status_code=codes.CREATED)
+async def upload_files(
+    uploaded_file: UploadFile,
+    project: Project = Depends(validated_project),
+    session: Session = Depends(gen_session),
+) -> FileModel:
+    """Upload new files"""
+    now = datetime.datetime.now(tz=datetime.UTC)
+    filename, size, mimetype = validate_uploaded_file(uploaded_file)
+    location = upload_file(BackendConf.temp_files_location, upload_file.file)
+    new_file = File(
+        filename=filename,
+        filesize=size,
+        title=filename,
+        authors=None,
+        description=None,
+        uploaded_on=now,
+        hash=generate_file_hash(location),
+        path=str(location.resolve()),
+        type=mimetype,
+        status="LOCAL",
+    )
+    project.files.append(new_file)
+    session.add(new_file)
+    session.flush()
+    session.refresh(new_file)
+    return FileModel.model_validate(new_file)
 
 
 @router.get("/{project_id}/files", response_model=list[FileModel])
