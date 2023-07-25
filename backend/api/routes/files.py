@@ -95,9 +95,10 @@ async def upload_files(
 ) -> list[FileModel]:
     """Upload new files"""
     added_files = []
-    temp_file_location = BackendConf.cache_path.joinpath("files")
     for uploaded_file_wrapper in uploaded_files:
-        location = upload_file(temp_file_location, uploaded_file_wrapper.file)
+        location = upload_file(
+            BackendConf.temp_files_location, uploaded_file_wrapper.file
+        )
 
         now = datetime.datetime.now(tz=datetime.UTC)
         filename = (

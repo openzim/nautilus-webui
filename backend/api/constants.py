@@ -25,7 +25,9 @@ class BackendConf:
 
     postgres_uri = os.getenv("POSTGRES_URI", "nodb")
     s3_uri = os.getenv("S3_URI")
-    cache_path = Path(os.getenv("CACHE_PATH", tempfile.gettempdir())).resolve()
+    temp_files_location = Path(
+        os.getenv("TEMP_FILES_LOCATION", tempfile.gettempdir())
+    ).resolve()
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
