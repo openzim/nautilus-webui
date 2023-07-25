@@ -18,7 +18,7 @@ from api.database import gen_session
 from api.database.models import File, Project
 from api.routes import validated_project
 
-router = APIRouter(prefix="/files")
+router = APIRouter()
 
 
 class FileMetadataUpdateRequest(BaseModel):
@@ -87,7 +87,9 @@ def upload_file(location: Path, file: BinaryIO) -> Path:
     return file_location
 
 
-@router.post("", response_model=list[FileModel], status_code=codes.CREATED)
+@router.post(
+    "/{project_id}/files", response_model=list[FileModel], status_code=codes.CREATED
+)
 async def upload_files(
     uploaded_files: list[UploadFile],
     project: Project = Depends(validated_project),
@@ -130,7 +132,7 @@ async def upload_files(
     return TypeAdapter(list[FileModel]).validate_python(added_files)
 
 
-@router.get("", response_model=list[FileModel])
+@router.get("/{project_id}/files", response_model=list[FileModel])
 async def get_all_files(
     project: Project = Depends(validated_project),
 ) -> list[FileModel]:
@@ -138,13 +140,13 @@ async def get_all_files(
     return TypeAdapter(list[FileModel]).validate_python(project.files)
 
 
-@router.get("/{file_id}", response_model=FileModel)
-async def get_file(project: File = Depends(validated_file)) -> FileModel:
+@router.get("/{project_id}/files/{file_id}", response_model=FileModel)
+async def get_file(file: File = Depends(validated_file)) -> FileModel:
     """Get a specific file by its id."""
-    return FileModel.model_validate(project)
+    return FileModel.model_validate(file)
 
 
-@router.patch("/{file_id}", status_code=codes.NO_CONTENT)
+@router.patch("/{project_id}/files/{file_id}", status_code=codes.NO_CONTENT)
 async def update_file(
     update_request: FileMetadataUpdateRequest,
     file: File = Depends(validated_file),
@@ -164,7 +166,7 @@ async def update_file(
     session.execute(stmt)
 
 
-@router.delete("/{file_id}", status_code=codes.NO_CONTENT)
+@router.delete("/{project_id}/files/{file_id}", status_code=codes.NO_CONTENT)
 async def delete_file(
     file: File = Depends(validated_file), session: Session = Depends(gen_session)
 ):
