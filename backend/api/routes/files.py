@@ -2,7 +2,9 @@ import datetime
 import hashlib
 import os
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
+from typing import BinaryIO
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
@@ -56,13 +58,32 @@ def validated_file(
     return file
 
 
-def upload_file(location: Path, file: bytes) -> Path:
-    """Saves a binary file to a specific location and returns its absolute path."""
+def read_file_in_chunks(reader: BinaryIO, chunck_size=2048) -> Iterator[bytes]:
+    """Read Big file chunk by chunk. Default chunk size is 2k"""
+    while True:
+        chunk = reader.read(chunck_size)
+        if not chunk:
+            break
+        yield chunk
+
+
+def generate_file_hash(file: Path) -> str:
+    """Generate sha256 hash of a file, optimized for large files"""
+    with open(file, "rb") as f:
+        hasher = hashlib.sha256()
+        for chunk in read_file_in_chunks(f):
+            hasher.update(chunk)
+        return hasher.hexdigest()
+
+
+def upload_file(location: Path, file: BinaryIO) -> Path:
+    """Saves a binary file to a specific location and returns its path."""
     if not location.exists():
         os.makedirs(location, exist_ok=True)
     file_location = Path(tempfile.NamedTemporaryFile(dir=location, delete=False).name)
-    with open(file_location, "wb+") as file_object:
-        file_object.write(file)
+    with open(file_location, "wb") as file_object:
+        for chunk in read_file_in_chunks(file):
+            file_object.write(chunk)
     return file_location
 
 
@@ -75,15 +96,19 @@ async def upload_files(
     """Upload new files"""
     added_files = []
     temp_file_location = BackendConf.cache_path.joinpath("files")
-    for file in uploaded_files:
-        binary_file = await file.read()
-
-        location = upload_file(temp_file_location, binary_file)
+    for uploaded_file_wrapper in uploaded_files:
+        location = upload_file(temp_file_location, uploaded_file_wrapper.file)
 
         now = datetime.datetime.now(tz=datetime.UTC)
-        filename = file.filename if file.filename else ""
-        size = file.size if file.size else 0
-        content_type = file.content_type if file.content_type else "text/plain"
+        filename = (
+            uploaded_file_wrapper.filename if uploaded_file_wrapper.filename else ""
+        )
+        size = uploaded_file_wrapper.size if uploaded_file_wrapper.size else 0
+        content_type = (
+            uploaded_file_wrapper.content_type
+            if uploaded_file_wrapper.content_type
+            else "text/plain"
+        )
         new_file = File(
             filename=filename,
             filesize=size,
@@ -91,7 +116,7 @@ async def upload_files(
             authors=None,
             description=None,
             uploaded_on=now,
-            hash=hashlib.sha256(binary_file).hexdigest(),
+            hash=generate_file_hash(location),
             path=str(location.resolve()),
             type=content_type,
             status="LOCAL",
