@@ -19,7 +19,7 @@ from api.routes import validated_project
 router = APIRouter(prefix="/files")
 
 
-class FileRequest(BaseModel):
+class FileMetadataUpdateRequest(BaseModel):
     filename: str
     title: str
     authors: list[str] | None
@@ -52,11 +52,12 @@ def validated_file(
     stmt = select(File).filter_by(id=file_id).filter_by(project_id=project.id)
     file = session.execute(stmt).scalar()
     if not file:
-        raise HTTPException(codes.NOT_FOUND, f"Project not found: {file_id}")
+        raise HTTPException(codes.NOT_FOUND, f"File not found: {file_id}")
     return file
 
 
 def upload_file(location: Path, file: bytes) -> Path:
+    """Saves a binary file to a specific location and returns its absolute path."""
     if not location.exists():
         os.makedirs(location, exist_ok=True)
     file_location = Path(tempfile.NamedTemporaryFile(dir=location, delete=False).name)
@@ -119,7 +120,7 @@ async def get_file(project: File = Depends(validated_file)) -> FileModel:
 
 @router.patch("/{file_id}", status_code=codes.NO_CONTENT)
 async def update_file(
-    file_request: FileRequest,
+    update_request: FileMetadataUpdateRequest,
     file: File = Depends(validated_file),
     session: Session = Depends(gen_session),
 ):
@@ -128,10 +129,10 @@ async def update_file(
         update(File)
         .filter_by(id=file.id)
         .values(
-            filename=file_request.filename,
-            title=file_request.title,
-            authors=file_request.authors,
-            description=file_request.description,
+            filename=update_request.filename,
+            title=update_request.title,
+            authors=update_request.authors,
+            description=update_request.description,
         )
     )
     session.execute(stmt)
