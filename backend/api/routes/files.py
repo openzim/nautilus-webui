@@ -1,9 +1,9 @@
 import datetime
-from enum import Enum
 import hashlib
 import os
 import tempfile
 from collections.abc import Iterator
+from enum import Enum
 from pathlib import Path
 from typing import BinaryIO
 from uuid import UUID
@@ -72,15 +72,15 @@ def read_file_in_chunks(reader: BinaryIO, chunck_size=2048) -> Iterator[bytes]:
         if not chunk:
             break
         yield chunk
+    reader.seek(0)
 
 
-def generate_file_hash(file: Path) -> str:
+def generate_file_hash(file: BinaryIO) -> str:
     """Generate sha256 hash of a file, optimized for large files"""
-    with open(file, "rb") as f:
-        hasher = hashlib.sha256()
-        for chunk in read_file_in_chunks(f):
-            hasher.update(chunk)
-        return hasher.hexdigest()
+    hasher = hashlib.sha256()
+    for chunk in read_file_in_chunks(file):
+        hasher.update(chunk)
+    return hasher.hexdigest()
 
 
 def upload_file(location: Path, file: BinaryIO) -> Path:
@@ -119,6 +119,7 @@ def validate_uploaded_file(upload_file: UploadFile):
         raise HTTPException(status_code=codes.NOT_ACCEPTABLE, detail="Emtpy file.")
 
     mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
+    upload_file.file.seek(0)
 
     return (filename, size, mimetype)
 
@@ -133,7 +134,7 @@ def validate_project_quota(file_size: int, project: Project):
         )
 
 
-@router.post("/{project_id}/files/")
+@router.post("/{project_id}/files", status_code=codes.CREATED)
 async def create_file(
     uploaded_file: UploadFile,
     project: Project = Depends(validated_project),
@@ -169,7 +170,7 @@ async def create_file(
         authors=None,
         description=None,
         uploaded_on=now,
-        hash=generate_file_hash(location),
+        hash=generate_file_hash(uploaded_file.file),
         # TODO: Using S3 to save file.
         path=str(location.resolve()),
         type=mimetype,
@@ -222,6 +223,5 @@ async def delete_file(
 ):
     """Delete a specific file by its id."""
     file_location = Path(file.path)
-    if file_location.exists():
-        os.remove(file_location)
+    file_location.unlink(missing_ok=True)
     session.delete(file)
