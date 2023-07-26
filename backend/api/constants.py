@@ -29,7 +29,7 @@ class BackendConf:
         os.getenv("TEMP_FILES_LOCATION", tempfile.gettempdir())
     ).resolve()
 
-    maximum_upload_file_size = int(os.getenv("MAXIMUM_UPLOAD_FILE_SIZE", "104857600"))
+    maximum_project_quota = int(os.getenv("maximum_project_quota ", "104857600"))
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",

@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 import hashlib
 import os
 import tempfile
@@ -7,7 +8,6 @@ from pathlib import Path
 from typing import BinaryIO
 from uuid import UUID
 
-import magic
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from httpx import codes
 from pydantic import BaseModel, ConfigDict, TypeAdapter
@@ -45,6 +45,11 @@ class FileModel(BaseModel):
     status: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FileSaveLocation(Enum):
+    LOCAL = "LOCAL"
+    S3 = "S3"
 
 
 def validated_file(
@@ -100,40 +105,63 @@ def validate_uploaded_file(upload_file: UploadFile):
         tuple: A tuple containing filename, size, and mimetype of the file.
 
     Raises:
-        HTTPException: If the filename is invalid, the file is empty,
-        or the file size exceeds the maximum allowed size.
+        HTTPException: If the filename is invalid, the file is empty.
     """
     filename = upload_file.filename
     size = upload_file.size
 
     if not filename:
         raise HTTPException(
-            status_code=codes.NOT_ACCEPTABLE, detail="The filename is invalid."
+            status_code=codes.NOT_ACCEPTABLE, detail="Filename is invalid."
         )
 
     if not size or size == 0:
         raise HTTPException(status_code=codes.NOT_ACCEPTABLE, detail="Emtpy file.")
-    elif size > BackendConf.maximum_upload_file_size:
-        raise HTTPException(
-            status_code=codes.REQUEST_ENTITY_TOO_LARGE,
-            detail="Upload file is too large.",
-        )
 
-    mimetype = filesystem.get_content_mimetype(upload_files.read(2048))
+    mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
 
     return (filename, size, mimetype)
 
 
-@router.post("/{project_id}/files", response_model=FileModel, status_code=codes.CREATED)
-async def upload_files(
+def validate_project_quota(file_size: int, project: Project):
+    """Validates total size of uploaded files to ensure it meets the requirements."""
+    total_size = sum([file.filesize for file in project.files]) + file_size
+    if total_size > BackendConf.maximum_project_quota:
+        raise HTTPException(
+            status_code=codes.REQUEST_ENTITY_TOO_LARGE,
+            detail="Uploaded files exceeded quota",
+        )
+
+
+@router.post("/{project_id}/files/")
+async def create_file(
     uploaded_file: UploadFile,
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ) -> FileModel:
-    """Upload new files"""
+    """
+    Uploads a new file and creates a corresponding FileModel.
+
+    Returns:
+
+        FileModel: The created FileModel.
+
+    Note:
+
+        HTTPException(406, "Filename is invalid"): If the filename is invalid.
+
+        HTTPException(406, "Emtpy File"): the file is empty.
+
+        HTTPException(416, "Uploaded files exceeded quota"):
+            the file size exceeds the maximum allowed size.
+    """
     now = datetime.datetime.now(tz=datetime.UTC)
+
     filename, size, mimetype = validate_uploaded_file(uploaded_file)
-    location = upload_file(BackendConf.temp_files_location, upload_file.file)
+    validate_project_quota(size, project)
+
+    location = upload_file(BackendConf.temp_files_location, uploaded_file.file)
+
     new_file = File(
         filename=filename,
         filesize=size,
@@ -142,9 +170,10 @@ async def upload_files(
         description=None,
         uploaded_on=now,
         hash=generate_file_hash(location),
+        # TODO: Using S3 to save file.
         path=str(location.resolve()),
         type=mimetype,
-        status="LOCAL",
+        status=FileSaveLocation.LOCAL.value,
     )
     project.files.append(new_file)
     session.add(new_file)
