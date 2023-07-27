@@ -1,7 +1,7 @@
 import datetime
 import hashlib
-import http
 import os
+from http import HTTPStatus
 from collections.abc import Iterator
 from enum import Enum
 from pathlib import Path
@@ -9,7 +9,6 @@ from typing import BinaryIO
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
-from httpx import codes
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
@@ -61,7 +60,7 @@ def validated_file(
     stmt = select(File).filter_by(id=file_id).filter_by(project_id=project.id)
     file = session.execute(stmt).scalar()
     if not file:
-        raise HTTPException(codes.NOT_FOUND, f"File not found: {file_id}")
+        raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {file_id}")
     return file
 
 
@@ -124,17 +123,15 @@ def validate_uploaded_file(upload_file: UploadFile):
 
     if not filename:
         raise HTTPException(
-            status_code=http.HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
+            status_code=HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
         )  # pragma: no cover
 
     if size == 0:
-        raise HTTPException(
-            status_code=http.HTTPStatus.BAD_REQUEST, detail="Empty file."
-        )
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty file.")
 
     if size > BackendConf.project_quota:
         raise HTTPException(
-            status_code=http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded File is too large.",
         )
 
@@ -149,12 +146,12 @@ def validate_project_quota(file_size: int, project: Project):
     total_size = file_size + project.used_space
     if total_size > BackendConf.project_quota:
         raise HTTPException(
-            status_code=http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded files exceeded project quota",
         )
 
 
-@router.post("/{project_id}/files", status_code=http.HTTPStatus.CREATED)
+@router.post("/{project_id}/files", status_code=HTTPStatus.CREATED)
 async def create_file(
     uploaded_file: UploadFile,
     project: Project = Depends(validated_project),
@@ -186,7 +183,7 @@ async def create_file(
     except Exception as exc:
         logger.error(exc)
         raise HTTPException(
-            http.HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
+            HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
         ) from exc
 
     new_file = File(
@@ -224,7 +221,7 @@ async def get_file(file: File = Depends(validated_file)) -> FileModel:
     return FileModel.model_validate(file)
 
 
-@router.patch("/{project_id}/files/{file_id}", status_code=codes.NO_CONTENT)
+@router.patch("/{project_id}/files/{file_id}", status_code=HTTPStatus.NO_CONTENT)
 async def update_file(
     update_request: FileStatus,
     file: File = Depends(validated_file),
@@ -244,19 +241,18 @@ async def update_file(
     session.execute(stmt)
 
 
-@router.delete("/{project_id}/files/{file_id}", status_code=codes.NO_CONTENT)
+@router.delete("/{project_id}/files/{file_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_file(
     file: File = Depends(validated_file), session: Session = Depends(gen_session)
 ):
     """Delete a specific file by its id."""
     stmt = (
-        select(func.count())
-        .select_from(File)
-        .filter_by(project_id=file.project_id)
+        select(func.count()).select_from(File)
+        # .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
     )
-    number_of_duplicate_files = session.scalars(stmt).first()
+    file_location = Path(file.path)
+    number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
-        file_location = Path(file.path)
         file_location.unlink(missing_ok=True)
     session.delete(file)
