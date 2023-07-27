@@ -137,7 +137,7 @@ def validate_project_quota(file_size: int, project: Project):
     if total_size > BackendConf.project_quota:
         raise HTTPException(
             status_code=codes.REQUEST_ENTITY_TOO_LARGE,
-            detail="Uploaded files exceeded quota",
+            detail="Uploaded files exceeded project quota",
         )
 
 
