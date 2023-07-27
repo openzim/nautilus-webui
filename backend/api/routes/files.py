@@ -252,8 +252,8 @@ async def delete_file(
         .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
     )
-    file_location = Path(file.path)
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
+        file_location = Path(file.path)
         file_location.unlink(missing_ok=True)
     session.delete(file)
