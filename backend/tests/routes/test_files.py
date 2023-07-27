@@ -1,5 +1,5 @@
-from http import HTTPStatus
 import uuid
+from http import HTTPStatus
 
 from dateutil import parser
 
