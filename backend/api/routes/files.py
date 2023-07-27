@@ -125,7 +125,7 @@ def validate_uploaded_file(upload_file: UploadFile):
 
     if not size or size == 0:
         raise HTTPException(
-            status_code=http.HTTPStatus.BAD_REQUEST, detail="Emtpy file."
+            status_code=http.HTTPStatus.BAD_REQUEST, detail="Empty file."
         )
 
     mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
