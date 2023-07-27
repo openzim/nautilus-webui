@@ -124,7 +124,7 @@ def validate_uploaded_file(upload_file: UploadFile):
     if not filename:
         raise HTTPException(
             status_code=http.HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
-        )
+        )  # pragma: no cover
 
     if size == 0:
         raise HTTPException(

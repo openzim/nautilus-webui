@@ -6,11 +6,10 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from api.constants import BackendConf
 from api.database import Session
 from api.database.models import File, Project, User
 from api.entrypoint import app
-from api.routes.files import upload_file
+from api.routes.files import save_file
 
 
 @pytest.fixture()
@@ -63,7 +62,7 @@ def logged_in_client(client, user_id) -> str:
 @pytest.fixture()
 def file_id(project_id, test_file, test_file_hash):
     now = datetime.datetime.now(datetime.UTC)
-    location = upload_file(BytesIO(test_file))
+    location = save_file(f"{project_id}-{test_file_hash}", BytesIO(test_file))
     new_file = File(
         filename="test filename",
         filesize=123,
@@ -113,7 +112,12 @@ def non_existent_file_id():
 def project_id(test_project_name, user_id):
     now = datetime.datetime.now(datetime.UTC)
     new_project = Project(
-        name=test_project_name, created_on=now, expire_on=None, files=[], archives=[]
+        name=test_project_name,
+        created_on=now,
+        expire_on=None,
+        files=[],
+        archives=[],
+        used_space=0,
     )
     with Session.begin() as session:
         user = session.get(User, user_id)
