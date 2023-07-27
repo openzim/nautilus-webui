@@ -41,6 +41,7 @@ async def create_project(
         expire_on=None,
         files=[],
         archives=[],
+        used_space=0,
     )
     user.projects.append(new_project)
     session.add(new_project)

@@ -82,6 +82,7 @@ class Project(Base):
 
     files: Mapped[list["File"]] = relationship(cascade="all, delete-orphan")
     archives: Mapped[list["Archive"]] = relationship(cascade="all, delete-orphan")
+    used_space: Mapped[int]
 
 
 class File(Base):

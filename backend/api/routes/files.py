@@ -2,7 +2,6 @@ import datetime
 import hashlib
 import http
 import os
-import tempfile
 from collections.abc import Iterator
 from enum import Enum
 from pathlib import Path
@@ -16,7 +15,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
-from api.constants import BackendConf
+from api.constants import BackendConf, logger
 from api.database import gen_session
 from api.database.models import File, Project
 from api.routes import validated_project
@@ -86,20 +85,24 @@ def generate_file_hash(file: BinaryIO) -> str:
     return hasher.hexdigest()
 
 
-def upload_file(file: BinaryIO) -> Path:
+def save_file(file_name: str, file: BinaryIO) -> Path:
     """Saves a binary file to a specific location and returns its path."""
     if not BackendConf.transient_storage_path.exists():
         os.makedirs(BackendConf.transient_storage_path, exist_ok=True)
-    file_location = Path(
-        tempfile.NamedTemporaryFile(
-            dir=BackendConf.transient_storage_path, delete=False
-        ).name
-    )
-    with open(file_location, "wb") as file_object:
-        for chunk in read_file_in_chunks(file):
-            file_object.write(chunk)
-        file.seek(0)
-    return file_location
+    fpath = Path(BackendConf.transient_storage_path).joinpath(file_name)
+    if not fpath.is_file():
+        with open(fpath, "wb") as file_object:
+            for chunk in read_file_in_chunks(file):
+                file_object.write(chunk)
+            file.seek(0)
+    return fpath
+
+
+def calculate_file_size(file: BinaryIO) -> int:
+    size = 0
+    for chunk in read_file_in_chunks(file):
+        size += len(chunk)
+    return size
 
 
 def validate_uploaded_file(upload_file: UploadFile):
@@ -116,16 +119,22 @@ def validate_uploaded_file(upload_file: UploadFile):
         HTTPException: If the filename is invalid, the file is empty.
     """
     filename = upload_file.filename
-    size = upload_file.size
+    size = calculate_file_size(upload_file.file)
 
     if not filename:
         raise HTTPException(
             status_code=http.HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
         )
 
-    if not size or size == 0:
+    if size == 0:
         raise HTTPException(
             status_code=http.HTTPStatus.BAD_REQUEST, detail="Empty file."
+        )
+
+    if size > BackendConf.project_quota:
+        raise HTTPException(
+            status_code=http.HTTPStatus.BAD_REQUEST,
+            detail="Uploaded File is too large.",
         )
 
     mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
@@ -136,7 +145,7 @@ def validate_uploaded_file(upload_file: UploadFile):
 
 def validate_project_quota(file_size: int, project: Project):
     """Validates total size of uploaded files to ensure it meets the requirements."""
-    total_size = sum([file.filesize for file in project.files]) + file_size
+    total_size = file_size + project.used_space
     if total_size > BackendConf.project_quota:
         raise HTTPException(
             status_code=codes.REQUEST_ENTITY_TOO_LARGE,
@@ -170,8 +179,14 @@ async def create_file(
 
     filename, size, mimetype = validate_uploaded_file(uploaded_file)
     validate_project_quota(size, project)
-
-    location = upload_file(uploaded_file.file)
+    file_hash = generate_file_hash(uploaded_file.file)
+    try:
+        fpath = save_file(f"{project.id}-{file_hash}", uploaded_file.file)
+    except Exception as exc:
+        logger.error(exc)
+        raise HTTPException(
+            http.HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
+        ) from exc
 
     new_file = File(
         filename=filename,
@@ -180,12 +195,13 @@ async def create_file(
         authors=None,
         description=None,
         uploaded_on=now,
-        hash=generate_file_hash(uploaded_file.file),
+        hash=file_hash,
         # TODO: Using S3 to save file.
-        path=str(location.resolve()),
+        path=str(fpath.resolve()),
         type=mimetype,
         status=FileSaveLocation.LOCAL.value,
     )
+    project.used_space += size
     project.files.append(new_file)
     session.add(new_file)
     session.flush()
