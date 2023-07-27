@@ -11,7 +11,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from httpx import codes
 from pydantic import BaseModel, ConfigDict, TypeAdapter
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
@@ -249,6 +249,14 @@ async def delete_file(
     file: File = Depends(validated_file), session: Session = Depends(gen_session)
 ):
     """Delete a specific file by its id."""
-    file_location = Path(file.path)
-    file_location.unlink(missing_ok=True)
+    stmt = (
+        select(func.count())
+        .select_from(File)
+        .filter_by(project_id=file.project_id)
+        .filter_by(hash=file.hash)
+    )
+    number_of_duplicate_files = session.scalars(stmt).first()
+    if number_of_duplicate_files == 1:
+        file_location = Path(file.path)
+        file_location.unlink(missing_ok=True)
     session.delete(file)
