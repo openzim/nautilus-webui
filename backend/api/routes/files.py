@@ -133,7 +133,7 @@ def validate_uploaded_file(upload_file: UploadFile):
 
     if size > BackendConf.project_quota:
         raise HTTPException(
-            status_code=http.HTTPStatus.BAD_REQUEST,
+            status_code=http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded File is too large.",
         )
 
@@ -148,7 +148,7 @@ def validate_project_quota(file_size: int, project: Project):
     total_size = file_size + project.used_space
     if total_size > BackendConf.project_quota:
         raise HTTPException(
-            status_code=codes.REQUEST_ENTITY_TOO_LARGE,
+            status_code=http.HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded files exceeded project quota",
         )
 
