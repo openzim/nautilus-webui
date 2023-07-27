@@ -31,6 +31,7 @@ class BackendConf:
     ).resolve()
 
     project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MiB"))
+    chunk_size = humanfriendly.parse_size(os.getenv("CHUNK_SIZE", "2MiB"))
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",

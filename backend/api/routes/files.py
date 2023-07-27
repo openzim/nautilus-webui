@@ -67,7 +67,7 @@ def validated_file(
 
 
 def read_file_in_chunks(
-    reader: BinaryIO, chunk_size=humanfriendly.parse_size("2MiB")
+    reader: BinaryIO, chunk_size=BackendConf.chunk_size
 ) -> Iterator[bytes]:
     """Read Big file chunk by chunk. Default chunk size is 2k"""
     while True:
