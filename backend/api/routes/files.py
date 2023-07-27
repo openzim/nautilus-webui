@@ -98,6 +98,7 @@ def upload_file(file: BinaryIO) -> Path:
     with open(file_location, "wb") as file_object:
         for chunk in read_file_in_chunks(file):
             file_object.write(chunk)
+        file.seek(0)
     return file_location
 
 
