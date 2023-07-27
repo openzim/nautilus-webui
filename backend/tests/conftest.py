@@ -63,7 +63,7 @@ def logged_in_client(client, user_id) -> str:
 @pytest.fixture()
 def file_id(project_id, test_file, test_file_hash):
     now = datetime.datetime.now(datetime.UTC)
-    location = upload_file(BackendConf.temp_files_location, BytesIO(test_file))
+    location = upload_file(BytesIO(test_file))
     new_file = File(
         filename="test filename",
         filesize=123,

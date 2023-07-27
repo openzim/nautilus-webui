@@ -86,11 +86,15 @@ def generate_file_hash(file: BinaryIO) -> str:
     return hasher.hexdigest()
 
 
-def upload_file(location: Path, file: BinaryIO) -> Path:
+def upload_file(file: BinaryIO) -> Path:
     """Saves a binary file to a specific location and returns its path."""
-    if not location.exists():
-        os.makedirs(location, exist_ok=True)
-    file_location = Path(tempfile.NamedTemporaryFile(dir=location, delete=False).name)
+    if not BackendConf.transient_storage_path.exists():
+        os.makedirs(BackendConf.transient_storage_path, exist_ok=True)
+    file_location = Path(
+        tempfile.NamedTemporaryFile(
+            dir=BackendConf.transient_storage_path, delete=False
+        ).name
+    )
     with open(file_location, "wb") as file_object:
         for chunk in read_file_in_chunks(file):
             file_object.write(chunk)
@@ -164,7 +168,7 @@ async def create_file(
     filename, size, mimetype = validate_uploaded_file(uploaded_file)
     validate_project_quota(size, project)
 
-    location = upload_file(BackendConf.transient_storage_path, uploaded_file.file)
+    location = upload_file(uploaded_file.file)
 
     new_file = File(
         filename=filename,
