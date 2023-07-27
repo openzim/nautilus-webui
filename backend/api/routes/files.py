@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import http
 import os
 import tempfile
 from collections.abc import Iterator
@@ -10,7 +11,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from httpx import codes
-import humanfriendly
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -120,11 +120,13 @@ def validate_uploaded_file(upload_file: UploadFile):
 
     if not filename:
         raise HTTPException(
-            status_code=codes.NOT_ACCEPTABLE, detail="Filename is invalid."
+            status_code=http.HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
         )
 
     if not size or size == 0:
-        raise HTTPException(status_code=codes.NOT_ACCEPTABLE, detail="Emtpy file.")
+        raise HTTPException(
+            status_code=http.HTTPStatus.BAD_REQUEST, detail="Emtpy file."
+        )
 
     mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
     upload_file.file.seek(0)
@@ -142,7 +144,7 @@ def validate_project_quota(file_size: int, project: Project):
         )
 
 
-@router.post("/{project_id}/files", status_code=codes.CREATED)
+@router.post("/{project_id}/files", status_code=http.HTTPStatus.CREATED)
 async def create_file(
     uploaded_file: UploadFile,
     project: Project = Depends(validated_project),
