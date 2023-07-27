@@ -99,6 +99,7 @@ def save_file(file_name: str, file: BinaryIO) -> Path:
 
 
 def calculate_file_size(file: BinaryIO) -> int:
+    """Calculate the size of a file chunk by chunk"""
     size = 0
     for chunk in read_file_in_chunks(file):
         size += len(chunk)
