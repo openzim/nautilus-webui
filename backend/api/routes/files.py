@@ -247,7 +247,8 @@ async def delete_file(
 ):
     """Delete a specific file by its id."""
     stmt = (
-        select(func.count()).select_from(File)
+        select(func.count())
+        .select_from(File)
         .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
     )
