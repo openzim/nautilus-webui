@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import humanfriendly
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,11 +26,11 @@ class BackendConf:
 
     postgres_uri = os.getenv("POSTGRES_URI", "nodb")
     s3_uri = os.getenv("S3_URI")
-    temp_files_location = Path(
-        os.getenv("TEMP_FILES_LOCATION", tempfile.gettempdir())
+    transient_storage_path = Path(
+        os.getenv("TRANSIENT_STORAGE_PATH ", tempfile.gettempdir())
     ).resolve()
 
-    maximum_project_quota = int(os.getenv("maximum_project_quota ", "104857600"))
+    project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MiB"))
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",

@@ -10,6 +10,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from httpx import codes
+import humanfriendly
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -65,10 +66,12 @@ def validated_file(
     return file
 
 
-def read_file_in_chunks(reader: BinaryIO, chunck_size=2048) -> Iterator[bytes]:
+def read_file_in_chunks(
+    reader: BinaryIO, chunk_size=humanfriendly.parse_size("2MiB")
+) -> Iterator[bytes]:
     """Read Big file chunk by chunk. Default chunk size is 2k"""
     while True:
-        chunk = reader.read(chunck_size)
+        chunk = reader.read(chunk_size)
         if not chunk:
             break
         yield chunk
@@ -127,7 +130,7 @@ def validate_uploaded_file(upload_file: UploadFile):
 def validate_project_quota(file_size: int, project: Project):
     """Validates total size of uploaded files to ensure it meets the requirements."""
     total_size = sum([file.filesize for file in project.files]) + file_size
-    if total_size > BackendConf.maximum_project_quota:
+    if total_size > BackendConf.project_quota:
         raise HTTPException(
             status_code=codes.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded files exceeded quota",
@@ -161,7 +164,7 @@ async def create_file(
     filename, size, mimetype = validate_uploaded_file(uploaded_file)
     validate_project_quota(size, project)
 
-    location = upload_file(BackendConf.temp_files_location, uploaded_file.file)
+    location = upload_file(BackendConf.transient_storage_path, uploaded_file.file)
 
     new_file = File(
         filename=filename,

@@ -30,7 +30,7 @@ def test_upload_empty_file(logged_in_client, project_id):
 
 def test_upload_too_large_file(logged_in_client, project_id):
     params = {"project_id": project_id}
-    file = {"uploaded_file": b"\xff" * (BackendConf.maximum_project_quota + 1)}
+    file = {"uploaded_file": b"\xff" * (BackendConf.project_quota + 1)}
     response = logged_in_client.post(
         f"{API_VERSION_PREFIX}/projects/{project_id}/files", params=params, files=file
     )
