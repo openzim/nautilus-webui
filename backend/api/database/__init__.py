@@ -42,4 +42,5 @@ def gen_session() -> Generator[OrmSession, None, None]:
 
 
 def get_local_fpath_for(file_hash: str, project_id: UUID):
+    """Generates the local file path for a given file hash and project ID."""
     return BackendConf.transient_storage_path.joinpath(f"{project_id}-{file_hash}")
