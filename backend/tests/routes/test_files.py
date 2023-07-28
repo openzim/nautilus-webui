@@ -2,7 +2,6 @@ import uuid
 from http import HTTPStatus
 
 from dateutil import parser
-from fastapi import Path
 
 from api.constants import API_VERSION_PREFIX, BackendConf
 from api.database import get_local_fpath_for
