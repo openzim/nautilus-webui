@@ -199,7 +199,6 @@ async def create_file(
         type=mimetype,
         status=FileSaveLocation.LOCAL.value,
     )
-    project.used_space += size
     project.files.append(new_file)
     session.add(new_file)
     session.flush()

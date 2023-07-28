@@ -117,7 +117,6 @@ def project_id(test_project_name, user_id):
         expire_on=None,
         files=[],
         archives=[],
-        used_space=0,
     )
     with Session.begin() as session:
         user = session.get(User, user_id)
