@@ -13,6 +13,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql.schema import MetaData
 
+from api.database import get_local_fpath_for
+
 
 class Base(MappedAsDataclass, DeclarativeBase):
     # This map details the specific transformation of types between Python and
@@ -112,6 +114,10 @@ class File(Base):
     path: Mapped[str]
     type: Mapped[str]
     status: Mapped[str]
+
+    @property
+    def local_fpath(self):
+        return get_local_fpath_for(self.hash, self.project_id)
 
 
 class Archive(Base):

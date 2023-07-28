@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
 from api.constants import BackendConf, logger
-from api.database import gen_session
+from api.database import gen_session, get_local_fpath_for
 from api.database.models import File, Project
 from api.routes import validated_project
 
@@ -83,10 +83,10 @@ def generate_file_hash(file: BinaryIO) -> str:
     return hasher.hexdigest()
 
 
-def save_file(file: BinaryIO, file_name: str) -> Path:
+def save_file(file: BinaryIO, file_hash: str, project_id: UUID) -> Path:
     """Saves a binary file to a specific location and returns its path."""
     BackendConf.transient_storage_path.mkdir(exist_ok=True)
-    fpath = Path(BackendConf.transient_storage_path).joinpath(file_name)
+    fpath = get_local_fpath_for(file_hash, project_id)
     if not fpath.is_file():
         with open(fpath, "wb") as file_object:
             for chunk in read_file_in_chunks(file):
@@ -176,7 +176,7 @@ async def create_file(
     validate_project_quota(size, project)
     file_hash = generate_file_hash(uploaded_file.file)
     try:
-        fpath = save_file(uploaded_file.file, f"{project.id}-{file_hash}")
+        fpath = save_file(uploaded_file.file, file_hash, project.id)
     except Exception as exc:
         logger.error(exc)
         raise HTTPException(
@@ -247,9 +247,10 @@ async def delete_file(
         .select_from(File)
         .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
+        .filter_by(status=FileSaveLocation.LOCAL.value)
     )
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
-        file_location = Path(file.path)
+        file_location = file.local_fpath
         file_location.unlink(missing_ok=True)
     session.delete(file)

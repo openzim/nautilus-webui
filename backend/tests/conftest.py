@@ -62,7 +62,7 @@ def logged_in_client(client, user_id) -> str:
 @pytest.fixture()
 def file_id(project_id, test_file, test_file_hash):
     now = datetime.datetime.now(datetime.UTC)
-    location = save_file(BytesIO(test_file), f"{project_id}-{test_file_hash}")
+    location = save_file(BytesIO(test_file), test_file_hash, project_id)
     new_file = File(
         filename="test filename",
         filesize=123,
