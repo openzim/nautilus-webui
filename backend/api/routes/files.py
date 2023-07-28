@@ -83,7 +83,7 @@ def generate_file_hash(file: BinaryIO) -> str:
     return hasher.hexdigest()
 
 
-def save_file(file_name: str, file: BinaryIO) -> Path:
+def save_file(file: BinaryIO, file_name: str) -> Path:
     """Saves a binary file to a specific location and returns its path."""
     BackendConf.transient_storage_path.mkdir(exist_ok=True)
     fpath = Path(BackendConf.transient_storage_path).joinpath(file_name)
@@ -177,7 +177,7 @@ async def create_file(
     validate_project_quota(size, project)
     file_hash = generate_file_hash(uploaded_file.file)
     try:
-        fpath = save_file(f"{project.id}-{file_hash}", uploaded_file.file)
+        fpath = save_file(uploaded_file.file, f"{project.id}-{file_hash}")
     except Exception as exc:
         logger.error(exc)
         raise HTTPException(
