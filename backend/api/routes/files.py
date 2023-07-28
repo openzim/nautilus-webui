@@ -192,7 +192,7 @@ async def create_file(
         uploaded_on=now,
         hash=file_hash,
         # TODO: Using S3 to save file.
-        path=str(fpath.resolve()),
+        path=str(fpath),
         type=mimetype,
         status=FileSaveLocation.LOCAL.value,
     )
