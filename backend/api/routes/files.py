@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import os
 from collections.abc import Iterator
 from enum import Enum
 from http import HTTPStatus
@@ -86,8 +85,7 @@ def generate_file_hash(file: BinaryIO) -> str:
 
 def save_file(file_name: str, file: BinaryIO) -> Path:
     """Saves a binary file to a specific location and returns its path."""
-    if not BackendConf.transient_storage_path.exists():
-        os.makedirs(BackendConf.transient_storage_path, exist_ok=True)
+    BackendConf.transient_storage_path.mkdir(exist_ok=True)
     fpath = Path(BackendConf.transient_storage_path).joinpath(file_name)
     if not fpath.is_file():
         with open(fpath, "wb") as file_object:
