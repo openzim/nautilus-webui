@@ -2,8 +2,10 @@ import uuid
 from http import HTTPStatus
 
 from dateutil import parser
+from fastapi import Path
 
 from api.constants import API_VERSION_PREFIX, BackendConf
+from api.database import get_local_fpath_for
 
 
 def test_upload_file_correct_data(
@@ -128,12 +130,13 @@ def test_get_project_wrong_authorization(
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_delete_file_correct_id(logged_in_client, project_id, file_id):
-    # params = {"project_id": project_id, "file_id": file_id}
+def test_delete_file_correct_id(logged_in_client, project_id, file_id, test_file_hash):
     response = logged_in_client.delete(
         f"{API_VERSION_PREFIX}/projects/{project_id}/files/{file_id}"
     )
     assert response.status_code == HTTPStatus.NO_CONTENT
+    fpath = get_local_fpath_for(test_file_hash, project_id)
+    assert not fpath.is_file()
 
 
 def test_delete_file_wrong_id(logged_in_client, project_id, non_existent_file_id):
