@@ -22,7 +22,7 @@ from api.routes import validated_project
 router = APIRouter()
 
 
-class FileStatus(BaseModel):
+class FileRequest(BaseModel):
     filename: str
     title: str
     authors: list[str] | None
@@ -222,7 +222,7 @@ async def get_file(file: File = Depends(validated_file)) -> FileModel:
 
 @router.patch("/{project_id}/files/{file_id}", status_code=HTTPStatus.NO_CONTENT)
 async def update_file(
-    update_request: FileStatus,
+    update_request: FileRequest,
     file: File = Depends(validated_file),
     session: Session = Depends(gen_session),
 ):
