@@ -18,6 +18,10 @@ logger = logging.getLogger(src_dir.name)
 if not os.getenv("POSTGRES_URI"):
     raise OSError("Please set the POSTGRES_URI environment variable")
 
+Path(os.getenv("TRANSIENT_STORAGE_PATH ", tempfile.gettempdir())).resolve().mkdir(
+    exist_ok=True
+)
+
 
 @dataclass
 class BackendConf:

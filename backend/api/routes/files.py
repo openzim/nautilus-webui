@@ -85,7 +85,6 @@ def generate_file_hash(file: BinaryIO) -> str:
 
 def save_file(file: BinaryIO, file_hash: str, project_id: UUID) -> Path:
     """Saves a binary file to a specific location and returns its path."""
-    BackendConf.transient_storage_path.mkdir(exist_ok=True)
     fpath = get_local_fpath_for(file_hash, project_id)
     if not fpath.is_file():
         with open(fpath, "wb") as file_object:
