@@ -21,7 +21,7 @@ from api.routes import validated_project
 router = APIRouter()
 
 
-class FileRequest(BaseModel):
+class FileMetadataUpdateRequest(BaseModel):
     filename: str
     title: str
     authors: list[str] | None
@@ -45,7 +45,7 @@ class FileModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class FileSaveLocation(Enum):
+class FileStatus(Enum):
     LOCAL = "LOCAL"
     S3 = "S3"
 
@@ -194,7 +194,7 @@ async def create_file(
         # TODO: Using S3 to save file.
         path=str(fpath),
         type=mimetype,
-        status=FileSaveLocation.LOCAL.value,
+        status=FileStatus.LOCAL.value,
     )
     project.files.append(new_file)
     session.add(new_file)
@@ -219,7 +219,7 @@ async def get_file(file: File = Depends(validated_file)) -> FileModel:
 
 @router.patch("/{project_id}/files/{file_id}", status_code=HTTPStatus.NO_CONTENT)
 async def update_file(
-    update_request: FileRequest,
+    update_request: FileMetadataUpdateRequest,
     file: File = Depends(validated_file),
     session: Session = Depends(gen_session),
 ):
@@ -247,7 +247,7 @@ async def delete_file(
         .select_from(File)
         .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
-        .filter_by(status=FileSaveLocation.LOCAL.value)
+        .filter_by(status=FileStatus.LOCAL.value)
     )
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
