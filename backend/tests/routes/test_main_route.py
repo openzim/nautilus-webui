@@ -1,7 +1,8 @@
-import httpx
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 
-from api.constants import API_VERSION_PREFIX
+from api.constants import constants
 from api.entrypoint import app
 
 client = TestClient(app)
@@ -9,10 +10,10 @@ client = TestClient(app)
 
 def test_root():
     response = client.get("/", follow_redirects=False)
-    assert response.status_code == httpx.codes.PERMANENT_REDIRECT
+    assert response.status_code == HTTPStatus.PERMANENT_REDIRECT
 
 
 def test_ping():
-    response = client.get(f"{API_VERSION_PREFIX}/ping")
-    assert response.status_code == httpx.codes.OK
+    response = client.get(f"{constants.api_version_prefix}/ping")
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "pong"}

@@ -1,14 +1,14 @@
 import uuid
+from http import HTTPStatus
 
 from dateutil import parser
-from httpx import codes
 
-from api.constants import API_VERSION_PREFIX
+from api.constants import constants
 
 
 def test_create_user(client):
-    response = client.post(f"{API_VERSION_PREFIX}/users")
-    assert response.status_code == codes.CREATED
+    response = client.post(f"{constants.api_version_prefix}/users")
+    assert response.status_code == HTTPStatus.CREATED
     json_result = response.json()
     assert uuid.UUID(json_result.get("id"))
     assert parser.parse(json_result.get("created_on"))

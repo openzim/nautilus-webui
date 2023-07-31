@@ -1,15 +1,15 @@
 import datetime
-from typing import Annotated
+from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException
-from httpx import codes
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, TypeAdapter
-from sqlalchemy import select, update
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from api.database import gen_session
 from api.database.models import Project, User
+from api.routes import validated_project, validated_user
 
 router = APIRouter(prefix="/projects")
 
@@ -27,36 +27,7 @@ class ProjectModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-async def validated_user(
-    user_id: Annotated[UUID | None, Cookie()] = None,
-    session: Session = Depends(gen_session),
-) -> User:
-    """Depends()-able User from request, ensuring it exists"""
-    if not user_id:
-        raise HTTPException(status_code=codes.UNAUTHORIZED, detail="Missing User ID.")
-    stmt = select(User).filter_by(id=user_id)
-    user = session.execute(stmt).scalar()
-    if not user:
-        raise HTTPException(
-            status_code=codes.UNAUTHORIZED, detail=f"User Not Found, ID: {user_id}."
-        )
-    return user
-
-
-async def validated_project(
-    project_id: UUID,
-    user: User = Depends(validated_user),
-    session: Session = Depends(gen_session),
-) -> Project:
-    """Depends()-able Project from request, ensuring it exists"""
-    stmt = select(Project).filter_by(id=project_id).filter_by(user_id=user.id)
-    project = session.execute(stmt).scalar()
-    if not project:
-        raise HTTPException(codes.NOT_FOUND, f"Project not found: {project_id}")
-    return project
-
-
-@router.post("", response_model=ProjectModel, status_code=codes.CREATED)
+@router.post("", response_model=ProjectModel, status_code=HTTPStatus.CREATED)
 async def create_project(
     project: ProjectRequest,
     user: User = Depends(validated_user),
@@ -92,7 +63,7 @@ async def get_project(project: Project = Depends(validated_project)) -> ProjectM
     return ProjectModel.model_validate(project)
 
 
-@router.delete("/{project_id}", status_code=codes.NO_CONTENT)
+@router.delete("/{project_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_project(
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
@@ -101,7 +72,7 @@ async def delete_project(
     session.delete(project)
 
 
-@router.patch("/{project_id}", status_code=codes.NO_CONTENT)
+@router.patch("/{project_id}", status_code=HTTPStatus.NO_CONTENT)
 async def update_project(
     project_request: ProjectRequest,
     project: Project = Depends(validated_project),

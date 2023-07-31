@@ -1,8 +1,8 @@
 import datetime
+from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response
-from httpx import codes
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -19,7 +19,7 @@ class UserModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.post("", response_model=UserModel, status_code=codes.CREATED)
+@router.post("", response_model=UserModel, status_code=HTTPStatus.CREATED)
 async def create_user(
     response: Response, session: Session = Depends(gen_session)
 ) -> UserModel:

@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine
 
-from api.constants import BackendConf
+from api.constants import constants
 from api.database.models import Base
 
 # this is the Alembic Config object, which provides
@@ -39,7 +39,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = BackendConf.postgres_uri
+    url = constants.postgres_uri
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -58,7 +58,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = create_engine(BackendConf.postgres_uri, echo=False)
+    connectable = create_engine(constants.postgres_uri, echo=False)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)

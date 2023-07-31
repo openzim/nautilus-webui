@@ -13,6 +13,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql.schema import MetaData
 
+from api.database import get_local_fpath_for
+
 
 class Base(MappedAsDataclass, DeclarativeBase):
     # This map details the specific transformation of types between Python and
@@ -83,6 +85,10 @@ class Project(Base):
     files: Mapped[list["File"]] = relationship(cascade="all, delete-orphan")
     archives: Mapped[list["Archive"]] = relationship(cascade="all, delete-orphan")
 
+    @property
+    def used_space(self):
+        return sum([file.filesize for file in self.files])
+
 
 class File(Base):
     """
@@ -108,6 +114,10 @@ class File(Base):
     path: Mapped[str]
     type: Mapped[str]
     status: Mapped[str]
+
+    @property
+    def local_fpath(self):
+        return get_local_fpath_for(self.hash, self.project_id)
 
 
 class Archive(Base):
