@@ -1,4 +1,5 @@
-import httpx
+from http import HTTPStatus
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -16,7 +17,7 @@ def create_app() -> FastAPI:
         """Redirect to root of latest version of the API"""
         return RedirectResponse(
             f"{constants.api_version_prefix}",
-            status_code=httpx.codes.PERMANENT_REDIRECT,
+            status_code=HTTPStatus.PERMANENT_REDIRECT,
         )
 
     api = FastAPI(

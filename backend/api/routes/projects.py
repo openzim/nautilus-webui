@@ -1,8 +1,8 @@
 import datetime
+from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from httpx import codes
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import update
 from sqlalchemy.orm import Session
@@ -27,7 +27,7 @@ class ProjectModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.post("", response_model=ProjectModel, status_code=codes.CREATED)
+@router.post("", response_model=ProjectModel, status_code=HTTPStatus.CREATED)
 async def create_project(
     project: ProjectRequest,
     user: User = Depends(validated_user),
@@ -63,7 +63,7 @@ async def get_project(project: Project = Depends(validated_project)) -> ProjectM
     return ProjectModel.model_validate(project)
 
 
-@router.delete("/{project_id}", status_code=codes.NO_CONTENT)
+@router.delete("/{project_id}", status_code=HTTPStatus.NO_CONTENT)
 async def delete_project(
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
@@ -72,7 +72,7 @@ async def delete_project(
     session.delete(project)
 
 
-@router.patch("/{project_id}", status_code=codes.NO_CONTENT)
+@router.patch("/{project_id}", status_code=HTTPStatus.NO_CONTENT)
 async def update_project(
     project_request: ProjectRequest,
     project: Project = Depends(validated_project),
