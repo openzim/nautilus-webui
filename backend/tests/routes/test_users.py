@@ -3,11 +3,11 @@ import uuid
 from dateutil import parser
 from httpx import codes
 
-from api.constants import API_VERSION_PREFIX
+from api.constants import constants
 
 
 def test_create_user(client):
-    response = client.post(f"{API_VERSION_PREFIX}/users")
+    response = client.post(f"{constants.api_version_prefix}/users")
     assert response.status_code == codes.CREATED
     json_result = response.json()
     assert uuid.UUID(json_result.get("id"))

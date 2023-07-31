@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from api import __description__, __titile__, __version__
-from api.constants import API_VERSION_PREFIX, BackendConf
+from api.constants import constants
 from api.routes import files, projects, users, utils
 
 
@@ -15,7 +15,8 @@ def create_app() -> FastAPI:
     async def landing() -> RedirectResponse:
         """Redirect to root of latest version of the API"""
         return RedirectResponse(
-            f"{API_VERSION_PREFIX}", status_code=httpx.codes.PERMANENT_REDIRECT
+            f"{constants.api_version_prefix}",
+            status_code=httpx.codes.PERMANENT_REDIRECT,
         )
 
     api = FastAPI(
@@ -41,7 +42,7 @@ def create_app() -> FastAPI:
     )
     api.add_middleware(
         CORSMiddleware,
-        allow_origins=BackendConf.allowed_origins,
+        allow_origins=constants.allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -50,5 +51,5 @@ def create_app() -> FastAPI:
     api.include_router(users.router)
     projects.router.include_router(files.router)
     api.include_router(projects.router)
-    app.mount(API_VERSION_PREFIX, api)
+    app.mount(constants.api_version_prefix, api)
     return app

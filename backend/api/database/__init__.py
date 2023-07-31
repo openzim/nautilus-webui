@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
-from api.constants import BackendConf, logger
+from api.constants import constants, logger
 
 
 # custom overload of bson deserializer to make naive datetime
@@ -23,7 +23,7 @@ def my_loads(s, *args, **kwargs):
 
 Session = sessionmaker(
     bind=create_engine(
-        BackendConf.postgres_uri,
+        constants.postgres_uri,
         echo=False,
         json_serializer=dumps,  # use bson serializer to handle datetime naively
         json_deserializer=my_loads,  # use custom bson deserializer for same reason
@@ -43,4 +43,4 @@ def gen_session() -> Generator[OrmSession, None, None]:
 
 def get_local_fpath_for(file_hash: str, project_id: UUID):
     """Generates the local file path for a given file hash and project ID."""
-    return BackendConf.transient_storage_path.joinpath(f"{project_id}-{file_hash}")
+    return constants.transient_storage_path.joinpath(f"{project_id}-{file_hash}")

@@ -13,7 +13,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
-from api.constants import BackendConf, logger
+from api.constants import constants, logger
 from api.database import gen_session, get_local_fpath_for
 from api.database.models import File, Project
 from api.routes import validated_project
@@ -64,7 +64,7 @@ def validated_file(
 
 
 def read_file_in_chunks(
-    reader: BinaryIO, chunk_size=BackendConf.chunk_size
+    reader: BinaryIO, chunk_size=constants.chunk_size
 ) -> Iterator[bytes]:
     """Read Big file chunk by chunk. Default chunk size is 2k"""
     while True:
@@ -125,7 +125,7 @@ def validate_uploaded_file(upload_file: UploadFile):
     if size == 0:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty file.")
 
-    if size > BackendConf.project_quota:
+    if size > constants.project_quota:
         raise HTTPException(
             status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded File is too large.",
@@ -140,7 +140,7 @@ def validate_uploaded_file(upload_file: UploadFile):
 def validate_project_quota(file_size: int, project: Project):
     """Validates total size of uploaded files to ensure it meets the requirements."""
     total_size = file_size + project.used_space
-    if total_size > BackendConf.project_quota:
+    if total_size > constants.project_quota:
         raise HTTPException(
             status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded files exceeded project quota",
