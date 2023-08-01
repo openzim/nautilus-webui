@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import FooterComponetns from './components/FooterComponents.vue'
-</script>
-
 <template>
   <div class="d-flex flex-column vh-100">
     <div class="flex-shrink-1">
@@ -11,4 +7,6 @@ import FooterComponetns from './components/FooterComponents.vue'
   </div>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import FooterComponetns from './components/FooterComponents.vue'
+</script>
