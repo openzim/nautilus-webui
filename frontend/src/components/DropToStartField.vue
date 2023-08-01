@@ -1,8 +1,25 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+const isActive = ref(false)
+function setActive() {
+  isActive.value = true
+}
+function setInactive() {
+  isActive.value = false
+}
+</script>
 <template>
   <TheSlogan />
   <div class="container">
     <div class="row justify-content-md-center">
-      <div class="card border-3 border-3 rounded-3 drop">
+      <div
+        class="card border-3 border-3 rounded-3 drop"
+        :data-active="isActive"
+        @dragenter.prevent="setActive"
+        @dragover.prevent="setActive"
+        @dragleave.prevent="setInactive"
+        :class="{ 'bg-light': isActive }"
+      >
         <div class="card-body d-flex justify-content-center align-items-center">
           <h3 class="card-title">Drop File to Start!</h3>
         </div>
@@ -21,5 +38,10 @@
   border-style: dashed;
   border-color: var(--main-color);
   color: var(--main-color);
+}
+
+.isActive {
+  background-color: var(--main-color);
+  opacity: 0.6;
 }
 </style>
