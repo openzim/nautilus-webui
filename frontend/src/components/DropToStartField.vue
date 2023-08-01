@@ -1,7 +1,6 @@
 <template>
-  <TheSlogan />
   <div class="container">
-    <div class="row justify-content-md-center">
+    <div class="d-flex justify-content-md-center">
       <div
         class="card border-3 border-3 rounded-3 drop"
         :data-active="isActive"
@@ -15,8 +14,12 @@
         </div>
       </div>
     </div>
-    <div class="row justify-content-md-center text-secondary">
-      Agree to our Terms of Service and Privacy & Cookie Statement.
+    <div class="d-flex justify-content-md-center text-secondary">
+      <p>
+        Agree to our
+        <RouterLink to="/privacy-and-cookie-statement"> Terms of Service </RouterLink> and
+        <RouterLink to="/terms-of-service"> Privacy & Cookie Statement</RouterLink>.
+      </p>
     </div>
   </div>
 </template>
