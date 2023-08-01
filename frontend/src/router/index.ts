@@ -12,12 +12,12 @@ const router = createRouter({
     },
     {
       path: '/privacy-and-cookie-statement',
-      name: 'privacy_cookie_statement',
+      name: 'PrivacyCookieStatement',
       component: PrivacyAndCookieStatement
     },
     {
       path: '/terms-of-service',
-      name: 'terms-of-service',
+      name: 'TermsOfService',
       component: TermsOfService
     }
   ]
