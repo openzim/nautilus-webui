@@ -43,7 +43,6 @@ function toggleCollapse(index: number) {
   faqs.value[index].toggle = !faqs.value[index].toggle
 }
 </script>
-
 <template>
   <div class="container help">
     <div class="row justify-content-md-center">

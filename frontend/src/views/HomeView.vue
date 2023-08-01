@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import TheSlogan from '@/components/TheSlogan.vue'
+import SloganComponents from '@/components/SloganComponents.vue'
 import DropToStartField from '@/components/DropToStartField.vue'
-import TheFAQs from '@/components/TheFAQs.vue'
+import FAQs from '@/components/FAQs.vue'
 </script>
 
 <template>
   <div class="mt-5">
-    <TheSlogan />
+    <SloganComponents />
     <div class="mt-5">
       <DropToStartField />
     </div>
     <div class="mt-5">
-      <TheFAQs />
+      <FAQs />
     </div>
   </div>
 </template>

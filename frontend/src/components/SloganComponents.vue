@@ -1,5 +1,3 @@
-<script setup lang="ts"></script>
-
 <template>
   <div class="container">
     <div class="row justify-content-md-center gx-2">
