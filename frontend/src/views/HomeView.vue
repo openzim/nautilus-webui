@@ -1,9 +1,3 @@
-<script setup lang="ts">
-import SloganComponents from '@/components/SloganComponents.vue'
-import DropToStartField from '@/components/DropToStartField.vue'
-import FAQs from '@/components/FAQs.vue'
-</script>
-
 <template>
   <div class="mt-5">
     <SloganComponents />
@@ -16,4 +10,8 @@ import FAQs from '@/components/FAQs.vue'
   </div>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import SloganComponents from '@/components/SloganComponents.vue'
+import DropToStartField from '@/components/DropToStartField.vue'
+import FAQs from '@/components/FAQs.vue'
+</script>

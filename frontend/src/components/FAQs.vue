@@ -1,3 +1,41 @@
+<template>
+  <div class="container help">
+    <div class="row justify-content-md-center">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" v-for="(item, index) in faqs" :key="item.title">
+          <div class="d-grid">
+            <button
+              type="button"
+              class="btn px-0"
+              data-bs-toggle="collapse"
+              :data-bs-target="'#collapse' + index"
+              aria-expanded="false"
+              :aria-controls="'collapse' + index"
+              @click="toggleCollapse(index)"
+            >
+              <div class="container px-0">
+                <div class="row align-items-start justify-content-start">
+                  <div class="col-md-auto">{{ item.title }}</div>
+                  <div class="col" />
+                  <div class="col-md-auto">
+                    <font-awesome-icon v-if="!item.toggle" :icon="['fas', 'plus']" />
+                    <font-awesome-icon v-else :icon="['fas', 'minus']" />
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+          <div
+            class="collapse mt-3 text-secondary"
+            :id="'collapse' + index"
+            v-html="item.content"
+          ></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue'
 const faqs = ref([
@@ -43,43 +81,6 @@ function toggleCollapse(index: number) {
   faqs.value[index].toggle = !faqs.value[index].toggle
 }
 </script>
-<template>
-  <div class="container help">
-    <div class="row justify-content-md-center">
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item" v-for="(item, index) in faqs" :key="item.title">
-          <div class="d-grid">
-            <button
-              type="button"
-              class="btn px-0"
-              data-bs-toggle="collapse"
-              :data-bs-target="'#collapse' + index"
-              aria-expanded="false"
-              :aria-controls="'collapse' + index"
-              @click="toggleCollapse(index)"
-            >
-              <div class="container px-0">
-                <div class="row align-items-start justify-content-start">
-                  <div class="col-md-auto">{{ item.title }}</div>
-                  <div class="col" />
-                  <div class="col-md-auto">
-                    <font-awesome-icon v-if="!item.toggle" :icon="['fas', 'plus']" />
-                    <font-awesome-icon v-else :icon="['fas', 'minus']" />
-                  </div>
-                </div>
-              </div>
-            </button>
-          </div>
-          <div
-            class="collapse mt-3 text-secondary"
-            :id="'collapse' + index"
-            v-html="item.content"
-          ></div>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .help {

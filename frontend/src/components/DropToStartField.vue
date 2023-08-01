@@ -1,13 +1,3 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-const isActive = ref(false)
-function setActive() {
-  isActive.value = true
-}
-function setInactive() {
-  isActive.value = false
-}
-</script>
 <template>
   <TheSlogan />
   <div class="container">
@@ -30,6 +20,17 @@ function setInactive() {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+const isActive = ref(false)
+function setActive() {
+  isActive.value = true
+}
+function setInactive() {
+  isActive.value = false
+}
+</script>
 
 <style scoped>
 .drop {
