@@ -8,11 +8,14 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
 
+// Enable Cookies for Axios.
+axios.defaults.withCredentials = true
 /* add icons to the library */
 library.add(faPlus, faMinus)
 
 import App from './App.vue'
 import router from './router'
+import axios from 'axios'
 
 const app = createApp(App)
 

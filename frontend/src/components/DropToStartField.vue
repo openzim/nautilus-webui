@@ -7,6 +7,7 @@
         @dragenter.prevent="setActive"
         @dragover.prevent="setActive"
         @dragleave.prevent="setInactive"
+        @drop.prevent="dropFiles"
         :class="{ 'bg-light': isActive }"
       >
         <div class="card-body d-flex justify-content-center align-items-center">
@@ -27,11 +28,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 const isActive = ref(false)
+
+const emit = defineEmits<{
+  dropFilesHandler: [event: DragEvent]
+}>()
+
 function setActive() {
   isActive.value = true
 }
 function setInactive() {
   isActive.value = false
+}
+async function dropFiles(event: DragEvent) {
+  emit('dropFilesHandler', event)
 }
 </script>
 
