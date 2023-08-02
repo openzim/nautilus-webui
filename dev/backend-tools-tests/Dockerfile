@@ -5,14 +5,19 @@ RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libmagic1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-COPY pyproject.toml README.md tasks.py /app/
+COPY pyproject.toml README.md tasks.py entrypoint.sh /app/
 COPY api/ /app/api
+COPY tests /app/tests
 COPY alembic.ini /app/alembic.ini
 COPY migrations/  /app/migrations
 
 RUN cd /app && \
+    chmod +x /app/entrypoint.sh && \
     pip install --no-cache-dir -U pip && \
     cd /app && pip install --no-cache-dir -e .[dev]
 
 WORKDIR /app
 COPY README.md /app
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
+CMD ["/bin/sh"]
