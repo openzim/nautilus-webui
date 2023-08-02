@@ -10,11 +10,14 @@ RUN apt-get update -y \
     && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml README.md tasks.py entrypoint.sh /app/
 COPY api/ /app/api
+COPY alembic.ini /app/alembic.ini
+COPY migrations/  /app/migrations
 
 RUN cd /app && \
     chmod +x /app/entrypoint.sh && \
     pip install --no-cache-dir -U pip && \
     cd /app && pip install --no-cache-dir -e .
 
+WORKDIR /app
 ENTRYPOINT [ "/app/entrypoint.sh" ]
 CMD ["uvicorn", "api.entrypoint:app", "--host", "0.0.0.0", "--port", "80"]
