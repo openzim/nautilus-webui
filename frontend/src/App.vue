@@ -3,10 +3,10 @@
     <div class="flex-shrink-1">
       <RouterView />
     </div>
-    <FooterComponetns />
+    <FooterComponent />
   </div>
 </template>
 
 <script setup lang="ts">
-import FooterComponetns from './components/FooterComponents.vue'
+import FooterComponent from './components/FooterComponent.vue'
 </script>
