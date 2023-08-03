@@ -2,15 +2,15 @@
   <div class="mt-5">
     <SloganComponent />
     <div class="mt-5">
+      <div v-if="hasErorr" class="alert alert-danger alert-dismissible" role="alert">
+        <div>{{ errorMessage }}</div>
+        <button type="button" @click="dismissAlert" class="btn-close" aria-label="Close"></button>
+      </div>
       <DropToStartField @dropFilesHandler="dropFilesHandler" />
     </div>
     <div class="mt-5">
       <FrequentlyAskedQuestions />
     </div>
-  </div>
-  <div v-if="hasErorr" class="alert alert-danger alert-dismissible" role="alert">
-    <div>{{ errorMessage }}</div>
-    <button type="button" @click="dismissAlert" class="btn-close" aria-label="Close"></button>
   </div>
 </template>
 
