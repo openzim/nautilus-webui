@@ -20,7 +20,7 @@ import DropToStartField from '@/components/DropToStartField.vue'
 import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
 import { ref } from 'vue'
 import axios from 'axios'
-import router from '@/router'
+import { Constants, type Project, type User } from '@/constants'
 
 const hasErorr = ref(false)
 const errorMessage = ref('')
@@ -34,34 +34,33 @@ async function dropFilesHandler(event: DragEvent) {
     return
   }
   const files = event.dataTransfer.files
-  axios
-    .post(`${import.meta.env.VITE_API_URL}/users`)
-    .then(() => {
-      const data = {
-        name: 'First Project'
-      }
-      return axios.post(`${import.meta.env.VITE_API_URL}/projects`, data)
-    })
-    .then((response) => {
-      const project_id = response.data.id
-      const uploadFileRequestsList = []
-      for (let i = 0; i < files.length; ++i) {
-        const file = files[i]
-        const requestData = new FormData()
-        requestData.append('project_id', project_id)
-        requestData.append('uploaded_file', file)
-        uploadFileRequestsList.push(
-          axios.post(`${import.meta.env.VITE_API_URL}/projects/${project_id}/files`, requestData)
+  const env = await Constants.env
+  try {
+    await axios.post<User>(`${env.NAUTILUS_WEBAPI}/users`)
+    const projectRequestData = {
+      name: 'First Project'
+    }
+    const createProjectResponse = await axios.post<Project>(
+      `${env.NAUTILUS_WEBAPI}/projects`,
+      projectRequestData
+    )
+    const uploadFileRequestsList = []
+    for (let i = 0; i < files.length; ++i) {
+      const file = files[i]
+      const requestData = new FormData()
+      requestData.append('project_id', createProjectResponse.data.id)
+      requestData.append('uploaded_file', file)
+      uploadFileRequestsList.push(
+        axios.post(
+          `${env.NAUTILUS_WEBAPI}/projects/${createProjectResponse.data.id}/files`,
+          requestData
         )
-      }
-      return axios.all(uploadFileRequestsList)
-    })
-    .then(() => {
-      router.push({ path: '/project' })
-    })
-    .catch((error) => {
-      hasErorr.value = true
-      errorMessage.value = `${error.request.responseURL}: ${error.response.statusText}`
-    })
+      )
+    }
+    await axios.all(uploadFileRequestsList)
+  } catch (error: any) {
+    hasErorr.value = true
+    errorMessage.value = `${error.request.responseURL}: ${error.response.statusText}`
+  }
 }
 </script>
