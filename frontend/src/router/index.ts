@@ -1,5 +1,4 @@
 import HomeView from '@/views/HomeView.vue'
-import ProjectView from '@/views/ProjectView.vue'
 import PrivacyAndCookieStatement from '@/views/PrivacyAndCookieStatement.vue'
 import TermsOfService from '@/views/TermsOfService.vue'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -10,11 +9,6 @@ const router = createRouter({
       path: '/',
       name: 'Home',
       component: HomeView
-    },
-    {
-      path: '/project',
-      name: 'Project',
-      component: ProjectView
     },
     {
       path: '/privacy-and-cookie-statement',
