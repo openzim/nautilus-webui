@@ -40,6 +40,7 @@ function setInactive() {
   isActive.value = false
 }
 async function dropFiles(event: DragEvent) {
+  isActive.value = false
   emit('dropFilesHandler', event)
 }
 </script>
