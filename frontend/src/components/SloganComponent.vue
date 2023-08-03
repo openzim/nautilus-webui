@@ -14,13 +14,13 @@
         <p class="fs-1 fw-bold">Nautilus</p>
       </div>
     </div>
-    <class class="row justify-content-md-center">
+    <div class="row justify-content-md-center">
       <div class="col-md-auto">
         <p class="fs-5 fw-bold text-secondary">
           Just <span class="spot">Zim</span> Your Collection!
         </p>
       </div>
-    </class>
+    </div>
   </div>
 </template>
 
