@@ -28,7 +28,6 @@ async function setupProjectId() {
     console.log(error)
   }
 }
-console.log(projectId.value)
 if (projectId.value && !validProjectID(projectId.value)) {
   setupProjectId()
 }
