@@ -32,7 +32,7 @@ export enum UploadStatus {
 }
 
 interface Environ {
-  NAUTILUS_WEBAPI: string
+  NAUTILUS_WEB_API: string
 }
 interface ConstantsInterface {
   env: Promise<Environ>
@@ -46,7 +46,7 @@ export const Constants: ConstantsInterface = {
       const response = await axios.get<Environ>(`environ.json`)
       return response.data
     } catch (error) {
-      return { NAUTILUS_WEBAPI: 'noapi' }
+      return { NAUTILUS_WEB_API: 'noapi' }
     }
   })(),
   fakeId: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
@@ -59,7 +59,7 @@ export async function validProjectID(id: string | null) {
   }
   const env = await Constants.env
   try {
-    await axios.get<Project>(`${env.NAUTILUS_WEBAPI}/projects/${id}`)
+    await axios.get<Project>(`${env.NAUTILUS_WEB_API}/projects/${id}`)
     return true
   } catch (error: any) {
     console.log(error)

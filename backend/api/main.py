@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
             "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
         },
     )
+    print(constants.allowed_origins)
     api.add_middleware(
         CORSMiddleware,
         allow_origins=constants.allowed_origins,

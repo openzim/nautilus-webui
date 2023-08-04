@@ -20,7 +20,7 @@ watch(projectId, async () => {
 async function setupProjectId() {
   const env = await Constants.env
   try {
-    const lastProject = (await axios.get<Project[]>(`${env.NAUTILUS_WEBAPI}/projects`)).data.pop()
+    const lastProject = (await axios.get<Project[]>(`${env.NAUTILUS_WEB_API}/projects`)).data.pop()
     if (lastProject && (await validProjectID(lastProject?.id))) {
       projectId.value = lastProject.id
     }

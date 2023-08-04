@@ -25,7 +25,7 @@ async function getAllFiles(projectId: string | null) {
   }
   const env = await Constants.env
   try {
-    const reponse = await axios.get<File[]>(`${env.NAUTILUS_WEBAPI}/projects/${projectId}/files`)
+    const reponse = await axios.get<File[]>(`${env.NAUTILUS_WEB_API}/projects/${projectId}/files`)
     result = reponse.data
   } catch (error: any) {
     console.log(error)
@@ -57,7 +57,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     requestData.append('uploaded_file', uploadFile)
     uploadFileRequestsList.push(
       axios
-        .post(`${env.NAUTILUS_WEBAPI}/projects/${props.projectId}/files`, requestData)
+        .post(`${env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`, requestData)
         .then(() => {
           files.value[fileIndex].uploadStatus = UploadStatus.Success
         })

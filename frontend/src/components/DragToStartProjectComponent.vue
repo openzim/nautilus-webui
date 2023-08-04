@@ -22,12 +22,12 @@ watch(projectId, async (newId) => {
 
 async function createUserAndProject(): Promise<[Project, User]> {
   const env = await Constants.env
-  const user = await axios.post<User>(`${env.NAUTILUS_WEBAPI}/users`)
+  const user = await axios.post<User>(`${env.NAUTILUS_WEB_API}/users`)
   const projectRequestData = {
     name: 'First Project'
   }
   const createProjectResponse = await axios.post<Project>(
-    `${env.NAUTILUS_WEBAPI}/projects/`,
+    `${env.NAUTILUS_WEB_API}/projects/`,
     projectRequestData
   )
   return [createProjectResponse.data, user.data]
