@@ -3,7 +3,9 @@
     <SloganComponent />
   </div>
   <div class="mt-5">
-    <ProjectView :project="undefined" />
+    <Suspense>
+      <DragToStartProjectComponent />
+    </Suspense>
   </div>
   <div class="mt-5">
     <FrequentlyAskedQuestions />
@@ -13,5 +15,5 @@
 <script setup lang="ts">
 import SloganComponent from '@/components/SloganComponent.vue'
 import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
-import ProjectView from '@/views/ProjectView.vue'
+import DragToStartProjectComponent from '@/components/DragToStartProjectComponent.vue'
 </script>
