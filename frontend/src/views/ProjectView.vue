@@ -1,63 +1,81 @@
 <template>
-  <div v-if="hasErorr" class="alert alert-danger alert-dismissible" role="alert">
-    <div>{{ errorMessage }}</div>
-    <button type="button" @click="dismissAlert" class="btn-close" aria-label="Close"></button>
-  </div>
-  <DropToStartField @dropFilesHandler="dropFilesHandler" />
+  <ul>
+    <li v-for="file in files" :key="file.id">
+      {{ file.filename }}
+    </li>
+  </ul>
 </template>
-
 <script setup lang="ts">
-import DropToStartField from '@/components/DropToStartField.vue'
-import type { User, Project } from '@/constants'
-import { Constants } from '@/constants'
+import { Constants, UploadStatus, type File } from '@/constants'
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 
-const props = defineProps<{ project: Project | undefined }>()
-const project = ref(props.project)
-const hasErorr = ref(false)
-const errorMessage = ref('')
-function dismissAlert() {
-  hasErorr.value = false
+const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
+const files: Ref<File[]> = ref([])
+const pendingFiles = ref(props.initialFiles)
+
+if (pendingFiles.value == undefined) {
+  files.value = await getAllFiles(props.projectId)
 }
 
-async function createUserAndProject() {
-  const env = await Constants.env
-  await axios.post<User>(`${env.NAUTILUS_WEBAPI}/users`)
-  const projectRequestData = {
-    name: 'First Project'
+async function getAllFiles(projectId: string | null) {
+  var result: File[] = []
+  if (projectId == null) {
+    return result
   }
-  const createProjectResponse = await axios.post<Project>(
-    `${env.NAUTILUS_WEBAPI}/projects`,
-    projectRequestData
-  )
-  return createProjectResponse.data
-}
-
-async function dropFilesHandler(event: DragEvent) {
-  if (event.dataTransfer?.files == undefined) {
-    return
-  }
-  const files = event.dataTransfer.files
   const env = await Constants.env
   try {
-    if (project.value == undefined) {
-      project.value = await createUserAndProject()
-    }
-    const uploadFileRequestsList = []
-    for (let i = 0; i < files.length; ++i) {
-      const file = files[i]
-      const requestData = new FormData()
-      requestData.append('project_id', project.value.id)
-      requestData.append('uploaded_file', file)
-      uploadFileRequestsList.push(
-        axios.post(`${env.NAUTILUS_WEBAPI}/projects/${project.value.id}/files`, requestData)
-      )
-    }
-    await axios.all(uploadFileRequestsList)
+    const reponse = await axios.get<File[]>(`${env.NAUTILUS_WEBAPI}/projects/${projectId}/files`)
+    result = reponse.data
   } catch (error: any) {
-    hasErorr.value = true
-    errorMessage.value = `${error.request.responseURL}: ${error.response.statusText}`
+    console.log(error)
   }
+  return result
+}
+
+async function uploadFiles(uploadFiles: FileList | undefined) {
+  if (uploadFiles == undefined || props.projectId == null) {
+    return
+  }
+  const uploadFileRequestsList = []
+  const env = await Constants.env
+  for (const uploadFile of uploadFiles) {
+    const newFile: File = {
+      id: Constants.fakeId,
+      project_id: Constants.fakeId,
+      filename: uploadFile.name,
+      filesize: uploadFile.size,
+      title: uploadFile.name,
+      uploaded_on: new Date().toISOString(),
+      hash: Constants.fakeHash,
+      type: uploadFile.type,
+      uploadStatus: UploadStatus.Uploading
+    }
+    const fileIndex = files.value.push(newFile) - 1
+    const requestData = new FormData()
+    requestData.append('project_id', props.projectId)
+    requestData.append('uploaded_file', uploadFile)
+    uploadFileRequestsList.push(
+      axios
+        .post(`${env.NAUTILUS_WEBAPI}/projects/${props.projectId}/files`, requestData)
+        .then(() => {
+          files.value[fileIndex].uploadStatus = UploadStatus.Success
+        })
+        .catch((error) => {
+          console.log(error)
+          files.value[fileIndex].uploadStatus = UploadStatus.Failure
+        })
+    )
+    axios.all(uploadFileRequestsList)
+    pendingFiles.value = undefined
+  }
+}
+
+watch(pendingFiles, async (newFiles) => {
+  await uploadFiles(newFiles)
+})
+
+if (pendingFiles.value != undefined) {
+  await uploadFiles(pendingFiles.value)
 }
 </script>

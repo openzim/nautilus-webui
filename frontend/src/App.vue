@@ -1,7 +1,9 @@
 <template>
   <div class="d-flex flex-column vh-100">
     <div class="flex-shrink-1">
-      <RouterView />
+      <Suspense>
+        <RouterView />
+      </Suspense>
     </div>
     <FooterComponent />
   </div>

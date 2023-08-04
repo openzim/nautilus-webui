@@ -1,5 +1,5 @@
-import HomeView from '@/views/HomeView.vue'
 import PrivacyAndCookieStatement from '@/views/PrivacyAndCookieStatement.vue'
+import StartView from '@/views/StartView.vue'
 import TermsOfService from '@/views/TermsOfService.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
@@ -7,8 +7,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'Home',
-      component: HomeView
+      name: 'start',
+      component: StartView
     },
     {
       path: '/privacy-and-cookie-statement',
