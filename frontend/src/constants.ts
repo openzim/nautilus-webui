@@ -20,7 +20,7 @@ interface ConstantsInterface {
 export const Constants: ConstantsInterface = {
   env: (async function () {
     try {
-      const response = await axios.get<Environ>(`${import.meta.env.BASE_URL}environ.json`)
+      const response = await axios.get<Environ>(`environ.json`)
       return response.data
     } catch (error) {
       return { NAUTILUS_WEBAPI: 'noapi' }
