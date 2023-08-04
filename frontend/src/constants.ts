@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 
 export interface Project {
   id: string
@@ -54,15 +54,17 @@ export const Constants: ConstantsInterface = {
 }
 
 export async function validProjectID(id: string | null) {
+  let result = false
   if (id == null) {
-    return false
+    return result
   }
   const env = await Constants.env
   try {
     await axios.get<Project>(`${env.NAUTILUS_WEB_API}/projects/${id}`)
-    return true
+    result = true
   } catch (error: any) {
     console.log(error)
-    return false
+    result = false
   }
+  return result
 }
