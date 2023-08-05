@@ -42,7 +42,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
   for (const uploadFile of uploadFiles) {
     const newFile: File = {
       id: Constants.fakeId,
-      project_id: Constants.fakeId,
+      project_id: props.projectId,
       filename: uploadFile.name,
       filesize: uploadFile.size,
       title: uploadFile.name,
