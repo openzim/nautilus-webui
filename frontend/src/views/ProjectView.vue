@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="file in files" :key="file.id">
+    <li v-for="[key, file] in files" :key="key">
       {{ file.filename }}
     </li>
   </ul>
@@ -13,10 +13,11 @@ import { ref, type Ref } from 'vue'
 
 const storeApp = useAppStore()
 const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
-const files: Ref<File[]> = ref([])
+const files: Ref<Map<string, File>> = ref(new Map())
 
 if (props.initialFiles == undefined) {
-  files.value = await getAllFiles(props.projectId)
+  const requestedFiles = await getAllFiles(props.projectId)
+  requestedFiles.forEach((item) => files.value.set(item.id, item))
 } else {
   await uploadFiles(props.initialFiles)
 }
@@ -54,34 +55,30 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
       type: uploadFile.type,
       uploadStatus: UploadStatus.Uploading
     }
-    files.value.push(newFile)
-    const fileId = newFile.id
+    files.value.set(newFile.id, newFile)
+
     const requestData = new FormData()
     requestData.append('project_id', props.projectId)
     requestData.append('uploaded_file', uploadFile)
+    const config = {
+      onUploadProgress: (progressEvent: any) => {
+        //TODO: TRACK upload porgress.
+        console.log(progressEvent.loaded)
+      }
+    }
     uploadFileRequestsList.push(
       axios
         .post<File>(
           `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`,
-          requestData
+          requestData,
+          config
         )
-        .then((response) => {
-          files.value.forEach((element, index) => {
-            if (element.id == fileId) {
-              files.value[index] = response.data
-              files.value[index].uploadStatus = UploadStatus.Success
-            }
-          })
-        })
         .catch((error) => {
           console.log(error)
-          files.value.forEach((element, index) => {
-            if (element.id == fileId) {
-              files.value[index].uploadStatus = UploadStatus.Failure
-            }
-          })
+          files.value.get(newFile.id)!.uploadStatus = UploadStatus.Failure
         })
     )
+
     axios.all(uploadFileRequestsList)
   }
 }
