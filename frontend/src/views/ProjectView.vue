@@ -8,14 +8,15 @@
 <script setup lang="ts">
 import { Constants, UploadStatus, type File } from '@/constants'
 import axios from 'axios'
-import { ref, watch, type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 
 const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
 const files: Ref<File[]> = ref([])
-const pendingFiles = ref(props.initialFiles)
 
-if (pendingFiles.value == undefined) {
+if (props.initialFiles == undefined) {
   files.value = await getAllFiles(props.projectId)
+} else {
+  await uploadFiles(props.initialFiles)
 }
 
 async function getAllFiles(projectId: string | null) {
@@ -77,15 +78,6 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
         })
     )
     axios.all(uploadFileRequestsList)
-    pendingFiles.value = undefined
   }
-}
-
-watch(pendingFiles, async (newFiles) => {
-  await uploadFiles(newFiles)
-})
-
-if (pendingFiles.value != undefined) {
-  await uploadFiles(pendingFiles.value)
 }
 </script>
