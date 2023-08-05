@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { v4 as uuid } from 'uuid'
 
 export interface Project {
@@ -7,6 +6,7 @@ export interface Project {
   created_on: string
   expire_on?: string
 }
+
 export interface User {
   id: string
   created_on: string
@@ -33,40 +33,22 @@ export enum UploadStatus {
   Failure = 'Failure'
 }
 
-interface Environ {
+export interface Environ {
   NAUTILUS_WEB_API: string
 }
-interface ConstantsInterface {
-  env: Promise<Environ>
-  fakeId: string
+
+export class Constants {
+  env: Environ
   fakeHash: string
+
+  constructor(env: Environ) {
+    this.env = env
+    this.fakeHash = ''
+  }
+
+  get fakeId() {
+    return uuid()
+  }
 }
 
-export const Constants: ConstantsInterface = {
-  env: (async function () {
-    try {
-      const response = await axios.get<Environ>(`environ.json`)
-      return response.data
-    } catch (error) {
-      return { NAUTILUS_WEB_API: 'noapi' }
-    }
-  })(),
-  fakeId: uuid(),
-  fakeHash: 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-}
-
-export async function validProjectID(id: string | null) {
-  let result = false
-  if (id == null) {
-    return result
-  }
-  const env = await Constants.env
-  try {
-    await axios.get<Project>(`${env.NAUTILUS_WEB_API}/projects/${id}`)
-    result = true
-  } catch (error: any) {
-    console.log(error)
-    result = false
-  }
-  return result
-}
+export const EmptyConstants = new Constants({ NAUTILUS_WEB_API: 'noapi' })

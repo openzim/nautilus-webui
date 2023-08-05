@@ -6,10 +6,12 @@
   </ul>
 </template>
 <script setup lang="ts">
-import { Constants, UploadStatus, type File } from '@/constants'
+import { UploadStatus, type File } from '@/constants'
+import { useAppStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref } from 'vue'
 
+const storeApp = useAppStore()
 const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
 const files: Ref<File[]> = ref([])
 
@@ -24,9 +26,10 @@ async function getAllFiles(projectId: string | null) {
   if (projectId == null) {
     return result
   }
-  const env = await Constants.env
   try {
-    const reponse = await axios.get<File[]>(`${env.NAUTILUS_WEB_API}/projects/${projectId}/files`)
+    const reponse = await axios.get<File[]>(
+      `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${projectId}/files`
+    )
     result = reponse.data
   } catch (error: any) {
     console.log(error)
@@ -39,16 +42,15 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     return
   }
   const uploadFileRequestsList = []
-  const env = await Constants.env
   for (const uploadFile of uploadFiles) {
     const newFile: File = {
-      id: Constants.fakeId,
+      id: storeApp.constants.fakeId,
       project_id: props.projectId,
       filename: uploadFile.name,
       filesize: uploadFile.size,
       title: uploadFile.name,
       uploaded_on: new Date().toISOString(),
-      hash: Constants.fakeHash,
+      hash: storeApp.constants.fakeHash,
       type: uploadFile.type,
       uploadStatus: UploadStatus.Uploading
     }
@@ -59,7 +61,10 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     requestData.append('uploaded_file', uploadFile)
     uploadFileRequestsList.push(
       axios
-        .post<File>(`${env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`, requestData)
+        .post<File>(
+          `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`,
+          requestData
+        )
         .then((response) => {
           files.value.forEach((element, index) => {
             if (element.id == fileId) {

@@ -7,13 +7,14 @@
 import DragToStartField from '@/components/DropToStartField.vue'
 import ProjectView from '@/views/ProjectView.vue'
 import axios from 'axios'
-import { validProjectID, type Project } from '@/constants'
-import { Constants } from '@/constants'
+import { type Project } from '@/constants'
 import { ref, watch, type Ref } from 'vue'
 import type { User } from '@/constants'
-import { useProjectIdStore } from '@/stores/counter'
+import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import { validProjectID } from '@/utlis'
 
 const storeProjectId = useProjectIdStore()
+const storeApp = useAppStore()
 const projectId: Ref<string | null> = ref(null)
 const filesToUpload: Ref<FileList | undefined> = ref(undefined)
 const isValidProjectId = ref(await validProjectID(projectId.value))
@@ -23,13 +24,12 @@ watch(projectId, async (newId) => {
 })
 
 async function createUserAndProject(): Promise<[Project, User]> {
-  const env = await Constants.env
-  const user = await axios.post<User>(`${env.NAUTILUS_WEB_API}/users`)
+  const user = await axios.post<User>(`${storeApp.constants.env.NAUTILUS_WEB_API}/users`)
   const projectRequestData = {
     name: 'First Project'
   }
   const createProjectResponse = await axios.post<Project>(
-    `${env.NAUTILUS_WEB_API}/projects/`,
+    `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/`,
     projectRequestData
   )
   return [createProjectResponse.data, user.data]

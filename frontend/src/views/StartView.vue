@@ -6,12 +6,14 @@
 <script setup lang="ts">
 import ProjectView from '@/views/ProjectView.vue'
 import HomeView from '@/views/HomeView.vue'
-import { Constants, validProjectID, type Project } from '@/constants'
+import { type Project } from '@/constants'
 import axios from 'axios'
 import { ref, watch } from 'vue'
-import { useProjectIdStore } from '@/stores/counter'
+import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import { validProjectID } from '@/utlis'
 
 const storeProjectId = useProjectIdStore()
+const storeApp = useAppStore()
 const projectId = ref(storeProjectId.projectId)
 const isVaildProjectID = ref(await validProjectID(projectId.value))
 
@@ -20,13 +22,15 @@ watch(projectId, async () => {
 })
 
 async function setupProjectId() {
-  const env = await Constants.env
   try {
-    const lastProject = (await axios.get<Project[]>(`${env.NAUTILUS_WEB_API}/projects`)).data.pop()
+    const lastProject = (
+      await axios.get<Project[]>(`${storeApp.constants.env.NAUTILUS_WEB_API}/projects`)
+    ).data.pop()
     if (lastProject && (await validProjectID(lastProject?.id))) {
       projectId.value = lastProject.id
     }
   } catch (error: any) {
+    storeApp.alertsError('Can not setup project id.')
     console.log(error)
   }
 }
