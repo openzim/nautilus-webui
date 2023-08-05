@@ -11,9 +11,9 @@ import { validProjectID, type Project } from '@/constants'
 import { Constants } from '@/constants'
 import { ref, watch, type Ref } from 'vue'
 import type { User } from '@/constants'
-import { useProjectId } from '@/stores/counter'
+import { useProjectIdStore } from '@/stores/counter'
 
-const storeProjectId = useProjectId()
+const storeProjectId = useProjectIdStore()
 const projectId: Ref<string | null> = ref(null)
 const filesToUpload: Ref<FileList | undefined> = ref(undefined)
 const isValidProjectId = ref(await validProjectID(projectId.value))

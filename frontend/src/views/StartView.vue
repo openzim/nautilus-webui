@@ -9,9 +9,9 @@ import HomeView from '@/views/HomeView.vue'
 import { Constants, validProjectID, type Project } from '@/constants'
 import axios from 'axios'
 import { ref, watch } from 'vue'
-import { useProjectId } from '@/stores/counter'
+import { useProjectIdStore } from '@/stores/counter'
 
-const storeProjectId = useProjectId()
+const storeProjectId = useProjectIdStore()
 const projectId = ref(storeProjectId.projectId)
 const isVaildProjectID = ref(await validProjectID(projectId.value))
 
