@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li v-for="file in files" :key="file.id">
-      {{ file.filename }}
+      {{ file.data.filename }}
     </li>
   </ul>
 </template>
@@ -11,11 +11,17 @@ import axios from 'axios'
 import { ref, watch, type Ref } from 'vue'
 
 const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
-const files: Ref<File[]> = ref([])
+/* Because files may be sorted according to different circumstances,
+and because there is no fixed id for a file until it is uploaded successfully, 
+we need to generate a local id for tracking purposes. */
+const files: Ref<{ id: number; data: File }[]> = ref([])
 const pendingFiles = ref(props.initialFiles)
 
 if (pendingFiles.value == undefined) {
-  files.value = await getAllFiles(props.projectId)
+  const allFiles = await getAllFiles(props.projectId)
+  for (let i = 0; i < allFiles.length; i++) {
+    files.value.push({ id: i, data: allFiles[i] })
+  }
 }
 
 async function getAllFiles(projectId: string | null) {
@@ -51,19 +57,29 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
       type: uploadFile.type,
       uploadStatus: UploadStatus.Uploading
     }
-    const fileIndex = files.value.push(newFile) - 1
+    const fileId = files.value.length
+    files.value.push({ id: fileId, data: newFile })
     const requestData = new FormData()
     requestData.append('project_id', props.projectId)
     requestData.append('uploaded_file', uploadFile)
     uploadFileRequestsList.push(
       axios
-        .post(`${env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`, requestData)
-        .then(() => {
-          files.value[fileIndex].uploadStatus = UploadStatus.Success
+        .post<File>(`${env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`, requestData)
+        .then((response) => {
+          files.value.forEach((element, index) => {
+            if (element.id == fileId) {
+              files.value[index].data = response.data
+              files.value[index].data.uploadStatus = UploadStatus.Success
+            }
+          })
         })
         .catch((error) => {
           console.log(error)
-          files.value[fileIndex].uploadStatus = UploadStatus.Failure
+          files.value.forEach((element, index) => {
+            if (element.id == fileId) {
+              files.value[index].data.uploadStatus = UploadStatus.Failure
+            }
+          })
         })
     )
     axios.all(uploadFileRequestsList)
