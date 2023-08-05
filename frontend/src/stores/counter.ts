@@ -1,12 +1,22 @@
-import { ref, computed } from 'vue'
+import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 
-export const useCounterStore = defineStore('counter', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
+export const useProjectId = defineStore(
+  'projectId',
+  () => {
+    const projectId: Ref<string | null> = ref(null)
 
-  return { count, doubleCount, increment }
-})
+    function setProjectId(newId: string) {
+      projectId.value = newId
+    }
+
+    function clearProjectId() {
+      projectId.value = null
+    }
+
+    return { projectId, setProjectId, clearProjectId }
+  },
+  {
+    persist: true
+  }
+)

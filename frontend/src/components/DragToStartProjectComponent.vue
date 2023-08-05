@@ -11,7 +11,9 @@ import { validProjectID, type Project } from '@/constants'
 import { Constants } from '@/constants'
 import { ref, watch, type Ref } from 'vue'
 import type { User } from '@/constants'
+import { useProjectId } from '@/stores/counter'
 
+const storeProjectId = useProjectId()
 const projectId: Ref<string | null> = ref(null)
 const filesToUpload: Ref<FileList | undefined> = ref(undefined)
 const isValidProjectId = ref(await validProjectID(projectId.value))
@@ -40,7 +42,7 @@ async function dropFilesHandler(event: DragEvent) {
 
 function setProjectAndUserIds(data: [Project, User]) {
   const [project] = data
-  localStorage.setItem('projectId', project.id)
+  storeProjectId.setProjectId(project.id)
   projectId.value = project.id
 }
 </script>
