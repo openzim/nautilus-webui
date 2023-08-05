@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li v-for="file in files" :key="file.id">
-      {{ file.data.filename }}
+      {{ file.filename }}
     </li>
   </ul>
 </template>
@@ -11,17 +11,11 @@ import axios from 'axios'
 import { ref, watch, type Ref } from 'vue'
 
 const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
-/* Because files may be sorted according to different circumstances,
-and because there is no fixed id for a file until it is uploaded successfully, 
-we need to generate a local id for tracking purposes. */
-const files: Ref<{ id: number; data: File }[]> = ref([])
+const files: Ref<File[]> = ref([])
 const pendingFiles = ref(props.initialFiles)
 
 if (pendingFiles.value == undefined) {
-  const allFiles = await getAllFiles(props.projectId)
-  for (let i = 0; i < allFiles.length; i++) {
-    files.value.push({ id: i, data: allFiles[i] })
-  }
+  files.value = await getAllFiles(props.projectId)
 }
 
 async function getAllFiles(projectId: string | null) {
@@ -57,8 +51,8 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
       type: uploadFile.type,
       uploadStatus: UploadStatus.Uploading
     }
-    const fileId = files.value.length
-    files.value.push({ id: fileId, data: newFile })
+    files.value.push(newFile)
+    const fileId = newFile.id
     const requestData = new FormData()
     requestData.append('project_id', props.projectId)
     requestData.append('uploaded_file', uploadFile)
@@ -68,8 +62,8 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
         .then((response) => {
           files.value.forEach((element, index) => {
             if (element.id == fileId) {
-              files.value[index].data = response.data
-              files.value[index].data.uploadStatus = UploadStatus.Success
+              files.value[index] = response.data
+              files.value[index].uploadStatus = UploadStatus.Success
             }
           })
         })
@@ -77,7 +71,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
           console.log(error)
           files.value.forEach((element, index) => {
             if (element.id == fileId) {
-              files.value[index].data.uploadStatus = UploadStatus.Failure
+              files.value[index].uploadStatus = UploadStatus.Failure
             }
           })
         })

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { v4 as uuid } from 'uuid'
 
 export interface Project {
   id: string
@@ -49,7 +50,7 @@ export const Constants: ConstantsInterface = {
       return { NAUTILUS_WEB_API: 'noapi' }
     }
   })(),
-  fakeId: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+  fakeId: uuid(),
   fakeHash: 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 }
 
