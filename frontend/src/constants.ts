@@ -23,6 +23,7 @@ export interface File {
   uploaded_on: string
   hash: string
   type: string
+  status: string
   uploadStatus: UploadStatus
 }
 
