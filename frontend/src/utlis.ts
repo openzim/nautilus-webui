@@ -13,8 +13,24 @@ export async function validProjectID(id: string | null) {
     result = true
   } catch (error: any) {
     console.log(error)
-    storeApp.alertsError(`Can not validate project id: ${id}`)
-    result = false
+    if (axios.isAxiosError(error) && error.response?.status == 404) {
+      result = false
+    }
+  }
+  return result
+}
+
+export async function validateUser() {
+  const storeApp = useAppStore()
+  let result = true
+  try {
+    await axios.get<Project[]>(`${storeApp.constants.env.NAUTILUS_WEB_API}/projects`)
+    result = true
+  } catch (error: any) {
+    console.log(error)
+    if (axios.isAxiosError(error) && error.response?.status == 401) {
+      result = false
+    }
   }
   return result
 }
