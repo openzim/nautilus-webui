@@ -67,7 +67,7 @@ async function setupProjectId() {
 
 if (getCookieByName('user_id') != null) {
   if (!(await validateUser())) {
-    storeApp.alertsError('Can not validate the user.')
+    storeApp.alertsError('ERROR: Can not validate the user.')
     clearCookies()
     storeProjectId.clearProjectId()
   } else if (!(await validProjectID(storeProjectId.projectId))) {
