@@ -7,11 +7,13 @@
     </div>
     <FooterComponent />
   </div>
+  <AlertsComponentVue />
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import AlertsComponentVue from './components/AlertsComponent.vue'
 import FooterComponent from './components/FooterComponent.vue'
+import { onMounted, ref } from 'vue'
 import { useAppStore } from './stores/stores'
 
 const storeApp = useAppStore()

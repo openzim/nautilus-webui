@@ -7,12 +7,12 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faMinus, faXmark } from '@fortawesome/free-solid-svg-icons'
 
 // Enable Cookies for Axios.
 axios.defaults.withCredentials = true
 /* add icons to the library */
-library.add(faPlus, faMinus)
+library.add(faPlus, faMinus, faXmark)
 
 import App from './App.vue'
 import router from './router'

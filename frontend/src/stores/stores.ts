@@ -1,6 +1,7 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import { Constants, EmptyConstants, type Environ } from '@/constants'
+import { v4 as uuid } from 'uuid'
 import axios from 'axios'
 
 export const useProjectIdStore = defineStore(
@@ -24,18 +25,15 @@ export const useProjectIdStore = defineStore(
 )
 
 export const useAppStore = defineStore('app', () => {
-  const hasError = ref(false)
-  const errorMessgae = ref('')
+  const errorMessgae: Ref<Map<string, string>> = ref(new Map())
   const constants: Ref<Constants> = ref(EmptyConstants)
 
-  function alertsError(messge: string) {
-    hasError.value = true
-    errorMessgae.value = messge
+  function alertsError(message: string) {
+    errorMessgae.value.set(uuid(), message)
   }
 
-  function clearError() {
-    hasError.value = false
-    errorMessgae.value = ''
+  function clearError(id: string) {
+    errorMessgae.value.delete(id)
   }
 
   async function initConstants() {
@@ -48,5 +46,5 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  return { hasError, errorMessgae, constants, alertsError, clearError, initConstants }
+  return { errorMessgae, constants, alertsError, clearError, initConstants }
 })
