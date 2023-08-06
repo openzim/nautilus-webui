@@ -7,16 +7,17 @@
 </template>
 <script setup lang="ts">
 import { FileStatus, type File } from '@/constants'
-import { useAppStore } from '@/stores/stores'
+import { useAppStore, useProjectIdStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref } from 'vue'
 
 const storeApp = useAppStore()
-const props = defineProps<{ initialFiles: FileList | undefined; projectId: string | null }>()
+const storeProjectId = useProjectIdStore()
+const props = defineProps<{ initialFiles: FileList | undefined }>()
 const files: Ref<Map<string, File>> = ref(new Map())
 
 if (props.initialFiles == undefined) {
-  const requestedFiles = await getAllFiles(props.projectId)
+  const requestedFiles = await getAllFiles(storeProjectId.projectId)
   requestedFiles.forEach((item) => files.value.set(item.id, item))
 } else {
   await uploadFiles(props.initialFiles)
@@ -40,14 +41,14 @@ async function getAllFiles(projectId: string | null) {
 }
 
 async function uploadFiles(uploadFiles: FileList | undefined) {
-  if (uploadFiles == undefined || props.projectId == null) {
+  if (uploadFiles == undefined || storeProjectId.projectId == null) {
     return
   }
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
     const newFile: File = {
       id: storeApp.constants.fakeId,
-      project_id: props.projectId,
+      project_id: storeProjectId.projectId,
       filename: uploadFile.name,
       filesize: uploadFile.size,
       title: uploadFile.name,
@@ -59,7 +60,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     files.value.set(newFile.id, newFile)
 
     const requestData = new FormData()
-    requestData.append('project_id', props.projectId)
+    requestData.append('project_id', storeProjectId.projectId)
     requestData.append('uploaded_file', uploadFile)
     const config = {
       onUploadProgress: (progressEvent: any) => {
@@ -70,7 +71,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     uploadFileRequestsList.push(
       axios
         .post<File>(
-          `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${props.projectId}/files`,
+          `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${storeProjectId.projectId}/files`,
           requestData,
           config
         )

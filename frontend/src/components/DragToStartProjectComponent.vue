@@ -1,11 +1,12 @@
 <template>
-  <ProjectView :project-id="projectId" v-if="isValidProjectId" :initial-files="filesToUpload" />
-  <DragToStartField v-else @dropFilesHandler="dropFilesHandler" />
+  <div>
+    <DragToStartField @dropFilesHandler="dropFilesHandler" />
+  </div>
 </template>
 
 <script setup lang="ts">
 import DragToStartField from '@/components/DropToStartField.vue'
-import ProjectView from '@/views/ProjectView.vue'
+// import ProjectView from '@/views/ProjectView.vue'
 import axios from 'axios'
 import { type Project } from '@/constants'
 import { ref, watch, type Ref } from 'vue'

@@ -23,15 +23,10 @@
       </p>
     </div>
   </div>
-  <div class="mt-5">
-    <FrequentlyAskedQuestions />
-  </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
-
 const isActive = ref(false)
 
 const emit = defineEmits<{
