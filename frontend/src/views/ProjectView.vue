@@ -6,7 +6,7 @@
   </ul>
 </template>
 <script setup lang="ts">
-import { UploadStatus, type File } from '@/constants'
+import { FileStatus, type File } from '@/constants'
 import { useAppStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref } from 'vue'
@@ -53,7 +53,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
       uploaded_on: new Date().toISOString(),
       hash: storeApp.constants.fakeHash,
       type: uploadFile.type,
-      uploadStatus: UploadStatus.Uploading
+      status: FileStatus.LOCAL
     }
     files.value.set(newFile.id, newFile)
 
@@ -75,7 +75,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
         )
         .catch((error) => {
           console.log(error)
-          files.value.get(newFile.id)!.uploadStatus = UploadStatus.Failure
+          storeApp.alertsError(`Failed to upload: ${uploadFile.name}`)
         })
     )
 

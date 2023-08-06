@@ -23,14 +23,12 @@ export interface File {
   uploaded_on: string
   hash: string
   type: string
-  status?: string
-  uploadStatus: UploadStatus
+  status: FileStatus
 }
 
-export enum UploadStatus {
-  Uploading = 'Uploading',
-  Success = 'Success',
-  Failure = 'Failure'
+export enum FileStatus {
+  LOCAL = 'LOCAL',
+  S3 = 'S3'
 }
 
 export interface Environ {
