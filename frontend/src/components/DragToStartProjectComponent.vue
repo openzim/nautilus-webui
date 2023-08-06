@@ -23,25 +23,46 @@ watch(projectId, async (newId) => {
   isValidProjectId.value = await validProjectID(newId)
 })
 
-async function createUserAndProject(): Promise<[Project, User]> {
-  const user = await axios.post<User>(`${storeApp.constants.env.NAUTILUS_WEB_API}/users`)
+async function createUserAndProject(): Promise<[User | null, Project | null]> {
   const projectRequestData = {
     name: 'First Project'
   }
-  const createProjectResponse = await axios.post<Project>(
-    `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/`,
-    projectRequestData
-  )
-  return [createProjectResponse.data, user.data]
+  var user: User | null = null
+  var project: Project | null = null
+  try {
+    const createUserRespone = await axios.post<User>(
+      `${storeApp.constants.env.NAUTILUS_WEB_API}/users`
+    )
+    user = createUserRespone.data
+  } catch (error) {
+    console.log(error)
+    storeApp.alertsError('Can not create the user.')
+    return [user, project]
+  }
+  try {
+    const createProjectResponse = await axios.post<Project>(
+      `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/`,
+      projectRequestData
+    )
+    project = createProjectResponse.data
+  } catch (error) {
+    console.log(error)
+    storeApp.alertsError('Can not create the project.')
+    return [user, project]
+  }
+  return [user, project]
 }
 
 async function dropFilesHandler(event: DragEvent) {
   filesToUpload.value = event.dataTransfer?.files
-  setProjectAndUserIds(await createUserAndProject())
+  setProjectId(await createUserAndProject())
 }
 
-function setProjectAndUserIds(data: [Project, User]) {
-  const [project] = data
+function setProjectId(data: [User | null, Project | null]) {
+  const [, project] = data
+  if (project == null) {
+    return
+  }
   storeProjectId.setProjectId(project.id)
   projectId.value = project.id
 }

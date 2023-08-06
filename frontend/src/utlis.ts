@@ -13,6 +13,7 @@ export async function validProjectID(id: string | null) {
     result = true
   } catch (error: any) {
     console.log(error)
+    storeApp.alertsError(`Can not validate project id: ${id}`)
     result = false
   }
   return result

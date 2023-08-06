@@ -30,8 +30,8 @@ async function setupProjectId() {
       projectId.value = lastProject.id
     }
   } catch (error: any) {
-    storeApp.alertsError('Can not setup project id.')
     console.log(error)
+    storeApp.alertsError('Can not setup project id.')
   }
 }
 if (projectId.value && !validProjectID(projectId.value)) {

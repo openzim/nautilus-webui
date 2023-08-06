@@ -34,6 +34,7 @@ async function getAllFiles(projectId: string | null) {
     result = reponse.data
   } catch (error: any) {
     console.log(error)
+    storeApp.alertsError(`Can not get Files info of project: ${projectId}`)
   }
   return result
 }
