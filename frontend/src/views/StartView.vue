@@ -1,8 +1,8 @@
 <template>
-  <div v-show="isVaildProjectID">
-    <ProjectView :initial-files="undefined" />
+  <div v-if="isVaildProjectID">
+    <ProjectView :initial-files="storeInitialFileStore.initialFiles" />
   </div>
-  <div v-show="!isVaildProjectID">
+  <div v-else>
     <HomeView />
   </div>
 </template>
@@ -13,12 +13,13 @@ import HomeView from '@/views/HomeView.vue'
 import { type Project } from '@/constants'
 import axios from 'axios'
 import { ref, watch } from 'vue'
-import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import { useAppStore, useInitialFilesStore, useProjectIdStore } from '@/stores/stores'
 import { validProjectID } from '@/utils'
 import { validateUser } from '@/utils'
 import { storeToRefs } from 'pinia'
 
 const storeProjectId = useProjectIdStore()
+const storeInitialFileStore = useInitialFilesStore()
 const { projectId } = storeToRefs(storeProjectId)
 const storeApp = useAppStore()
 const isVaildProjectID = ref(await validProjectID(storeProjectId.projectId))
@@ -29,8 +30,7 @@ watch(projectId, async (newId) => {
 
 function clearCookies() {
   document.cookie.split(';').forEach(function (c) {
-    document.cookie =
-      c.trim().split('=')[0] + '=;' + 'domain=*;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+    document.cookie = c.trim().split('=')[0] + '=;max-age=0;'
   })
 }
 
@@ -68,8 +68,7 @@ if (getCookieByName('user_id') != null) {
     storeApp.alertsError('Can not validate the user.')
     clearCookies()
     storeProjectId.clearProjectId()
-  }
-  if (!(await validProjectID(storeProjectId.projectId))) {
+  } else if (!(await validProjectID(storeProjectId.projectId))) {
     setupProjectId()
   }
 } else {

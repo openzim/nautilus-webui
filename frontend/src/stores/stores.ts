@@ -48,3 +48,12 @@ export const useAppStore = defineStore('app', () => {
 
   return { errorMessgae, constants, alertsError, clearError, initConstants }
 })
+
+export const useInitialFilesStore = defineStore('initialFiles', () => {
+  const initialFiles: Ref<FileList | undefined> = ref(undefined)
+
+  function setInitialFiles(files: FileList | undefined) {
+    initialFiles.value = files
+  }
+  return { initialFiles, setInitialFiles }
+})

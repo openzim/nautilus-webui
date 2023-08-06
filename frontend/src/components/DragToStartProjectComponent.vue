@@ -6,18 +6,17 @@
 
 <script setup lang="ts">
 import DragToStartField from '@/components/DropToStartField.vue'
-// import ProjectView from '@/views/ProjectView.vue'
 import axios from 'axios'
 import { type Project } from '@/constants'
 import { ref, watch, type Ref } from 'vue'
 import type { User } from '@/constants'
-import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import { validProjectID } from '@/utils'
 
 const storeProjectId = useProjectIdStore()
 const storeApp = useAppStore()
+const storeInitialFiles = useInitialFilesStore()
 const projectId: Ref<string | null> = ref(null)
-const filesToUpload: Ref<FileList | undefined> = ref(undefined)
 const isValidProjectId = ref(await validProjectID(projectId.value))
 
 watch(projectId, async (newId) => {
@@ -55,7 +54,7 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
 }
 
 async function dropFilesHandler(event: DragEvent) {
-  filesToUpload.value = event.dataTransfer?.files
+  storeInitialFiles.setInitialFiles(event.dataTransfer?.files)
   setProjectId(await createUserAndProject())
 }
 
