@@ -1,10 +1,6 @@
 <template>
-  <div v-if="isVaildProjectID">
-    <ProjectView :initial-files="storeInitialFileStore.initialFiles" />
-  </div>
-  <div v-else>
-    <HomeView />
-  </div>
+  <ProjectView :initial-files="storeInitialFileStore.initialFiles" v-if="isVaildProjectID" />
+  <HomeView v-else />
 </template>
 
 <script setup lang="ts">
