@@ -35,7 +35,9 @@ async function getAllFiles(projectId: string | null) {
     result = reponse.data
   } catch (error: any) {
     console.log(error)
-    storeApp.alertsError(`Can not get Files info of project: ${projectId}`)
+    if (axios.isAxiosError(error)) {
+      storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
+    }
   }
   return result
 }
@@ -77,7 +79,9 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
         )
         .catch((error) => {
           console.log(error)
-          storeApp.alertsError(`Failed to upload: ${uploadFile.name}`)
+          if (axios.isAxiosError(error)) {
+            storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
+          }
         })
     )
 

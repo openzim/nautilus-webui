@@ -59,7 +59,9 @@ async function setupProjectId() {
     }
   } catch (error: any) {
     console.log(error)
-    storeApp.alertsError('Can not get project id.')
+    if (axios.isAxiosError(error)) {
+      storeApp.alertsError(`ERROR: ${error.response?.statusText}.`)
+    }
   }
 }
 

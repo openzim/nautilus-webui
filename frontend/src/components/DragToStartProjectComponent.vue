@@ -36,7 +36,9 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     user = createUserRespone.data
   } catch (error) {
     console.log(error)
-    storeApp.alertsError('Can not create the user.')
+    if (axios.isAxiosError(error)) {
+      storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
+    }
     return [user, project]
   }
   try {
@@ -47,7 +49,9 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     project = createProjectResponse.data
   } catch (error) {
     console.log(error)
-    storeApp.alertsError('Can not create the user.')
+    if (axios.isAxiosError(error)) {
+      storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
+    }
     return [user, project]
   }
   return [user, project]
