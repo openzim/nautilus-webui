@@ -13,6 +13,7 @@ export async function validProjectID(id: string | null) {
     result = true
   } catch (error: any) {
     console.log(error)
+    storeApp.alertsError(error.message)
     if (axios.isAxiosError(error) && error.response?.status == 404) {
       result = false
     }
@@ -28,6 +29,7 @@ export async function validateUser() {
     result = true
   } catch (error: any) {
     console.log(error)
+    storeApp.alertsError(error.message)
     if (axios.isAxiosError(error) && error.response?.status == 401) {
       result = false
     }

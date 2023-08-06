@@ -29,7 +29,7 @@ export const useAppStore = defineStore('app', () => {
   const constants: Ref<Constants> = ref(EmptyConstants)
 
   function alertsError(message: string) {
-    errorMessgae.value.set(uuid(), message)
+    errorMessgae.value.set(uuid(), `ERROR: ${message}`)
   }
 
   function clearError(id: string) {

@@ -35,9 +35,7 @@ async function getAllFiles(projectId: string | null) {
     result = reponse.data
   } catch (error: any) {
     console.log(error)
-    if (axios.isAxiosError(error)) {
-      storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
-    }
+    storeApp.alertsError(error.message)
   }
   return result
 }
@@ -66,7 +64,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     requestData.append('uploaded_file', uploadFile)
     const config = {
       onUploadProgress: (progressEvent: any) => {
-        //TODO: TRACK upload porgress.
+        //TODO: track upload progress.
         console.log(progressEvent.loaded)
       }
     }
@@ -79,9 +77,8 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
         )
         .catch((error) => {
           console.log(error)
-          if (axios.isAxiosError(error)) {
-            storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
-          }
+          //TODO: Give users more personalized prompts based on different return codes.
+          storeApp.alertsError(error.message)
         })
     )
 

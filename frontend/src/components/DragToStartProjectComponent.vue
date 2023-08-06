@@ -28,11 +28,9 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
       `${storeApp.constants.env.NAUTILUS_WEB_API}/users`
     )
     user = createUserRespone.data
-  } catch (error) {
+  } catch (error: any) {
     console.log(error)
-    if (axios.isAxiosError(error)) {
-      storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
-    }
+    storeApp.alertsError(error.message)
     return [user, project]
   }
   try {
@@ -41,11 +39,9 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
       projectRequestData
     )
     project = createProjectResponse.data
-  } catch (error) {
+  } catch (error: any) {
     console.log(error)
-    if (axios.isAxiosError(error)) {
-      storeApp.alertsError(`ERROR: ${error.response?.statusText}`)
-    }
+    storeApp.alertsError(error.message)
     return [user, project]
   }
   return [user, project]

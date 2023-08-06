@@ -55,15 +55,13 @@ async function setupProjectId() {
     }
   } catch (error: any) {
     console.log(error)
-    if (axios.isAxiosError(error)) {
-      storeApp.alertsError(`ERROR: ${error.response?.statusText}.`)
-    }
+    storeApp.alertsError(error.message)
   }
 }
 
 if (getCookieByName('user_id') != null) {
   if (!(await validateUser())) {
-    storeApp.alertsError('ERROR: Can not validate the user.')
+    storeApp.alertsError('Can not validate the user.')
     clearCookies()
     storeProjectId.clearProjectId()
   } else if (!(await validProjectID(storeProjectId.projectId))) {
