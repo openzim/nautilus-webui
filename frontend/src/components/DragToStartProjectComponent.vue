@@ -53,11 +53,11 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
 
 async function dropFilesHandler(event: DragEvent) {
   storeInitialFiles.setInitialFiles(event.dataTransfer?.files)
-  setProjectId(await createUserAndProject())
+  const [, project] = await createUserAndProject()
+  setProjectId(project)
 }
 
-function setProjectId(data: [User | null, Project | null]) {
-  const [, project] = data
+function setProjectId(project: Project | null) {
   if (project == null) {
     return
   }
