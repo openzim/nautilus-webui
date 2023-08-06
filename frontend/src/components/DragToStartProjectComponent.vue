@@ -12,7 +12,7 @@ import { type Project } from '@/constants'
 import { ref, watch, type Ref } from 'vue'
 import type { User } from '@/constants'
 import { useAppStore, useProjectIdStore } from '@/stores/stores'
-import { validProjectID } from '@/utlis'
+import { validProjectID } from '@/utils'
 
 const storeProjectId = useProjectIdStore()
 const storeApp = useAppStore()

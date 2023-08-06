@@ -14,8 +14,8 @@ import { type Project } from '@/constants'
 import axios from 'axios'
 import { ref, watch } from 'vue'
 import { useAppStore, useProjectIdStore } from '@/stores/stores'
-import { validProjectID } from '@/utlis'
-import { validateUser } from '@/utlis'
+import { validProjectID } from '@/utils'
+import { validateUser } from '@/utils'
 import { storeToRefs } from 'pinia'
 
 const storeProjectId = useProjectIdStore()
