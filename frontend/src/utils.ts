@@ -4,11 +4,11 @@ import type { Project } from '@/constants'
 
 /** Checks if a given project ID is valid */
 export async function validProjectID(id: string | null) {
+  if (id == null) {
+    return false
+  }
   const storeApp = useAppStore()
   let result = false
-  if (id == null) {
-    return result
-  }
   try {
     await axios.get<Project>(`${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${id}`)
     result = true
