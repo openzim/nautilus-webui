@@ -37,15 +37,10 @@ async function setupProjectId() {
   }
 }
 
-if (getCookieByName('user_id') != null) {
-  if (!(await validateUser())) {
-    storeApp.alertsError('Can not validate the user.')
-    clearCookies()
-    storeProjectId.clearProjectId()
-  } else if (!(await validProjectID(storeProjectId.projectId))) {
-    setupProjectId()
-  }
-} else {
-  storeProjectId.clearProjectId()
+if (
+  (storeProjectId.projectId != undefined && !(await validProjectID(storeProjectId.projectId))) ||
+  (await validateUser())
+) {
+  setupProjectId()
 }
 </script>
