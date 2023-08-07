@@ -30,6 +30,6 @@ async def create_user(
     session.flush()
     session.refresh(new_user)
     response.set_cookie(
-        key=constants.cookie_name, value=str(new_user.id), httponly=True, secure=True
+        key=constants.authentication_cookie, value=str(new_user.id), httponly=True, secure=True
     )
     return UserModel.model_validate(new_user)
