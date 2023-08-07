@@ -4,7 +4,10 @@
   </div>
   <div class="mt-5">
     <Suspense>
-      <DragToStartProjectComponent />
+      <div class="container">
+        <DragToStartProjectComponent />
+        <StatementsComponent />
+      </div>
     </Suspense>
   </div>
   <div class="mt-5">
@@ -16,4 +19,5 @@
 import SloganComponent from '@/components/SloganComponent.vue'
 import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
 import DragToStartProjectComponent from '@/components/DragToStartProjectComponent.vue'
+import StatementsComponent from '@/components/StatementsComponent.vue'
 </script>
