@@ -40,7 +40,6 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
   } catch (error: any) {
     console.log(error)
     storeApp.alertsError(error.message)
-    return [user, project]
   }
   return [user, project]
 }
