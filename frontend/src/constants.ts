@@ -36,6 +36,16 @@ export interface Environ {
   NAUTILUS_WEB_API: string
 }
 
+export interface AlertMessage {
+  type: AlertType
+  message: string
+}
+
+export enum AlertType {
+  ERROR = 'danger',
+  WARNING = 'warning'
+}
+
 export class Constants {
   env: Environ
   fakeHash: string

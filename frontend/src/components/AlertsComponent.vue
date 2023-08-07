@@ -1,20 +1,17 @@
 <template>
   <div class="position-absolute top-0 end-0 mt-1 me-1">
-    <div
-      class="alert alert-danger px-1"
-      role="alert"
-      v-for="[key, message] in storeApp.errorMessgae"
-      :key="key"
-    >
-      <div class="container">
-        <div class="row justify-content-between">
-          <div class="col-md-auto">
-            {{ message }}
-          </div>
-          <div class="col-md-auto">
-            <button type="button" class="btn p-0" @click="storeApp.clearError(key)">
-              <font-awesome-icon :icon="['fas', 'xmark']" />
-            </button>
+    <div v-for="[key, item] in storeApp.alertMessages" :key="key">
+      <div class="alert px-1" :class="'alert-' + item.type" role="alert">
+        <div class="container">
+          <div class="row justify-content-between">
+            <div class="col-md-auto">
+              {{ item.message }}
+            </div>
+            <div class="col-md-auto">
+              <button type="button" class="btn p-0" @click="storeApp.clearError(key)">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

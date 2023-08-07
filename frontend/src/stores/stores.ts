@@ -1,6 +1,6 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { Constants, EmptyConstants, type Environ } from '@/constants'
+import { Constants, EmptyConstants, type AlertMessage, type Environ, AlertType } from '@/constants'
 import { v4 as uuid } from 'uuid'
 import axios from 'axios'
 
@@ -25,15 +25,19 @@ export const useProjectIdStore = defineStore(
 )
 
 export const useAppStore = defineStore('app', () => {
-  const errorMessgae: Ref<Map<string, string>> = ref(new Map())
+  const alertMessages: Ref<Map<string, AlertMessage>> = ref(new Map())
   const constants: Ref<Constants> = ref(EmptyConstants)
 
   function alertsError(message: string) {
-    errorMessgae.value.set(uuid(), `ERROR: ${message}`)
+    alertMessages.value.set(uuid(), { type: AlertType.ERROR, message: `ERROR: ${message}` })
+  }
+
+  function alertsWarning(message: string) {
+    alertMessages.value.set(uuid(), { type: AlertType.WARNING, message: `WARNING: ${message}` })
   }
 
   function clearError(id: string) {
-    errorMessgae.value.delete(id)
+    alertMessages.value.delete(id)
   }
 
   async function initConstants() {
@@ -46,7 +50,7 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  return { errorMessgae, constants, alertsError, clearError, initConstants }
+  return { alertMessages, constants, alertsError, alertsWarning, clearError, initConstants }
 })
 
 export const useInitialFilesStore = defineStore('initialFiles', () => {
