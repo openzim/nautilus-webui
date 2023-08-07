@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li v-for="[key, file] in files" :key="key">
-      {{ file.filename }}
+      {{ `${file.file.filename} ${file.uploadedSize} ${file.statusCode} ${file.statusText}` }}
     </li>
   </ul>
 </template>
@@ -14,11 +14,18 @@ import { ref, type Ref } from 'vue'
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
 const storeInitialFileStore = useInitialFilesStore()
-const files: Ref<Map<string, File>> = ref(new Map())
+const files: Ref<Map<string, RenderFile>> = ref(new Map())
+
+interface RenderFile {
+  file: File
+  uploadedSize: number
+  statusCode?: number
+  statusText?: string
+}
 
 if (storeInitialFileStore.initialFiles == undefined) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
-  apiFiles.forEach((item) => files.value.set(item.id, item))
+  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
 }
@@ -57,17 +64,21 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
       type: uploadFile.type,
       status: FileStatus.UPLOADING
     }
-    files.value.set(newFile.id, newFile)
+    files.value.set(newFile.id, { file: newFile, uploadedSize: 0 })
 
     const requestData = new FormData()
     requestData.append('project_id', storeProjectId.projectId)
     requestData.append('uploaded_file', uploadFile)
+
     const config = {
       onUploadProgress: (progressEvent: any) => {
-        //TODO: track upload progress.
+        if (files.value.has(newFile.id)) {
+          files.value.get(newFile.id)!.uploadedSize = progressEvent.loaded
+        }
         console.log(progressEvent.loaded)
       }
     }
+
     uploadFileRequestsList.push(
       axios
         .post<File>(
@@ -77,8 +88,12 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
         )
         .catch((error) => {
           console.log(error)
-          //TODO: Give users more personalized prompts based on different return codes.
-          storeApp.alertsError(error.message)
+          if (axios.isAxiosError(error)) {
+            if (files.value.has(newFile.id)) {
+              files.value.get(newFile.id)!.statusCode = error.response?.status
+              files.value.get(newFile.id)!.statusText = error.response?.statusText
+            }
+          }
         })
     )
 
