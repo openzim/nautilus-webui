@@ -1,5 +1,5 @@
 <template>
-  <ProjectView :initial-files="storeInitialFileStore.initialFiles" v-if="isVaildProjectID" />
+  <ProjectView v-if="isVaildProjectID" />
   <HomeView v-else />
 </template>
 
@@ -9,13 +9,12 @@ import HomeView from '@/views/HomeView.vue'
 import { type Project } from '@/constants'
 import axios from 'axios'
 import { ref, watch } from 'vue'
-import { useAppStore, useInitialFilesStore, useProjectIdStore } from '@/stores/stores'
+import { useAppStore, useProjectIdStore } from '@/stores/stores'
 import { clearCookies, getCookieByName, validProjectID } from '@/utils'
 import { validateUser } from '@/utils'
 import { storeToRefs } from 'pinia'
 
 const storeProjectId = useProjectIdStore()
-const storeInitialFileStore = useInitialFilesStore()
 const { projectId } = storeToRefs(storeProjectId)
 const storeApp = useAppStore()
 const isVaildProjectID = ref(await validProjectID(storeProjectId.projectId))

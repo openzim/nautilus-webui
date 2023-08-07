@@ -7,20 +7,20 @@
 </template>
 <script setup lang="ts">
 import { FileStatus, type File } from '@/constants'
-import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref } from 'vue'
 
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
-const props = defineProps<{ initialFiles: FileList | undefined }>()
+const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, File>> = ref(new Map())
 
-if (props.initialFiles == undefined) {
+if (storeInitialFileStore.initialFiles == undefined) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
   apiFiles.forEach((item) => files.value.set(item.id, item))
 } else {
-  await uploadFiles(props.initialFiles)
+  await uploadFiles(storeInitialFileStore.initialFiles)
 }
 
 async function getAllFiles(projectId: string | null) {
