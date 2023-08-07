@@ -34,6 +34,7 @@ async function setupProjectId() {
   } catch (error: any) {
     console.log('Unable to retrieve the last project id', error)
     storeApp.alertsWarning('Unable to the retrieve last project id.')
+    storeProjectId.clearProjectId()
   }
 }
 
