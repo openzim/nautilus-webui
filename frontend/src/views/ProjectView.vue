@@ -17,8 +17,8 @@ const props = defineProps<{ initialFiles: FileList | undefined }>()
 const files: Ref<Map<string, File>> = ref(new Map())
 
 if (props.initialFiles == undefined) {
-  const requestedFiles = await getAllFiles(storeProjectId.projectId)
-  requestedFiles.forEach((item) => files.value.set(item.id, item))
+  const apiFiles = await getAllFiles(storeProjectId.projectId)
+  apiFiles.forEach((item) => files.value.set(item.id, item))
 } else {
   await uploadFiles(props.initialFiles)
 }
