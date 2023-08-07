@@ -4,8 +4,11 @@
       {{ `${file.file.filename} ${file.uploadedSize} ${file.statusCode} ${file.statusText}` }}
     </li>
   </ul>
+  <!--TODO: It's a place holder and need to be refactored -->
+  <DragToStartField @dropFilesHandler="dropFilesHandler" />
 </template>
 <script setup lang="ts">
+import DragToStartField from '@/components/DropToStartField.vue'
 import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
@@ -99,5 +102,9 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
 
     axios.all(uploadFileRequestsList)
   }
+}
+
+async function dropFilesHandler(event: DragEvent) {
+  uploadFiles(event.dataTransfer?.files)
 }
 </script>
