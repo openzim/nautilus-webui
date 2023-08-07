@@ -47,7 +47,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
     const newFile: File = {
-      id: storeApp.constants.fakeId,
+      id: storeApp.constants.genFakeId,
       project_id: storeProjectId.projectId,
       filename: uploadFile.name,
       filesize: uploadFile.size,

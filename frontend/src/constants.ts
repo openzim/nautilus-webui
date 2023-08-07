@@ -44,7 +44,7 @@ export class Constants {
     this.fakeHash = ''
   }
 
-  get fakeId() {
+  get genFakeId() {
     return uuid()
   }
 }
