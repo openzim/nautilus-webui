@@ -6,7 +6,6 @@
 
 <script setup lang="ts">
 import DragToStartField from '@/components/DropToStartField.vue'
-import axios from 'axios'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
@@ -21,19 +20,19 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
   }
   var user: User | null = null
   var project: Project | null = null
+
   try {
-    const createUserRespone = await axios.post<User>(
-      `${storeApp.constants.env.NAUTILUS_WEB_API}/users`
-    )
+    const createUserRespone = await storeApp.axiosInstance.post<User>('/users')
     user = createUserRespone.data
   } catch (error: any) {
     console.log('Unable to create a new user.', error)
     storeApp.alertsError('Unable to create a new user.')
     return [user, project]
   }
+
   try {
-    const createProjectResponse = await axios.post<Project>(
-      `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/`,
+    const createProjectResponse = await storeApp.axiosInstance.post<Project>(
+      '/projects/',
       projectRequestData
     )
     project = createProjectResponse.data
@@ -41,6 +40,7 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     console.log('Unable to create a new project.', error)
     storeApp.alertsError('Unable to create a new project.')
   }
+
   return [user, project]
 }
 

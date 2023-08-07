@@ -7,7 +7,6 @@
 import ProjectView from '@/views/ProjectView.vue'
 import HomeView from '@/views/HomeView.vue'
 import { type Project } from '@/constants'
-import axios from 'axios'
 import { ref, watch } from 'vue'
 import { useAppStore, useProjectIdStore } from '@/stores/stores'
 import { validProjectID } from '@/utils'
@@ -25,9 +24,7 @@ watch(projectId, async (newId) => {
 
 async function setupProjectId() {
   try {
-    const lastProject = (
-      await axios.get<Project[]>(`${storeApp.constants.env.NAUTILUS_WEB_API}/projects`)
-    ).data.pop()
+    const lastProject = (await storeApp.axiosInstance.get<Project[]>('/projects')).data.pop()
     if (lastProject && (await validProjectID(lastProject?.id))) {
       storeProjectId.setProjectId(lastProject.id)
     }

@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { useAppStore } from './stores/stores'
 import type { Project } from '@/constants'
 
@@ -10,7 +9,7 @@ export async function validProjectID(id: string | null) {
   const storeApp = useAppStore()
   let result = false
   try {
-    await axios.get<Project>(`${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${id}`)
+    await storeApp.axiosInstance.get<Project>(`/projects/${id}`)
     result = true
   } catch (error: any) {
     console.log('Unable to retrieve projectId', error, id)
@@ -23,7 +22,7 @@ export async function validateUser() {
   const storeApp = useAppStore()
   let result = false
   try {
-    await axios.get<Project[]>(`${storeApp.constants.env.NAUTILUS_WEB_API}/projects`)
+    await storeApp.axiosInstance.get<Project[]>('/projects')
     result = true
   } catch (error: any) {
     console.log('Unable to validate the user', error)

@@ -39,9 +39,7 @@ async function getAllFiles(projectId: string | null) {
     return result
   }
   try {
-    const reponse = await axios.get<File[]>(
-      `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${projectId}/files`
-    )
+    const reponse = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
     result = reponse.data
   } catch (error: any) {
     console.log('Unable to retrieve the files info', error)
@@ -83,12 +81,8 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     }
 
     uploadFileRequestsList.push(
-      axios
-        .post<File>(
-          `${storeApp.constants.env.NAUTILUS_WEB_API}/projects/${storeProjectId.projectId}/files`,
-          requestData,
-          config
-        )
+      storeApp.axiosInstance
+        .post<File>(`/projects/${storeProjectId.projectId}/files`, requestData, config)
         .catch((error) => {
           console.log(error)
           if (axios.isAxiosError(error)) {
