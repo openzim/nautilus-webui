@@ -27,6 +27,7 @@ export interface File {
 }
 
 export enum FileStatus {
+  UPLOADING = 'UPLOADING',
   LOCAL = 'LOCAL',
   S3 = 'S3'
 }

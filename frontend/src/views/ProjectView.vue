@@ -55,7 +55,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
       uploaded_on: new Date().toISOString(),
       hash: storeApp.constants.fakeHash,
       type: uploadFile.type,
-      status: FileStatus.LOCAL
+      status: FileStatus.UPLOADING
     }
     files.value.set(newFile.id, newFile)
 
