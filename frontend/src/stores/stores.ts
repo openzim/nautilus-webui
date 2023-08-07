@@ -46,8 +46,8 @@ export const useAppStore = defineStore('app', () => {
       const env = response.data
       constants.value = new Constants(env)
     } catch (error: any) {
-      console.log("Unable to retrieve the environ.json file", error)
-      alertsError("Unable to retrieve the environ.json file")
+      console.log('Unable to retrieve the environ.json file', error)
+      alertsError('Unable to retrieve the environ.json file')
     }
   }
 
