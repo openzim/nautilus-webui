@@ -41,8 +41,8 @@ async function getAllFiles(projectId: string | null) {
     )
     result = reponse.data
   } catch (error: any) {
-    console.log(error)
-    storeApp.alertsError(error.message)
+    console.log('Unable to retrieve the files info', error)
+    storeApp.alertsWarning('Unable to retrieve the files info')
   }
   return result
 }

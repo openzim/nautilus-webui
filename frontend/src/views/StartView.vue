@@ -10,7 +10,7 @@ import { type Project } from '@/constants'
 import axios from 'axios'
 import { ref, watch } from 'vue'
 import { useAppStore, useProjectIdStore } from '@/stores/stores'
-import { clearCookies, getCookieByName, validProjectID } from '@/utils'
+import { validProjectID } from '@/utils'
 import { validateUser } from '@/utils'
 import { storeToRefs } from 'pinia'
 
@@ -32,8 +32,8 @@ async function setupProjectId() {
       storeProjectId.setProjectId(lastProject.id)
     }
   } catch (error: any) {
-    console.log(error)
-    storeApp.alertsError(error.message)
+    console.log('Unable to retrieve the last project id', error)
+    storeApp.alertsWarning('Unable to the retrieve last project id.')
   }
 }
 

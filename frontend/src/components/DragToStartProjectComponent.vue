@@ -27,8 +27,8 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     )
     user = createUserRespone.data
   } catch (error: any) {
-    console.log(error)
-    storeApp.alertsError(error.message)
+    console.log('Unable to create a new user.', error)
+    storeApp.alertsError('Unable to create a new user.')
     return [user, project]
   }
   try {
@@ -38,8 +38,8 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     )
     project = createProjectResponse.data
   } catch (error: any) {
-    console.log(error)
-    storeApp.alertsError(error.message)
+    console.log('Unable to create a new project.', error)
+    storeApp.alertsError('Unable to create a new project.')
   }
   return [user, project]
 }
