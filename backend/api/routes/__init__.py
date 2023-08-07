@@ -2,15 +2,17 @@ from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Cookie, Depends, HTTPException
+from fastapi import Cookie, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from api.constants import constants
 from api.database import gen_session
 from api.database.models import Project, User
 
 
 async def validated_user(
+    response: Response,
     user_id: Annotated[UUID | None, Cookie()] = None,
     session: Session = Depends(gen_session),
 ) -> User:
@@ -23,9 +25,12 @@ async def validated_user(
     user = session.execute(stmt).scalar()
     stmt = select(User)
     if not user:
+        response.delete_cookie(constants.cookie_name)
+        headers = {"set-cookie": response.headers["set-cookie"]}
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail=f"User Not Found, ID: {user_id}.",
+            headers=headers,
         )
     return user
 

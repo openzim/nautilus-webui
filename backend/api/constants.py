@@ -25,6 +25,7 @@ class BackendConf:
         os.getenv("TRANSIENT_STORAGE_PATH ", tempfile.gettempdir())
     ).resolve()
 
+    cookie_name = "user_id"
     api_version_prefix = "/v1"
     project_expire_after = datetime.timedelta(days=7)
     project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MiB"))
