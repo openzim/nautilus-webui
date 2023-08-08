@@ -3,6 +3,7 @@ LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 ENV ALLOWED_ORIGINS http://localhost
 ENV POSTGRES_URI nodb
+ENV WEB_CONCURRENCY 1
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libmagic1 \
@@ -16,8 +17,13 @@ COPY migrations/  /app/migrations
 RUN cd /app && \
     chmod +x /app/entrypoint.sh && \
     pip install --no-cache-dir -U pip && \
-    cd /app && pip install --no-cache-dir -e .
+    cd /app && pip install --no-cache-dir -e . && pip install gunicorn==21.2.0
 
 WORKDIR /app
 ENTRYPOINT [ "/app/entrypoint.sh" ]
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "api.entrypoint:app", "--port", "80"]
+CMD ["gunicorn", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind=0.0.0.0:80", \
+     # --workers default to env WEB_CONCURRENCY or 1
+     "api.entrypoint:app" \
+]
