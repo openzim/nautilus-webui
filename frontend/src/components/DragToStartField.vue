@@ -43,12 +43,12 @@ async function dropFiles(event: DragEvent) {
   let totalSize = 0
 
   for (const file of files) {
-    if (file.size > storeApp.constants.env.FILE_QUOTA) {
+    if (file.size > storeApp.constants.env.NAUTILUS_FILE_QUOTA) {
       storeApp.alertsWarning(`${file.name}'s exceeds the quota`)
       return
     }
 
-    if (file.size + totalSize > storeApp.constants.env.PROJECT_QUOTA) {
+    if (file.size + totalSize > storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) {
       storeApp.alertsWarning('Uploading files exceed the quota')
       return
     }

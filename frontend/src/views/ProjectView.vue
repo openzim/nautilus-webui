@@ -106,7 +106,7 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
   })
 
   console.log(totalSize + uploadFileSize)
-  if (totalSize + uploadFileSize > storeApp.constants.env.PROJECT_QUOTA) {
+  if (totalSize + uploadFileSize > storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) {
     storeApp.alertsWarning('Uploading file(s) exceed the quota')
     return
   }

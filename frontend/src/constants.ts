@@ -34,8 +34,8 @@ export enum FileStatus {
 
 export interface Environ {
   NAUTILUS_WEB_API: string
-  FILE_QUOTA: number
-  PROJECT_QUOTA: number
+  NAUTILUS_FILE_QUOTA: number
+  NAUTILUS_PROJECT_QUOTA: number
 }
 
 export interface AlertMessage {
@@ -62,4 +62,8 @@ export class Constants {
   }
 }
 
-export const EmptyConstants = new Constants({ NAUTILUS_WEB_API: 'noapi' })
+export const EmptyConstants = new Constants({
+  NAUTILUS_WEB_API: 'noapi',
+  NAUTILUS_FILE_QUOTA: 104857600,
+  NAUTILUS_PROJECT_QUOTA: 104857600
+})
