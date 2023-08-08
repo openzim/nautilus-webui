@@ -1,7 +1,6 @@
-version: '3.1'
+version: "3.1"
 
 services:
-
   database:
     image: postgres:15.3-bullseye
     container_name: nautilus-database
@@ -37,6 +36,8 @@ services:
       - 8081:80
     environment:
       - NAUTILUS_WEB_API=http://localhost:8080/v1
+      - NAUTILUS_FILE_QUOTA=104857600
+      - NAUTILUS_PROJECT_QUOTA=104857600
     depends_on:
       - database
   backend-tools:

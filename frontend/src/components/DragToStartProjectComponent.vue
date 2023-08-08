@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import DragToStartField from '@/components/DropToStartField.vue'
+import DragToStartField from '@/components/DragToStartField.vue'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
@@ -44,8 +44,8 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
   return [user, project]
 }
 
-async function dropFilesHandler(event: DragEvent) {
-  storeInitialFiles.setInitialFiles(event.dataTransfer?.files)
+async function dropFilesHandler(files: FileList) {
+  storeInitialFiles.setInitialFiles(files)
   const [, project] = await createUserAndProject()
   setProjectId(project)
 }

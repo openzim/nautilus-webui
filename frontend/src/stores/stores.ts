@@ -67,9 +67,9 @@ export const useAppStore = defineStore('app', () => {
 })
 
 export const useInitialFilesStore = defineStore('initialFiles', () => {
-  const initialFiles: Ref<FileList | undefined> = ref(undefined)
+  const initialFiles: Ref<FileList> = ref(new DataTransfer().files)
 
-  function setInitialFiles(files: FileList | undefined) {
+  function setInitialFiles(files: FileList) {
     initialFiles.value = files
   }
   return { initialFiles, setInitialFiles }

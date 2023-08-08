@@ -8,7 +8,7 @@
   <DragToStartField @dropFilesHandler="dropFilesHandler" />
 </template>
 <script setup lang="ts">
-import DragToStartField from '@/components/DropToStartField.vue'
+import DragToStartField from '@/components/DragToStartField.vue'
 import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
@@ -26,7 +26,7 @@ interface RenderFile {
   statusText?: string
 }
 
-if (storeInitialFileStore.initialFiles == undefined) {
+if (storeInitialFileStore.initialFiles.length == 0) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
@@ -98,7 +98,18 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
   }
 }
 
-async function dropFilesHandler(event: DragEvent) {
-  uploadFiles(event.dataTransfer?.files)
+async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
+  let totalSize = 0
+
+  files.value.forEach((element) => {
+    totalSize += element.file.filesize
+  })
+
+  if (totalSize + uploadFileSize > storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) {
+    storeApp.alertsWarning('Uploading file(s) exceed the quota')
+    return
+  }
+
+  uploadFiles(fileList)
 }
 </script>
