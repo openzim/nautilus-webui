@@ -49,7 +49,7 @@ export const useAppStore = defineStore('app', () => {
 
       // Enable Cookies for Axios.
       axiosInstance.value = axios.create({ baseURL: env.NAUTILUS_WEB_API, withCredentials: true })
-    } catch (error: Error) {
+    } catch (error: unknown) {
       console.log('Unable to retrieve the environ.json file', error)
       alertsError('Unable to retrieve the environ.json file')
     }

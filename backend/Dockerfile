@@ -20,4 +20,4 @@ RUN cd /app && \
 
 WORKDIR /app
 ENTRYPOINT [ "/app/entrypoint.sh" ]
-CMD ["uvicorn", "api.entrypoint:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "api.entrypoint:app", "--port", "80"]

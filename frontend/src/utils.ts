@@ -11,7 +11,7 @@ export async function validProjectID(id: string | null) {
   try {
     await storeApp.axiosInstance.get<Project>(`/projects/${id}`)
     result = true
-  } catch (error: Error) {
+  } catch (error: unknown) {
     console.log('Unable to retrieve projectId', error, id)
   }
   return result
@@ -24,7 +24,7 @@ export async function validateUser() {
   try {
     await storeApp.axiosInstance.get<Project[]>('/projects')
     result = true
-  } catch (error: Error) {
+  } catch (error: unknown) {
     console.log('Unable to validate the user', error)
   }
   return result
