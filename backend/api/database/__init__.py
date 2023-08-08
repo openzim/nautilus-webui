@@ -34,11 +34,7 @@ Session = sessionmaker(
 def gen_session() -> Generator[OrmSession, None, None]:
     """FastAPI's Depends() compatible helper to provide a began DB Session"""
     with Session.begin() as session:
-        try:
-            yield session
-        except Exception as exc:
-            logger.exception(exc)
-            raise exc
+        yield session
 
 
 def get_local_fpath_for(file_hash: str, project_id: UUID):
