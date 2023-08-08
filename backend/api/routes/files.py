@@ -126,6 +126,7 @@ def validate_uploaded_file(upload_file: UploadFile):
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty file.")
 
     if size > constants.project_quota:
+        print(constants.project_quota)
         raise HTTPException(
             status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded File is too large.",

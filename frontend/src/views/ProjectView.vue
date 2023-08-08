@@ -98,7 +98,19 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
   }
 }
 
-async function dropFilesHandler(files: FileList) {
-  uploadFiles(files)
+async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
+  let totalSize = 0
+
+  files.value.forEach((element) => {
+    totalSize += element.file.filesize
+  })
+
+  console.log(totalSize + uploadFileSize)
+  if (totalSize + uploadFileSize > storeApp.constants.env.PROJECT_QUOTA) {
+    storeApp.alertsWarning('Uploading file(s) exceed the quota')
+    return
+  }
+
+  uploadFiles(fileList)
 }
 </script>
