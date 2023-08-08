@@ -6,40 +6,52 @@ on:
       - main
 
 jobs:
-  publish:
+  api:
     runs-on: ubuntu-22.04
-
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - name: Build and push Docker image
+      uses: openzim/docker-publish-action@v10
+      with:
+        context: backend
+        image-name: openzim/nautilus-webui-api
+        manual-tag: dev
+        # SaaS service is not released
+        latest-on-tag: true
+        restrict-to: openzim/nautilus-webui
+        registries: ghcr.io
+        credentials:
+          GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+          GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+        repo_description: auto
+        repo_overview: auto
 
-      - name: Build and push API Docker image
-        uses: openzim/docker-publish-action@v10
-        with:
-          context: backend
-          image-name: openzim/nautilus-webui-api
-          manual-tag: dev
-          # SaaS service is not released
-          latest-on-tag: true
-          restrict-to: openzim/nautilus-webui
-          registries: ghcr.io
-          credentials:
-            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
-            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
-          repo_description: auto
-          repo_overview: auto
+  frontend:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build and push Docker image
+      uses: openzim/docker-publish-action@v10
+      with:
+        context: frontend
+        image-name: openzim/nautilus-webui-frontend
+        manual-tag: dev
+        # SaaS service is not released
+        latest-on-tag: true
+        restrict-to: openzim/nautilus-webui
+        registries: ghcr.io
+        credentials:
+          GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+          GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+        repo_description: auto
+        repo_overview: auto
 
-      - name: Build and push UI Docker image
-        uses: openzim/docker-publish-action@v10
-        with:
-          context: frontend
-          image-name: openzim/nautilus-webui-frontend
-          manual-tag: dev
-          # SaaS service is not released
-          latest-on-tag: true
-          restrict-to: openzim/nautilus-webui
-          registries: ghcr.io
-          credentials:
-            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
-            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
-          repo_description: auto
-          repo_overview: auto
+  restart:
+    runs-on: ubuntu-22.04
+    needs: [api,frontend]
+    - name: Restart live webapp
+      uses: actions-hub/kubectl@master
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      with:
+        args: rollout restart deployments api-deployment frontend-deployment -n nautilus
