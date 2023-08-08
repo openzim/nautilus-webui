@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
 
-from api.constants import constants, logger
+from api.constants import constants
 
 
 # custom overload of bson deserializer to make naive datetime
