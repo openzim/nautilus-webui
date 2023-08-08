@@ -1,9 +1,44 @@
 <template>
-  <ul>
-    <li v-for="[key, file] in files" :key="key">
-      {{ `${file.file.filename} ${file.uploadedSize} ${file.statusCode} ${file.statusText}` }}
-    </li>
-  </ul>
+  <div class="card m-5" @drop.prevent="dropFiles">
+    <div class="card-body">
+      <h4 class="card-title">Card title</h4>
+      <div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">
+                <input class="form-check-input" type="checkbox" value="" />
+              </th>
+              <th scope="col">Name</th>
+              <th scope="col">File Size</th>
+              <th scope="col">File Type</th>
+              <th scope="col">Uploaded On</th>
+              <th scope="col">Status</th>
+              <th scope="col">Metadata</th>
+              <th scope="col">Button</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="[key, element] in files" :key="key">
+              <th scope="row">
+                <input class="form-check-input" type="checkbox" value="" />
+              </th>
+              <td>{{ element.file.filename }}</td>
+              <td>{{ element.file.filesize }}</td>
+              <td>{{ element.file.type }}</td>
+              <td>{{ element.file.uploaded_on }}</td>
+              <td>{{ element.file.status }}</td>
+              <td>{{ element.file.authors + ' ' + element.file.description }}</td>
+              <td>Button</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="drag-field d-flex justify-content-center align-items-center">
+          <h4>Drag Files to here</h4>
+        </div>
+      </div>
+    </div>
+  </div>
   <!--TODO: It's a place holder and need to be refactored -->
   <DragToStartField @dropFilesHandler="dropFilesHandler" />
 </template>
@@ -98,6 +133,31 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
   }
 }
 
+async function dropFiles(event: DragEvent) {
+  let files = event.dataTransfer?.files
+
+  if (files == undefined) {
+    return
+  }
+
+  let totalSize = 0
+
+  for (const file of files) {
+    if (file.size > storeApp.constants.env.NAUTILUS_FILE_QUOTA) {
+      storeApp.alertsWarning(`${file.name}'s exceeds the quota`)
+      return
+    }
+
+    if (file.size + totalSize > storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) {
+      storeApp.alertsWarning('Uploading files exceed the quota')
+      return
+    }
+
+    totalSize += file.size
+  }
+  dropFilesHandler(files, totalSize)
+}
+
 async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
   let totalSize = 0
 
@@ -113,3 +173,9 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
   uploadFiles(fileList)
 }
 </script>
+
+<style>
+.drag-field {
+  height: 5em;
+}
+</style>
