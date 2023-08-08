@@ -26,7 +26,7 @@ interface RenderFile {
   statusText?: string
 }
 
-if (storeInitialFileStore.initialFiles == undefined) {
+if (storeInitialFileStore.initialFiles.length == 0) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
@@ -98,7 +98,7 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
   }
 }
 
-async function dropFilesHandler(event: DragEvent) {
-  uploadFiles(event.dataTransfer?.files)
+async function dropFilesHandler(files: FileList) {
+  uploadFiles(files)
 }
 </script>

@@ -44,8 +44,8 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
   return [user, project]
 }
 
-async function dropFilesHandler(event: DragEvent) {
-  storeInitialFiles.setInitialFiles(event.dataTransfer?.files)
+async function dropFilesHandler(files: FileList) {
+  storeInitialFiles.setInitialFiles(files)
   const [, project] = await createUserAndProject()
   setProjectId(project)
 }

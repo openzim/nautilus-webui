@@ -21,7 +21,7 @@ import { ref } from 'vue'
 const isActive = ref(false)
 
 const emit = defineEmits<{
-  dropFilesHandler: [event: DragEvent]
+  dropFilesHandler: [files: FileList]
 }>()
 
 function setActive() {
@@ -32,7 +32,10 @@ function setInactive() {
 }
 async function dropFiles(event: DragEvent) {
   isActive.value = false
-  emit('dropFilesHandler', event)
+  if (event.dataTransfer?.files == undefined) {
+    return
+  }
+  emit('dropFilesHandler', event.dataTransfer.files)
 }
 </script>
 
