@@ -1,0 +1,45 @@
+name: Publish Docker images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build and push API Docker image
+        uses: openzim/docker-publish-action@v10
+        with:
+          context: backend
+          image-name: openzim/nautilus-webui-api
+          manual-tag: dev
+          # SaaS service is not released
+          latest-on-tag: true
+          restrict-to: openzim/nautilus-webui
+          registries: ghcr.io
+          credentials:
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+          repo_description: auto
+          repo_overview: auto
+
+      - name: Build and push UI Docker image
+        uses: openzim/docker-publish-action@v10
+        with:
+          context: frontend
+          image-name: openzim/nautilus-webui-frontend
+          manual-tag: dev
+          # SaaS service is not released
+          latest-on-tag: true
+          restrict-to: openzim/nautilus-webui
+          registries: ghcr.io
+          credentials:
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+          repo_description: auto
+          repo_overview: auto
