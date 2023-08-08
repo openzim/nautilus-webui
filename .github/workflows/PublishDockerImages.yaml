@@ -46,9 +46,10 @@ jobs:
         repo_description: auto
         repo_overview: auto
 
-  restart:
-    runs-on: ubuntu-22.04
+  deploy:
     needs: [api,frontend]
+    runs-on: ubuntu-22.04
+    steps:
     - name: Restart live webapp
       uses: actions-hub/kubectl@master
       env:
