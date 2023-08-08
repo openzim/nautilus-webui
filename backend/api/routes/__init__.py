@@ -25,6 +25,8 @@ async def validated_user(
     user = session.execute(stmt).scalar()
     stmt = select(User)
     if not user:
+        # using delete_cookie to construct the cookie header
+        # but passing it to HTTPException as FastAPI middleware creates Response for it
         response.delete_cookie(
             key=constants.authentication_cookie_name,
             domain=constants.cookie_domain,
