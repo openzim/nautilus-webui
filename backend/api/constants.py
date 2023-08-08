@@ -22,7 +22,7 @@ class BackendConf:
     postgres_uri = os.getenv("POSTGRES_URI", "nodb")
     s3_uri = os.getenv("S3_URI")
     transient_storage_path = Path(
-        os.getenv("TRANSIENT_STORAGE_PATH ", tempfile.gettempdir())
+        os.getenv("TRANSIENT_STORAGE_PATH", tempfile.gettempdir())
     ).resolve()
 
     authentication_cookie_name: str = "user_id"
