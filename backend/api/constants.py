@@ -25,7 +25,9 @@ class BackendConf:
         os.getenv("TRANSIENT_STORAGE_PATH ", tempfile.gettempdir())
     ).resolve()
 
-    authentication_cookie = "user_id"
+    authentication_cookie_name: str = "user_id"
+    cookie_domain = os.getenv("COOKIE_DOMAIN", None)
+    cookie_expiration_days = int(os.getenv("COOKIE_EXPIRATION_DAYS", "30"))
     api_version_prefix = "/v1"
     project_expire_after = datetime.timedelta(days=7)
     project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MiB"))
@@ -34,7 +36,7 @@ class BackendConf:
 
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
-        "http://localhost|http://localhost:8000|http://localhost:8080",
+        "http://localhost",
     ).split("|")
 
     def __post_init__(self):

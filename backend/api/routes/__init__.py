@@ -25,7 +25,12 @@ async def validated_user(
     user = session.execute(stmt).scalar()
     stmt = select(User)
     if not user:
-        response.delete_cookie(constants.authentication_cookie)
+        response.delete_cookie(
+            key=constants.authentication_cookie_name,
+            domain=constants.cookie_domain,
+            secure=True,
+            httponly=True,
+        )
         headers = {"set-cookie": response.headers["set-cookie"]}
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
