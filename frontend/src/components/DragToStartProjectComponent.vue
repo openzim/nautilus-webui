@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import DragToStartField from '@/components/DropToStartField.vue'
+import DragToStartField from '@/components/DragToStartField.vue'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'

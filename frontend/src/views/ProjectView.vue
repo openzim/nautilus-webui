@@ -8,7 +8,7 @@
   <DragToStartField @dropFilesHandler="dropFilesHandler" />
 </template>
 <script setup lang="ts">
-import DragToStartField from '@/components/DropToStartField.vue'
+import DragToStartField from '@/components/DragToStartField.vue'
 import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
