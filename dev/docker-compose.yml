@@ -36,7 +36,7 @@ services:
     ports:
       - 8081:80
     environment:
-      - NAUTILUS_WEBUI_API=https://localhost:8080/v1
+      - NAUTILUS_WEB_API=http://localhost:8080/v1
     depends_on:
       - database
   backend-tools:
