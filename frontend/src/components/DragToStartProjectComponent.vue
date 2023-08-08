@@ -32,7 +32,7 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
 
   try {
     const createProjectResponse = await storeApp.axiosInstance.post<Project>(
-      '/projects/',
+      '/projects',
       projectRequestData
     )
     project = createProjectResponse.data
