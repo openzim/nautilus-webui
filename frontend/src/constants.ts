@@ -34,6 +34,7 @@ export enum FileStatus {
 
 export interface Environ {
   NAUTILUS_WEB_API: string
+  FILE_QUOTA: number
   PROJECT_QUOTA: number
 }
 
