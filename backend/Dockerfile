@@ -24,6 +24,7 @@ ENTRYPOINT [ "/app/entrypoint.sh" ]
 CMD ["gunicorn", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind=0.0.0.0:80", \
+     "--access-logfile", "-", \
      # --workers default to env WEB_CONCURRENCY or 1
      "api.entrypoint:app" \
 ]
