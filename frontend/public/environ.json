@@ -1,3 +1,4 @@
 {
-  "NAUTILUS_WEB_API": "http://localhost:8080/v1"
+  "NAUTILUS_WEB_API": "http://localhost:8080/v1",
+  "PROJECT_QUOTA": 209715200
 }

@@ -34,6 +34,7 @@ export enum FileStatus {
 
 export interface Environ {
   NAUTILUS_WEB_API: string
+  PROJECT_QUOTA: number
 }
 
 export interface AlertMessage {
