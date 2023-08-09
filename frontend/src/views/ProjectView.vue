@@ -14,12 +14,12 @@
         </h4>
         <div class="align-bottom">
           {{
-            filesize(
+            humanifyFileSize(
               Array.from(files.values()).reduce((pre, element) => pre + element.file.filesize, 0)
             )
           }}
           /
-          {{ filesize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) }}
+          {{ humanifyFileSize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) }}
         </div>
       </div>
       <UploadFilesComponent @drop-files-handler="dropFilesHandler" v-show="isShowed">
@@ -67,7 +67,7 @@
                   />
                 </th>
                 <td>{{ element.file.filename }}</td>
-                <td>{{ filesize(element.file.filesize) }}</td>
+                <td>{{ humanifyFileSize(element.file.filesize) }}</td>
                 <td>{{ element.file.type }}</td>
                 <td>{{ new Date(element.file.uploaded_on).toLocaleString() }}</td>
                 <td>
@@ -114,7 +114,7 @@ import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, watch, type Ref } from 'vue'
-import { filesize } from 'filesize'
+import { partial } from 'filesize'
 
 const isShowed = ref(true)
 const storeApp = useAppStore()
@@ -123,6 +123,7 @@ const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, RenderFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = ref(0)
+const humanifyFileSize = partial({ base: 2, standard: 'jedec', output: 'string' })
 
 watch(files, (newFiles) => {
   newFiles.forEach((element) => {
