@@ -21,7 +21,11 @@
               <th scope="col">Uploaded On</th>
               <th scope="col">Status</th>
               <th scope="col">Metadata</th>
-              <th scope="col">Button</th>
+              <th scope="col">
+                <button type="button" class="btn" disabled>
+                  <font-awesome-icon :icon="['fas', 'trash']" />
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -34,7 +38,6 @@
               <td>{{ element.file.type }}</td>
               <td>{{ element.file.uploaded_on }}</td>
               <td>
-                {{ element.file.status }}
                 <div
                   class="progress"
                   role="progressbar"
@@ -43,11 +46,18 @@
                   <div
                     class="progress-bar"
                     :style="{ width: (element.uploadedSize / element.file.filesize) * 100 + '%' }"
-                  ></div>
+                  />
+                </div>
+                <div v-else>
+                  {{ element.file.status }}
                 </div>
               </td>
               <td>{{ element.file.authors + ' ' + element.file.description }}</td>
-              <td>Button</td>
+              <td>
+                <button type="button" class="btn" @click.prevent="deleteFile(element.file)">
+                  <font-awesome-icon :icon="['fas', 'trash']" />
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -191,6 +201,16 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
   }
 
   uploadFiles(fileList)
+}
+
+async function deleteFile(file: File) {
+  try {
+    await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
+    files.value.delete(file.id)
+  } catch (error: any) {
+    console.log('Unable to delete the file', storeProjectId.projectId, error)
+    storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
+  }
 }
 </script>
 
