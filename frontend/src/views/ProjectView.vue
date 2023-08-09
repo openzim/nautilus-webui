@@ -70,6 +70,9 @@
                   <button type="button" class="btn" @click.prevent="deleteFile(key, element.file)">
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
+                  <button type="button" class="btn">
+                    <font-awesome-icon :icon="['fas', 'file-pen']" />
+                  </button>
                 </td>
               </tr>
             </tbody>
