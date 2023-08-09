@@ -56,69 +56,15 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="[key, element] in files" :key="key">
-                <th scope="row">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    value=""
-                    @change.prevent="toggleSelectFile(key)"
-                    :checked="selectedFiles.has(key) && selectedFiles.get(key)"
-                  />
-                </th>
-                <td>{{ element.file.filename }}</td>
-                <td>{{ humanifyFileSize(element.file.filesize) }}</td>
-                <td>{{ element.file.type }}</td>
-                <td>{{ new Date(element.file.uploaded_on).toLocaleString() }}</td>
-                <td>
-                  <div
-                    class="progress"
-                    role="progressbar"
-                    v-if="element.file.status == FileStatus.UPLOADING"
-                  >
-                    <div
-                      class="progress-bar"
-                      :style="{ width: (element.uploadedSize / element.file.filesize) * 100 + '%' }"
-                    />
-                  </div>
-                  <div v-else>
-                    {{ element.file.status }}
-                  </div>
-                </td>
-                <td>
-                  <div
-                    class="position-relative"
-                    @mouseover.prevent="upHere = true"
-                    @mouseleave.prevent="upHere = false"
-                  >
-                    {{ element.file.authors != undefined ? `Authors; ` : '' }}
-                    {{ element.file.description != undefined ? `Description; ` : '' }}
-                    <div
-                      v-show="upHere"
-                      class="card position-absolute bottom-0 start-0 metadata-card"
-                    >
-                      <div class="card-body">
-                        <div class="card-title">Description:</div>
-                        <p class="card-text">{{ element.file.description }}</p>
-                        <div class="card-title">Auhtors:</div>
-                        <p class="card-text">
-                          {{
-                            element.file.authors?.reduce((prev, author) => prev + author + ',', '')
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <button type="button" class="btn" @click.prevent="deleteFile(key, element.file)">
-                    <font-awesome-icon :icon="['fas', 'trash']" />
-                  </button>
-                  <button type="button" class="btn">
-                    <font-awesome-icon :icon="['fas', 'file-pen']" />
-                  </button>
-                </td>
-              </tr>
+              <FileTabRowComponent
+                v-for="[key, file] in files"
+                :key="key"
+                :render-key="key"
+                :render-file="file"
+                :is-selected="selectedFiles.has(key)"
+                @toggle-select-file="toggleSelectFile"
+                @delete-file="deleteFile"
+              />
             </tbody>
           </table>
           <div class="drag-field d-flex justify-content-center align-items-center">
@@ -131,11 +77,11 @@
 </template>
 <script setup lang="ts">
 import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
-import { FileStatus, type File } from '@/constants'
+import FileTabRowComponent from '@/components/FileTabRowComponent.vue'
+import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, watch, type Ref } from 'vue'
-import { partial } from 'filesize'
 
 const isShowed = ref(true)
 const storeApp = useAppStore()
@@ -144,21 +90,12 @@ const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, RenderFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = ref(0)
-const humanifyFileSize = partial({ base: 2, standard: 'jedec', output: 'string' })
-const upHere = ref(false)
 
 watch(files, (newFiles) => {
   newFiles.forEach((element) => {
     totalSize.value += element.file.filesize
   })
 })
-
-interface RenderFile {
-  file: File
-  uploadedSize: number
-  statusCode?: number
-  statusText?: string
-}
 
 if (storeInitialFileStore.initialFiles.length == 0) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
@@ -297,11 +234,5 @@ async function toggleSelectAllFiles() {
 <style scoped>
 .drag-field {
   height: 5em;
-}
-
-.metadata-card {
-  transform: translate(0, 100%);
-  /* z-index: -1; */
-  z-index: 2000;
 }
 </style>

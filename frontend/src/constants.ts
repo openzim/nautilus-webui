@@ -1,4 +1,12 @@
 import { v4 as uuid } from 'uuid'
+import {partial} from "filesize"
+
+export interface RenderFile {
+  file: File
+  uploadedSize: number
+  statusCode?: number
+  statusText?: string
+}
 
 export interface Project {
   id: string
@@ -67,3 +75,5 @@ export const EmptyConstants = new Constants({
   NAUTILUS_FILE_QUOTA: 104857600,
   NAUTILUS_PROJECT_QUOTA: 104857600
 })
+
+export const humanifyFileSize = partial({ base: 2, standard: 'jedec', output: 'string' })
