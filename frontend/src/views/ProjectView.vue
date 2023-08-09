@@ -1,70 +1,66 @@
 <template>
-  <div
-    class="card m-5"
-    draggable="true"
-    @drop.prevent="dropFiles"
-    @dragenter.prevent
-    @dragover.prevent
-  >
+  <div class="card m-5" draggable="true">
     <div class="card-body">
       <h4 class="card-title">Card title</h4>
-      <div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">
-                <input class="form-check-input" type="checkbox" value="" />
-              </th>
-              <th scope="col">Name</th>
-              <th scope="col">File Size</th>
-              <th scope="col">File Type</th>
-              <th scope="col">Uploaded On</th>
-              <th scope="col">Status</th>
-              <th scope="col">Metadata</th>
-              <th scope="col">
-                <button type="button" class="btn" disabled>
-                  <font-awesome-icon :icon="['fas', 'trash']" />
-                </button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="[key, element] in files" :key="key">
-              <th scope="row">
-                <input class="form-check-input" type="checkbox" value="" />
-              </th>
-              <td>{{ element.file.filename }}</td>
-              <td>{{ element.file.filesize }}</td>
-              <td>{{ element.file.type }}</td>
-              <td>{{ element.file.uploaded_on }}</td>
-              <td>
-                <div
-                  class="progress"
-                  role="progressbar"
-                  v-if="element.file.status == FileStatus.UPLOADING"
-                >
+      <UploadFilesComponent @drop-files-handler="dropFilesHandler">
+        <div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <input class="form-check-input" type="checkbox" value="" />
+                </th>
+                <th scope="col">Name</th>
+                <th scope="col">File Size</th>
+                <th scope="col">File Type</th>
+                <th scope="col">Uploaded On</th>
+                <th scope="col">Status</th>
+                <th scope="col">Metadata</th>
+                <th scope="col">
+                  <button type="button" class="btn" disabled>
+                    <font-awesome-icon :icon="['fas', 'trash']" />
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="[key, element] in files" :key="key">
+                <th scope="row">
+                  <input class="form-check-input" type="checkbox" value="" />
+                </th>
+                <td>{{ element.file.filename }}</td>
+                <td>{{ element.file.filesize }}</td>
+                <td>{{ element.file.type }}</td>
+                <td>{{ element.file.uploaded_on }}</td>
+                <td>
                   <div
-                    class="progress-bar"
-                    :style="{ width: (element.uploadedSize / element.file.filesize) * 100 + '%' }"
-                  />
-                </div>
-                <div v-else>
-                  {{ element.file.status }}
-                </div>
-              </td>
-              <td>{{ element.file.authors + ' ' + element.file.description }}</td>
-              <td>
-                <button type="button" class="btn" @click.prevent="deleteFile(element.file)">
-                  <font-awesome-icon :icon="['fas', 'trash']" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="drag-field d-flex justify-content-center align-items-center">
-          <h4>Drag Files to here</h4>
+                    class="progress"
+                    role="progressbar"
+                    v-if="element.file.status == FileStatus.UPLOADING"
+                  >
+                    <div
+                      class="progress-bar"
+                      :style="{ width: (element.uploadedSize / element.file.filesize) * 100 + '%' }"
+                    />
+                  </div>
+                  <div v-else>
+                    {{ element.file.status }}
+                  </div>
+                </td>
+                <td>{{ element.file.authors + ' ' + element.file.description }}</td>
+                <td>
+                  <button type="button" class="btn" @click.prevent="deleteFile(element.file)">
+                    <font-awesome-icon :icon="['fas', 'trash']" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="drag-field d-flex justify-content-center align-items-center">
+            <h4>Drag Files to here</h4>
+          </div>
         </div>
-      </div>
+      </UploadFilesComponent>
     </div>
   </div>
 </template>
@@ -73,6 +69,7 @@ import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref } from 'vue'
+import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
@@ -161,31 +158,6 @@ async function uploadFiles(uploadFiles: FileList) {
 
     axios.all(uploadFileRequestsList)
   }
-}
-
-async function dropFiles(event: DragEvent) {
-  let files = event.dataTransfer?.files
-
-  if (files == undefined) {
-    return
-  }
-
-  let totalSize = 0
-
-  for (const file of files) {
-    if (file.size > storeApp.constants.env.NAUTILUS_FILE_QUOTA) {
-      storeApp.alertsWarning(`${file.name}'s exceeds the quota`)
-      return
-    }
-
-    if (file.size + totalSize > storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) {
-      storeApp.alertsWarning('Uploading files exceed the quota')
-      return
-    }
-
-    totalSize += file.size
-  }
-  dropFilesHandler(files, totalSize)
 }
 
 async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
