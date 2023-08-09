@@ -1,5 +1,11 @@
 <template>
-  <div class="card m-5" @drop.prevent="dropFiles">
+  <div
+    class="card m-5"
+    draggable="true"
+    @drop.prevent="dropFiles"
+    @dragenter.prevent
+    @dragover.prevent
+  >
     <div class="card-body">
       <h4 class="card-title">Card title</h4>
       <div>
@@ -27,7 +33,19 @@
               <td>{{ element.file.filesize }}</td>
               <td>{{ element.file.type }}</td>
               <td>{{ element.file.uploaded_on }}</td>
-              <td>{{ element.file.status }}</td>
+              <td>
+                {{ element.file.status }}
+                <div
+                  class="progress"
+                  role="progressbar"
+                  v-if="element.file.status == FileStatus.UPLOADING"
+                >
+                  <div
+                    class="progress-bar"
+                    :style="{ width: (element.uploadedSize / element.file.filesize) * 100 + '%' }"
+                  ></div>
+                </div>
+              </td>
               <td>{{ element.file.authors + ' ' + element.file.description }}</td>
               <td>Button</td>
             </tr>
@@ -39,11 +57,8 @@
       </div>
     </div>
   </div>
-  <!--TODO: It's a place holder and need to be refactored -->
-  <DragToStartField @dropFilesHandler="dropFilesHandler" />
 </template>
 <script setup lang="ts">
-import DragToStartField from '@/components/DragToStartField.vue'
 import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
@@ -83,8 +98,8 @@ async function getAllFiles(projectId: string | null) {
   return result
 }
 
-async function uploadFiles(uploadFiles: FileList | undefined) {
-  if (uploadFiles == undefined || storeProjectId.projectId == null) {
+async function uploadFiles(uploadFiles: FileList) {
+  if (storeProjectId.projectId == null) {
     return
   }
   const uploadFileRequestsList = []
@@ -118,6 +133,11 @@ async function uploadFiles(uploadFiles: FileList | undefined) {
     uploadFileRequestsList.push(
       storeApp.axiosInstance
         .post<File>(`/projects/${storeProjectId.projectId}/files`, requestData, config)
+        .then((response) => {
+          if (files.value.has(newFile.id)) {
+            files.value.get(newFile.id)!.file = response.data
+          }
+        })
         .catch((error) => {
           console.log(error)
           if (axios.isAxiosError(error)) {
