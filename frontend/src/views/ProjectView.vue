@@ -8,7 +8,14 @@
             <thead>
               <tr>
                 <th scope="col">
-                  <input class="form-check-input" type="checkbox" value="" />
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value=""
+                    :indeterminate="selectedFiles.size != 0 && selectedFiles.size < files.size"
+                    :checked="selectedFiles.size != 0 && selectedFiles.size == files.size"
+                    @change.prevent="toggleSelectAllFiles"
+                  />
                 </th>
                 <th scope="col">Name</th>
                 <th scope="col">File Size</th>
@@ -17,7 +24,12 @@
                 <th scope="col">Status</th>
                 <th scope="col">Metadata</th>
                 <th scope="col">
-                  <button type="button" class="btn" disabled>
+                  <button
+                    type="button"
+                    class="btn"
+                    :disabled="selectedFiles.size == 0"
+                    @click.prevent="deleteSelectedFiles"
+                  >
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
                 </th>
@@ -26,7 +38,13 @@
             <tbody>
               <tr v-for="[key, element] in files" :key="key">
                 <th scope="row">
-                  <input class="form-check-input" type="checkbox" value="" />
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value=""
+                    @change.prevent="toggleSelectFile(key)"
+                    :checked="selectedFiles.has(key) && selectedFiles.get(key)"
+                  />
                 </th>
                 <td>{{ element.file.filename }}</td>
                 <td>{{ element.file.filesize }}</td>
@@ -49,7 +67,7 @@
                 </td>
                 <td>{{ element.file.authors + ' ' + element.file.description }}</td>
                 <td>
-                  <button type="button" class="btn" @click.prevent="deleteFile(element.file)">
+                  <button type="button" class="btn" @click.prevent="deleteFile(key, element.file)">
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
                 </td>
@@ -75,6 +93,7 @@ const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, RenderFile>> = ref(new Map())
+const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 
 interface RenderFile {
   file: File
@@ -175,13 +194,44 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
   uploadFiles(fileList)
 }
 
-async function deleteFile(file: File) {
+async function deleteFile(key: string, file: File) {
   try {
     await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
-    files.value.delete(file.id)
+    if (selectedFiles.value.has(key)) {
+      selectedFiles.value.delete(key)
+    }
+    files.value.delete(key)
   } catch (error: any) {
     console.log('Unable to delete the file', storeProjectId.projectId, error)
     storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
+  }
+}
+
+async function deleteSelectedFiles() {
+  selectedFiles.value.forEach((_, key) => {
+    const renderFile = files.value.get(key)
+    if (renderFile?.file != undefined) {
+      deleteFile(key, renderFile.file)
+    }
+  })
+}
+
+async function toggleSelectFile(key: string) {
+  if (selectedFiles.value.has(key)) {
+    selectedFiles.value.delete(key)
+  } else {
+    selectedFiles.value.set(key, true)
+  }
+}
+
+async function toggleSelectAllFiles() {
+  if (selectedFiles.value.size < files.value.size) {
+    selectedFiles.value.clear()
+    files.value.forEach((_, key) => {
+      selectedFiles.value.set(key, true)
+    })
+  } else {
+    selectedFiles.value.clear()
   }
 }
 </script>
