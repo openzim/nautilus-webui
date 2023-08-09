@@ -1,13 +1,27 @@
 <template>
   <div class="card m-5">
     <div class="card-body">
-      <h4 class="card-title">
-        <button type="button" class="btn" @click.prevent="isShowed = !isShowed">
-          <font-awesome-icon v-if="isShowed" :icon="['fas', 'minus']" />
-          <font-awesome-icon v-else :icon="['fas', 'angle-down']" />
-        </button>
-        <span>Upload Files</span>
-      </h4>
+      <div
+        class="card-title d-flex justify-content-between align-items-baseline"
+        :class="{ 'border-bottom': isShowed }"
+      >
+        <h4>
+          <button type="button" class="btn" @click.prevent="isShowed = !isShowed">
+            <font-awesome-icon v-if="isShowed" :icon="['fas', 'minus']" />
+            <font-awesome-icon v-else :icon="['fas', 'angle-down']" />
+          </button>
+          <span>Upload Files</span>
+        </h4>
+        <div class="align-bottom">
+          {{
+            filesize(
+              Array.from(files.values()).reduce((pre, element) => pre + element.file.filesize, 0)
+            )
+          }}
+          /
+          {{ filesize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) }}
+        </div>
+      </div>
       <UploadFilesComponent @drop-files-handler="dropFilesHandler" v-show="isShowed">
         <div>
           <table class="table">
@@ -99,7 +113,7 @@ import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import { filesize } from 'filesize'
 
 const isShowed = ref(true)
@@ -108,6 +122,13 @@ const storeProjectId = useProjectIdStore()
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, RenderFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
+const totalSize = ref(0)
+
+watch(files, (newFiles) => {
+  newFiles.forEach((element) => {
+    totalSize.value += element.file.filesize
+  })
+})
 
 interface RenderFile {
   file: File
