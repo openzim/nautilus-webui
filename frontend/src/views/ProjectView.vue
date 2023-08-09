@@ -1,8 +1,14 @@
 <template>
   <div class="card m-5">
     <div class="card-body">
-      <h4 class="card-title">Card title</h4>
-      <UploadFilesComponent @drop-files-handler="dropFilesHandler">
+      <h4 class="card-title">
+        <button type="button" class="btn" @click.prevent="isHidden = !isHidden">
+          <font-awesome-icon v-if="isHidden" :icon="['fas', 'minus']" />
+          <font-awesome-icon v-else :icon="['fas', 'angle-down']" />
+        </button>
+        <span>Upload Files</span>
+      </h4>
+      <UploadFilesComponent @drop-files-handler="dropFilesHandler" v-show="isHidden">
         <div>
           <table class="table">
             <thead>
@@ -96,6 +102,7 @@ import axios from 'axios'
 import { ref, type Ref } from 'vue'
 import { filesize } from 'filesize'
 
+const isHidden = ref(false)
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
 const storeInitialFileStore = useInitialFilesStore()
