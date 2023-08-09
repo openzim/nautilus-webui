@@ -1,5 +1,5 @@
 <template>
-  <div class="card m-5" draggable="true">
+  <div class="card m-5">
     <div class="card-body">
       <h4 class="card-title">Card title</h4>
       <UploadFilesComponent @drop-files-handler="dropFilesHandler">
