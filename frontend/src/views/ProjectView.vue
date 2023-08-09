@@ -86,8 +86,29 @@
                   </div>
                 </td>
                 <td>
-                  {{ element.file.authors != undefined ? `Authors; ` : '' }}
-                  {{ element.file.description != undefined ? `Description; ` : '' }}
+                  <div
+                    class="position-relative"
+                    @mouseover.prevent="upHere = true"
+                    @mouseleave.prevent="upHere = false"
+                  >
+                    {{ element.file.authors != undefined ? `Authors; ` : '' }}
+                    {{ element.file.description != undefined ? `Description; ` : '' }}
+                    <div
+                      v-show="upHere"
+                      class="card position-absolute bottom-0 start-0 metadata-card"
+                    >
+                      <div class="card-body">
+                        <div class="card-title">Description:</div>
+                        <p class="card-text">{{ element.file.description }}</p>
+                        <div class="card-title">Auhtors:</div>
+                        <p class="card-text">
+                          {{
+                            element.file.authors?.reduce((prev, author) => prev + author + ',', '')
+                          }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </td>
                 <td>
                   <button type="button" class="btn" @click.prevent="deleteFile(key, element.file)">
@@ -124,6 +145,7 @@ const files: Ref<Map<string, RenderFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = ref(0)
 const humanifyFileSize = partial({ base: 2, standard: 'jedec', output: 'string' })
+const upHere = ref(false)
 
 watch(files, (newFiles) => {
   newFiles.forEach((element) => {
@@ -272,8 +294,14 @@ async function toggleSelectAllFiles() {
 }
 </script>
 
-<style>
+<style scoped>
 .drag-field {
   height: 5em;
+}
+
+.metadata-card {
+  transform: translate(0, 100%);
+  /* z-index: -1; */
+  z-index: 2000;
 }
 </style>
