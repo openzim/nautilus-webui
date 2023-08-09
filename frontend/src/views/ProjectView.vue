@@ -47,9 +47,9 @@
                   />
                 </th>
                 <td>{{ element.file.filename }}</td>
-                <td>{{ element.file.filesize }}</td>
+                <td>{{ filesize(element.file.filesize) }}</td>
                 <td>{{ element.file.type }}</td>
-                <td>{{ element.file.uploaded_on }}</td>
+                <td>{{ new Date(element.file.uploaded_on).toLocaleString() }}</td>
                 <td>
                   <div
                     class="progress"
@@ -65,7 +65,10 @@
                     {{ element.file.status }}
                   </div>
                 </td>
-                <td>{{ element.file.authors + ' ' + element.file.description }}</td>
+                <td>
+                  {{ element.file.authors != undefined ? `Authors; ` : '' }}
+                  {{ element.file.description != undefined ? `Description; ` : '' }}
+                </td>
                 <td>
                   <button type="button" class="btn" @click.prevent="deleteFile(key, element.file)">
                     <font-awesome-icon :icon="['fas', 'trash']" />
@@ -86,11 +89,12 @@
   </div>
 </template>
 <script setup lang="ts">
+import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import { FileStatus, type File } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref } from 'vue'
-import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
+import { filesize } from 'filesize'
 
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
