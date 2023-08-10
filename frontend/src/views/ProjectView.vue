@@ -109,6 +109,7 @@ import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import FileTabRowComponent from '@/components/FileTabRowComponent.vue'
 import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
+import { fromMime } from 'human-filetypes'
 import axios from 'axios'
 import { ref, watch, type Ref } from 'vue'
 

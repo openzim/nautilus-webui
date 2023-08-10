@@ -11,7 +11,7 @@
     </th>
     <td>{{ props.renderFile.file.filename }}</td>
     <td>{{ humanifyFileSize(props.renderFile.file.filesize) }}</td>
-    <td>{{ props.renderFile.file.type }}</td>
+    <td>{{ fromMime(props.renderFile.file.type) }}</td>
     <td>{{ new Date(props.renderFile.file.uploaded_on).toLocaleString() }}</td>
     <td>
       <div
@@ -67,6 +67,7 @@
 
 <script setup lang="ts">
 import { FileStatus, humanifyFileSize, type File, type RenderFile } from '@/constants'
+import { fromMime } from 'human-filetypes'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -96,6 +97,7 @@ async function deleteFile(key: string, file: File) {
   transform: translate(0, 100%);
   z-index: 2000;
 }
+
 .custom-title {
   color: var(--main-color);
 }

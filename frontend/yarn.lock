@@ -1284,6 +1284,11 @@ hosted-git-info@^2.1.4:
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
   integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
+human-filetypes@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/human-filetypes/-/human-filetypes-0.2.1.tgz#4d0418cb29ae56245ea840073b367eaa7f56f2df"
+  integrity sha512-OKuOXUJKAXieqqDeMWip4OVp0AKn5Fu3lGfc7j5wOQU6DCxm3i8ey17hrtnyHiUoLxbI7WHf/Ok4nhlVifP7AA==
+
 ignore@^5.2.0:
   version "5.2.4"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.4.tgz#a291c0c6178ff1b960befe47fcdec301674a6324"
