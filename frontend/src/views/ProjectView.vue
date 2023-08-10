@@ -6,13 +6,13 @@
         :class="{ 'border-bottom': isShowed }"
       >
         <h4>
-          <button type="button" class="btn" @click.prevent="isShowed = !isShowed">
+          <button type="button" class="btn text-secondary" @click.prevent="isShowed = !isShowed">
             <font-awesome-icon v-if="isShowed" :icon="['fas', 'minus']" />
             <font-awesome-icon v-else :icon="['fas', 'angle-down']" />
           </button>
-          <span>Upload Files</span>
+          <span style="color: var(--main-color)">Upload Files:</span>
         </h4>
-        <div class="align-bottom">
+        <div class="align-bottom fw-bold text-secondary">
           {{
             humanifyFileSize(
               Array.from(files.values()).reduce((pre, element) => pre + element.file.filesize, 0)
@@ -25,7 +25,7 @@
       <UploadFilesComponent @drop-files-handler="dropFilesHandler" v-show="isShowed">
         <div>
           <div class="d-flex flex-row-reverse">
-            <div class="btn-group btn-group-sm" role="group">
+            <div class="btn-group btn-group-sm custom-btn-outline-primary" role="group">
               <input
                 type="radio"
                 class="btn-check"
@@ -97,7 +97,7 @@
             class="drag-field d-flex justify-content-center align-items-center"
             v-if="files.size <= 10"
           >
-            <h4>Drag Files to here</h4>
+            <h4 style="color: var(--main-color); opacity: 0.6">Drag Files to here</h4>
           </div>
         </div>
       </UploadFilesComponent>
@@ -264,5 +264,18 @@ async function toggleSelectAllFiles() {
 <style scoped>
 .drag-field {
   height: 5em;
+}
+
+.custom-btn-outline-primary {
+  .btn-outline-primary {
+    --bs-btn-color: var(--main-color);
+    --bs-btn-border-color: var(--main-color);
+    --bs-btn-hover-bg: var(--main-color);
+    --bs-btn-hover-border-color: var(--main-color);
+    --bs-btn-active-bg: var(--main-color);
+    --bs-btn-active-border-color: var(--main-color);
+    --bs-btn-disabled-color: var(--main-color);
+    --bs-btn-disabled-border-color: var(--main-color);
+  }
 }
 </style>
