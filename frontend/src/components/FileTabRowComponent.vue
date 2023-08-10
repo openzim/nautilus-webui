@@ -12,7 +12,9 @@
     <td>{{ props.renderFile.file.filename }}</td>
     <td>{{ humanifyFileSize(props.renderFile.file.filesize) }}</td>
     <td>{{ fromMime(props.renderFile.file.type) }}</td>
-    <td>{{ new Date(props.renderFile.file.uploaded_on).toLocaleString() }}</td>
+    <td>
+      {{ moment.utc(props.renderFile.file.uploaded_on).local().format('MMM DD HH:mm') }}
+    </td>
     <td>
       <div
         class="progress"
@@ -68,6 +70,7 @@
 <script setup lang="ts">
 import { FileStatus, humanifyFileSize, type File, type RenderFile } from '@/constants'
 import { fromMime } from 'human-filetypes'
+import moment from 'moment'
 import { ref } from 'vue'
 
 const props = defineProps<{
