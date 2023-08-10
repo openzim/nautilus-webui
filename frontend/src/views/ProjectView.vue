@@ -93,7 +93,10 @@
               />
             </tbody>
           </table>
-          <div class="drag-field d-flex justify-content-center align-items-center">
+          <div
+            class="drag-field d-flex justify-content-center align-items-center"
+            v-if="files.size <= 10"
+          >
             <h4>Drag Files to here</h4>
           </div>
         </div>
