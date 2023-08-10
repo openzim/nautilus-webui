@@ -58,7 +58,7 @@
       >
         <font-awesome-icon :icon="['fas', 'trash']" />
       </button>
-      <button type="button" class="btn">
+      <button type="button" class="btn" v-if="props.showEditButton">
         <font-awesome-icon :icon="['fas', 'file-pen']" />
       </button>
     </td>
@@ -73,6 +73,7 @@ const props = defineProps<{
   isSelected: boolean
   renderKey: string
   renderFile: RenderFile
+  showEditButton: boolean
 }>()
 const upHere = ref(false)
 const emit = defineEmits<{

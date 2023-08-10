@@ -24,6 +24,31 @@
       </div>
       <UploadFilesComponent @drop-files-handler="dropFilesHandler" v-show="isShowed">
         <div>
+          <div class="d-flex flex-row-reverse">
+            <div class="btn-group btn-group-sm" role="group">
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="edit"
+                autocomplete="off"
+                @change="isEditMode = true"
+                :checked="isEditMode"
+              />
+              <label class="btn btn-outline-primary" for="edit">Edit</label>
+
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="upload"
+                autocomplete="off"
+                @change="isEditMode = false"
+                :checked="!isEditMode"
+              />
+              <label class="btn btn-outline-primary" for="upload">Upload</label>
+            </div>
+          </div>
           <table class="table">
             <thead>
               <tr>
@@ -62,6 +87,7 @@
                 :render-key="key"
                 :render-file="file"
                 :is-selected="selectedFiles.has(key)"
+                :show-edit-button="isEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteFile"
               />
@@ -83,6 +109,7 @@ import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/s
 import axios from 'axios'
 import { ref, watch, type Ref } from 'vue'
 
+const isEditMode = ref(false)
 const isShowed = ref(true)
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
