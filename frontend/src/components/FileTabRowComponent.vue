@@ -40,9 +40,9 @@
         {{ props.renderFile.file.description != undefined ? `Description; ` : '' }}
         <div v-show="upHere" class="card position-absolute bottom-0 start-0 metadata-card">
           <div class="card-body">
-            <div class="card-title">Description:</div>
+            <div class="card-title custom-title">Description:</div>
             <p class="card-text">{{ props.renderFile.file.description }}</p>
-            <div class="card-title">Auhtors:</div>
+            <div class="card-title custom-title">Auhtors:</div>
             <p class="card-text">
               {{ props.renderFile.file.authors?.reduce((prev, author) => prev + author + ',', '') }}
             </p>
@@ -95,5 +95,8 @@ async function deleteFile(key: string, file: File) {
   max-width: 20em;
   transform: translate(0, 100%);
   z-index: 2000;
+}
+.custom-title {
+  color: var(--main-color);
 }
 </style>
