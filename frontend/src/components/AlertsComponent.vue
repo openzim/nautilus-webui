@@ -1,6 +1,7 @@
 <template>
-  <!-- Alert messages should be above all other elements -->
-  <div class="position-absolute top-0 end-0 mt-1 me-1" style="z-index: 9999">
+  <!-- The alert component should have the same z-index as modal-backdrop. -->
+  <!-- See: https://getbootstrap.com/docs/5.3/layout/z-index/ -->
+  <div class="position-absolute top-0 end-0 mt-1 me-1" style="z-index: 1050">
     <div v-for="[key, item] in storeApp.alertMessages" :key="key">
       <div class="alert px-1" :class="'alert-' + item.type" role="alert">
         <div class="container">
