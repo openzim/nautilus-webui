@@ -58,37 +58,15 @@
           </div>
           <table class="table">
             <thead>
-              <tr>
-                <th scope="col">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    value=""
-                    :indeterminate="selectedFiles.size != 0 && selectedFiles.size < files.size"
-                    :checked="selectedFiles.size != 0 && selectedFiles.size == files.size"
-                    @change.prevent="toggleSelectAllFiles"
-                  />
-                </th>
-                <th scope="col">Name</th>
-                <th scope="col">File Size</th>
-                <th scope="col">File Type</th>
-                <th scope="col">Uploaded On</th>
-                <th scope="col">Status</th>
-                <th scope="col">Metadata</th>
-                <th scope="col">
-                  <button
-                    type="button"
-                    class="btn"
-                    :disabled="selectedFiles.size == 0"
-                    @click.prevent="deleteSelectedFiles"
-                  >
-                    <font-awesome-icon :icon="['fas', 'trash']" />
-                  </button>
-                </th>
-              </tr>
+              <FileTableHeaderComponent
+                :selected-files="selectedFiles"
+                :files="files"
+                @update-select-files="updateSelectFiles"
+                @delete-selected-files="deleteSelectedFiles"
+              />
             </thead>
             <tbody>
-              <FileTabRowComponent
+              <FileTableRowComponent
                 v-for="[key, file] in files"
                 :key="key"
                 :render-key="key"
@@ -155,7 +133,8 @@
 </template>
 <script setup lang="ts">
 import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
-import FileTabRowComponent from '@/components/FileTabRowComponent.vue'
+import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
+import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
@@ -333,15 +312,8 @@ async function toggleSelectFile(key: string) {
   }
 }
 
-async function toggleSelectAllFiles() {
-  if (selectedFiles.value.size < files.value.size) {
-    selectedFiles.value.clear()
-    files.value.forEach((_, key) => {
-      selectedFiles.value.set(key, true)
-    })
-  } else {
-    selectedFiles.value.clear()
-  }
+function updateSelectFiles(newValue: Map<string, boolean>) {
+  selectedFiles.value = newValue
 }
 </script>
 
