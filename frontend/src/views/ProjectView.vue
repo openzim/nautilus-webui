@@ -16,11 +16,7 @@
           <span style="color: var(--main-color)">Upload Files:</span>
         </h4>
         <div class="align-bottom fw-bold text-secondary">
-          {{
-            humanifyFileSize(
-              Array.from(files.values()).reduce((pre, element) => pre + element.file.filesize, 0)
-            )
-          }}
+          {{ humanifyFileSize(totalSize) }}
           /
           {{ humanifyFileSize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) }}
         </div>
@@ -67,7 +63,7 @@
             </thead>
             <tbody>
               <FileTableRowComponent
-                v-for="[key, file] in files"
+                v-for="[key, file] in sortedFiles"
                 :key="key"
                 :render-key="key"
                 :render-file="file"
@@ -139,7 +135,7 @@ import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/cons
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
-import { ref, watch, type Ref } from 'vue'
+import { ref, watch, type Ref, computed } from 'vue'
 
 const isActive = ref(false)
 const isEditMode = ref(false)
@@ -149,15 +145,34 @@ const storeProjectId = useProjectIdStore()
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, RenderFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
-const totalSize = ref(0)
+const totalSize = computed(() =>
+  Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
+)
 const deletionModal: Ref<Element | null> = ref(null)
 const beDeletedFiles: Ref<Map<string, File>> = ref(new Map())
+const compareFunction: Ref<(a: [string, RenderFile], b: [string, RenderFile]) => number> = ref(
+  (a, b) => (a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1)
+)
+const sortedFiles: Ref<Map<string, RenderFile>> = ref(new Map())
 
-watch(files, (newFiles) => {
-  newFiles.forEach((element) => {
-    totalSize.value += element.file.filesize
-  })
+watch(compareFunction, (newFunction) => {
+  sortedFiles.value = sortFiles(files.value, newFunction)
 })
+
+watch(
+  files,
+  (newFiles) => {
+    sortedFiles.value = sortFiles(newFiles, compareFunction.value)
+  },
+  { deep: true }
+)
+
+function sortFiles(
+  files: Map<string, RenderFile>,
+  compareFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number
+): Map<string, RenderFile> {
+  return new Map([...files.entries()].sort(compareFunction))
+}
 
 if (storeInitialFileStore.initialFiles.length == 0) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
@@ -314,6 +329,12 @@ async function toggleSelectFile(key: string) {
 
 function updateSelectFiles(newValue: Map<string, boolean>) {
   selectedFiles.value = newValue
+}
+
+function updateCompareFunction(
+  newFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number
+) {
+  compareFunction.value = newFunction
 }
 </script>
 

@@ -42,6 +42,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   updateSelectFiles: [newValue: Map<string, boolean>]
   deleteSelectedFiles: []
+  updateCompareFunction: [newFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number]
 }>()
 
 async function toggleSelectAllFiles() {
