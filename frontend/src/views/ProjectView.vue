@@ -1,5 +1,8 @@
 <template>
-  <div class="card m-5">
+  <div
+    class="card m-5"
+    :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }"
+  >
     <div class="card-body">
       <div
         class="card-title d-flex justify-content-between align-items-baseline"
@@ -22,7 +25,11 @@
           {{ humanifyFileSize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) }}
         </div>
       </div>
-      <UploadFilesComponent @drop-files-handler="dropFilesHandler" v-show="isShowed">
+      <UploadFilesComponent
+        @drop-files-handler="dropFilesHandler"
+        @update-is-active="updateIsActive"
+        v-show="isShowed"
+      >
         <div>
           <div class="d-flex flex-row-reverse">
             <div class="btn-group btn-group-sm custom-btn-outline-primary" role="group">
@@ -155,6 +162,7 @@ import axios from 'axios'
 import * as bootstrap from 'bootstrap'
 import { ref, watch, type Ref } from 'vue'
 
+const isActive = ref(false)
 const isEditMode = ref(false)
 const isShowed = ref(true)
 const storeApp = useAppStore()
@@ -177,6 +185,10 @@ if (storeInitialFileStore.initialFiles.length == 0) {
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
+}
+
+function updateIsActive(newValue: boolean) {
+  isActive.value = newValue
 }
 
 async function getAllFiles(projectId: string | null) {
@@ -349,5 +361,10 @@ async function toggleSelectAllFiles() {
     --bs-btn-disabled-color: var(--main-color);
     --bs-btn-disabled-border-color: var(--main-color);
   }
+}
+
+.drag-active {
+  border-style: dashed !important;
+  border-color: var(--main-color) !important;
 }
 </style>
