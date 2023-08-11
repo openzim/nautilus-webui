@@ -89,7 +89,7 @@
                 :is-selected="selectedFiles.has(key)"
                 :show-edit-button="isEditMode"
                 @toggle-select-file="toggleSelectFile"
-                @delete-file="deleteFile"
+                @delete-file="deleteSingleFile"
               />
             </tbody>
           </table>
@@ -102,6 +102,48 @@
         </div>
       </UploadFilesComponent>
     </div>
+    <div>
+      <div class="modal fade show" id="exampleModal" tabindex="-1" ref="deletionModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">Are you sure you want to delete:</h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <ul>
+                <li v-for="[key, file] in beDeletedFiles" :key="key">
+                  {{ file.filename }}
+                </li>
+              </ul>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+                @click="beDeletedFiles.clear()"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-dismiss="modal"
+                @click.prevent="deleteFiles"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -110,6 +152,7 @@ import FileTabRowComponent from '@/components/FileTabRowComponent.vue'
 import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
+import * as bootstrap from 'bootstrap'
 import { ref, watch, type Ref } from 'vue'
 
 const isEditMode = ref(false)
@@ -120,6 +163,8 @@ const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, RenderFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = ref(0)
+const deletionModal: Ref<Element | null> = ref(null)
+const beDeletedFiles: Ref<Map<string, File>> = ref(new Map())
 
 watch(files, (newFiles) => {
   newFiles.forEach((element) => {
@@ -219,26 +264,43 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
   uploadFiles(fileList)
 }
 
-async function deleteFile(key: string, file: File) {
-  try {
-    await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
-    if (selectedFiles.value.has(key)) {
-      selectedFiles.value.delete(key)
+async function deleteFiles() {
+  for (const [key, file] of beDeletedFiles.value) {
+    try {
+      await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
+      if (selectedFiles.value.has(key)) {
+        selectedFiles.value.delete(key)
+      }
+      files.value.delete(key)
+    } catch (error: any) {
+      console.log('Unable to delete the file', storeProjectId.projectId, error)
+      storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
     }
-    files.value.delete(key)
-  } catch (error: any) {
-    console.log('Unable to delete the file', storeProjectId.projectId, error)
-    storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
   }
 }
 
+function showDeleteConfirmModal() {
+  if (deletionModal.value != null) {
+    const confirmModal = new bootstrap.Modal(deletionModal.value)
+    confirmModal.show()
+  }
+}
+
+async function deleteSingleFile(key: string, file: File) {
+  beDeletedFiles.value.clear()
+  beDeletedFiles.value.set(key, file)
+  showDeleteConfirmModal()
+}
+
 async function deleteSelectedFiles() {
+  beDeletedFiles.value.clear()
   selectedFiles.value.forEach((_, key) => {
     const renderFile = files.value.get(key)
     if (renderFile?.file != undefined) {
-      deleteFile(key, renderFile.file)
+      beDeletedFiles.value.set(key, renderFile.file)
     }
   })
+  showDeleteConfirmModal()
 }
 
 async function toggleSelectFile(key: string) {
