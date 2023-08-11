@@ -265,6 +265,8 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
 }
 
 async function deleteFiles() {
+  const deletedFiles: File[] = []
+
   for (const [key, file] of beDeletedFiles.value) {
     try {
       await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
@@ -272,10 +274,18 @@ async function deleteFiles() {
         selectedFiles.value.delete(key)
       }
       files.value.delete(key)
+
+      deletedFiles.push(file)
     } catch (error: any) {
       console.log('Unable to delete the file', storeProjectId.projectId, error)
       storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
     }
+  }
+
+  if (deletedFiles.length == 1) {
+    storeApp.alertsWarning(`File ${deletedFiles[0].filename}has been removed`)
+  } else {
+    storeApp.alertsWarning(`${deletedFiles.length} files have been removed`)
   }
 }
 
