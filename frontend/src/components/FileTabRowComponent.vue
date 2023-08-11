@@ -9,30 +9,34 @@
         :checked="props.isSelected"
       />
     </th>
-    <td>{{ props.renderFile.file.filename }}</td>
-    <td>{{ humanifyFileSize(props.renderFile.file.filesize) }}</td>
-    <td>{{ fromMime(props.renderFile.file.type) }}</td>
-    <td>
+    <td class="align-middle">
+      {{ props.renderFile.file.filename }}
+    </td>
+    <td class="align-middle">
+      {{ humanifyFileSize(props.renderFile.file.filesize) }}
+    </td>
+    <td class="align-middle">
+      {{ fromMime(props.renderFile.file.type) }}
+    </td>
+    <td class="align-middle">
       {{ moment.utc(props.renderFile.file.uploaded_on).local().format('MMM DD HH:mm') }}
     </td>
-    <td>
+    <td class="align-middle ps-4">
       <div
-        class="progress"
-        role="progressbar"
         v-if="props.renderFile.file.status == FileStatus.UPLOADING"
+        class="spinner-border text-secondary"
+        role="status"
       >
-        <div
-          class="progress-bar"
-          :style="{
-            width: (props.renderFile.uploadedSize / props.renderFile.file.filesize) * 100 + '%'
-          }"
-        />
+        <span class="visually-hidden">Loading...</span>
       </div>
-      <div v-else>
-        {{ props.renderFile.file.status }}
-      </div>
+      <font-awesome-icon
+        class="text-danger fs-5"
+        v-else-if="props.renderFile.statusCode != undefined"
+        :icon="['fas', 'xmark']"
+      />
+      <font-awesome-icon class="text-primary fs-5" v-else :icon="['fas', 'check']" />
     </td>
-    <td>
+    <td class="align-middle">
       <div
         class="position-relative"
         @mouseover.prevent="upHere = true"
@@ -52,7 +56,7 @@
         </div>
       </div>
     </td>
-    <td>
+    <td class="align-middle">
       <button
         type="button"
         class="btn"
