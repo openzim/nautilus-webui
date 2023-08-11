@@ -135,7 +135,7 @@ import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/cons
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
-import { ref, watch, type Ref, computed } from 'vue'
+import { ref, type Ref, computed } from 'vue'
 
 const isActive = ref(false)
 const isEditMode = ref(false)
@@ -153,18 +153,8 @@ const beDeletedFiles: Ref<Map<string, File>> = ref(new Map())
 const compareFunction: Ref<(a: [string, RenderFile], b: [string, RenderFile]) => number> = ref(
   (a, b) => (a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1)
 )
-const sortedFiles: Ref<Map<string, RenderFile>> = ref(new Map())
-
-watch(compareFunction, (newFunction) => {
-  sortedFiles.value = sortFiles(files.value, newFunction)
-})
-
-watch(
-  files,
-  (newFiles) => {
-    sortedFiles.value = sortFiles(newFiles, compareFunction.value)
-  },
-  { deep: true }
+const sortedFiles: Ref<Map<string, RenderFile>> = computed(() =>
+  sortFiles(files.value, compareFunction.value)
 )
 
 function sortFiles(
