@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import {partial} from "filesize"
+import { partial } from 'filesize'
 
 export interface RenderFile {
   file: File
@@ -77,3 +77,5 @@ export const EmptyConstants = new Constants({
 })
 
 export const humanifyFileSize = partial({ base: 2, standard: 'jedec', output: 'string' })
+
+export type CompareFunctionType = (a: [string, RenderFile], b: [string, RenderFile]) => number

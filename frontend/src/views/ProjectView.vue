@@ -59,6 +59,7 @@
                 :files="files"
                 @update-select-files="updateSelectFiles"
                 @delete-selected-files="deleteSelectedFiles"
+                @update-compare-function="updateCompareFunction"
               />
             </thead>
             <tbody>
@@ -131,7 +132,13 @@
 import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
-import { FileStatus, type File, type RenderFile, humanifyFileSize } from '@/constants'
+import {
+  FileStatus,
+  type File,
+  type RenderFile,
+  humanifyFileSize,
+  type CompareFunctionType
+} from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
@@ -150,8 +157,8 @@ const totalSize = computed(() =>
 )
 const deletionModal: Ref<Element | null> = ref(null)
 const beDeletedFiles: Ref<Map<string, File>> = ref(new Map())
-const compareFunction: Ref<(a: [string, RenderFile], b: [string, RenderFile]) => number> = ref(
-  (a, b) => (a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1)
+const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
+  a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 )
 const sortedFiles: Ref<Map<string, RenderFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
@@ -159,7 +166,7 @@ const sortedFiles: Ref<Map<string, RenderFile>> = computed(() =>
 
 function sortFiles(
   files: Map<string, RenderFile>,
-  compareFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number
+  compareFunction: CompareFunctionType
 ): Map<string, RenderFile> {
   return new Map([...files.entries()].sort(compareFunction))
 }
@@ -321,9 +328,7 @@ function updateSelectFiles(newValue: Map<string, boolean>) {
   selectedFiles.value = newValue
 }
 
-function updateCompareFunction(
-  newFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number
-) {
+function updateCompareFunction(newFunction: CompareFunctionType) {
   compareFunction.value = newFunction
 }
 </script>
