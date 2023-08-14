@@ -56,7 +56,7 @@
     <th scope="col">
       <button
         type="button"
-        class="btn"
+        class="btn border-0"
         :disabled="selectedFiles.size == 0"
         @click.prevent="emit('deleteSelectedFiles')"
       >
