@@ -2,7 +2,7 @@
   <div class="d-flex justify-content-md-center">
     <UploadFilesComponent @drop-files-handler="dropFiles" @update-is-active="updateIsActive">
       <div
-        class="card border border-3 rounded-3 drop"
+        class="card border-3 rounded-3 drop"
         :data-active="isActive"
         :class="{ 'bg-light': isActive }"
       >
