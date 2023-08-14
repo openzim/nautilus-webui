@@ -1,65 +1,33 @@
 <template>
   <tr>
     <th scope="col">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        value=""
-        :indeterminate="
-          props.selectedFiles.size != 0 && props.selectedFiles.size < props.files.size
-        "
-        :checked="selectedFiles.size != 0 && selectedFiles.size == props.files.size"
-        @change.prevent="toggleSelectAllFiles"
-      />
+      <input class="form-check-input" type="checkbox" value="" :indeterminate="isIndeterminate" :checked="isCheckedAll"
+        @change.prevent="toggleSelectAllFiles" />
     </th>
     <th scope="col">
-      <SortButton
-        title="Name"
-        :increase-function="increaseByName"
-        :decrease-function="decreaseByName"
-        @update-compare-function="updateCompareFunction"
-      />
+      <SortButton title="Name" :increase-function="increaseByName" :decrease-function="decreaseByName"
+        @update-compare-function="updateCompareFunction" />
     </th>
     <th scope=" col">
-      <SortButton
-        title="File Size"
-        :increase-function="increaseBySize"
-        :decrease-function="decreaseBySize"
-        @update-compare-function="updateCompareFunction"
-      />
+      <SortButton title="File Size" :increase-function="increaseBySize" :decrease-function="decreaseBySize"
+        @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="col">
-      <SortButton
-        title="Kind"
-        :increase-function="increaseByKind"
-        :decrease-function="decreaseByKind"
-        @update-compare-function="updateCompareFunction"
-      />
+      <SortButton title="Kind" :increase-function="increaseByKind" :decrease-function="decreaseByKind"
+        @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="col">
-      <SortButton
-        title="Date Uploaded"
-        :increase-function="increaseByUploadedDate"
-        :decrease-function="decreaseByUploadedDate"
-        @update-compare-function="updateCompareFunction"
-      />
+      <SortButton title="Date Uploaded" :increase-function="increaseByUploadedDate"
+        :decrease-function="decreaseByUploadedDate" @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="col">
-      <SortButton
-        title="Status"
-        :increase-function="increaseByStatus"
-        :decrease-function="decreaseByStatus"
-        @update-compare-function="updateCompareFunction"
-      />
+      <SortButton title="Status" :increase-function="increaseByStatus" :decrease-function="decreaseByStatus"
+        @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="align-middle">Metadata</th>
     <th scope="col">
-      <button
-        type="button"
-        class="btn border-0"
-        :disabled="selectedFiles.size == 0"
-        @click.prevent="emit('deleteSelectedFiles')"
-      >
+      <button type="button" class="btn border-0" :disabled="isDisableDeleteButton"
+        @click.prevent="emit('deleteSelectedFiles')">
         <font-awesome-icon :icon="['fas', 'trash']" />
       </button>
     </th>
@@ -70,6 +38,7 @@
 import type { RenderFile } from '@/constants'
 import SortButton from './SortButton.vue'
 import type { CompareFunctionType } from '@/constants'
+import { computed } from 'vue'
 
 const props = defineProps<{
   selectedFiles: Map<string, boolean>
@@ -81,6 +50,14 @@ const emit = defineEmits<{
   deleteSelectedFiles: []
   updateCompareFunction: [newFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number]
 }>()
+
+const isIndeterminate = computed(
+  () => props.selectedFiles.size != 0 && props.selectedFiles.size < props.files.size
+)
+const isCheckedAll = computed(
+  () => props.selectedFiles.size != 0 && props.selectedFiles.size == props.files.size
+)
+const isDisableDeleteButton = computed(() => props.selectedFiles.size == 0)
 
 /** Start to define compare functions **/
 const increaseByName: CompareFunctionType = (a, b) => (a[1].file.title > b[1].file.title ? 1 : -1)

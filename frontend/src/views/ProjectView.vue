@@ -92,18 +92,18 @@ const sortedFiles: Ref<Map<string, RenderFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
 )
 
-function sortFiles(
-  files: Map<string, RenderFile>,
-  compareFunction: CompareFunctionType
-): Map<string, RenderFile> {
-  return new Map([...files.entries()].sort(compareFunction))
-}
-
 if (storeInitialFileStore.initialFiles.length == 0) {
   const apiFiles = await getAllFiles(storeProjectId.projectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
+}
+
+function sortFiles(
+  files: Map<string, RenderFile>,
+  compareFunction: CompareFunctionType
+): Map<string, RenderFile> {
+  return new Map([...files.entries()].sort(compareFunction))
 }
 
 function updateIsActive(newValue: boolean) {
