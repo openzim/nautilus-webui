@@ -36,8 +36,8 @@ services:
       - 8081:80
     environment:
       - NAUTILUS_WEB_API=http://localhost:8080/v1
-      - NAUTILUS_FILE_QUOTA=100MB
-      - NAUTILUS_PROJECT_QUOTA=100MB
+      - NAUTILUS_FILE_QUOTA=100000000
+      - NAUTILUS_PROJECT_QUOTA=100000000
     depends_on:
       - database
   backend-tools:
