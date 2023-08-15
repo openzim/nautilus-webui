@@ -30,7 +30,7 @@ class BackendConf:
     cookie_expiration_days = int(os.getenv("COOKIE_EXPIRATION_DAYS", "30"))
     api_version_prefix = "/v1"
     project_expire_after = datetime.timedelta(days=7)
-    project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MiB"))
+    project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MB"))
 
     chunk_size = humanfriendly.parse_size(os.getenv("CHUNK_SIZE", "2MiB"))
 
