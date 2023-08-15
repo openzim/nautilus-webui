@@ -49,6 +49,11 @@ async function dropFiles(event: DragEvent) {
       return
     }
 
+    if (file.type == '') {
+      storeApp.alertsWarning("Folders cannot be uploaded directly")
+      return
+    }
+
     totalSize += file.size
   }
 
