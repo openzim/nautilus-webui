@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import { partial } from 'filesize'
 
-export interface RenderFile {
+export interface ClientVisibleFile {
   file: File
   uploadedSize: number
   statusCode?: string
@@ -85,4 +85,4 @@ export const EmptyConstants = new Constants({
 // After using jedec, the file will display MB instead of MiB
 export const humanifyFileSize = partial({ base: 2, standard: 'jedec', output: 'string' })
 
-export type CompareFunctionType = (a: [string, RenderFile], b: [string, RenderFile]) => number
+export type CompareFunctionType = (a: [string, ClientVisibleFile], b: [string, ClientVisibleFile]) => number

@@ -35,20 +35,20 @@
 </template>
 
 <script setup lang="ts">
-import type { RenderFile } from '@/constants'
+import type { ClientVisibleFile } from '@/constants'
 import SortButton from './SortButton.vue'
 import type { CompareFunctionType } from '@/constants'
 import { computed } from 'vue'
 
 const props = defineProps<{
   selectedFiles: Map<string, boolean>
-  files: Map<string, RenderFile>
+  files: Map<string, ClientVisibleFile>
 }>()
 
 const emit = defineEmits<{
   updateSelectFiles: [newValue: Map<string, boolean>]
   deleteSelectedFiles: []
-  updateCompareFunction: [newFunction: (a: [string, RenderFile], b: [string, RenderFile]) => number]
+  updateCompareFunction: [newFunction: (a: [string, ClientVisibleFile], b: [string, ClientVisibleFile]) => number]
 }>()
 
 const isIndeterminate = computed(

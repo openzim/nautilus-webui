@@ -35,7 +35,7 @@
                 @update-compare-function="updateCompareFunction" />
             </thead>
             <tbody>
-              <FileTableRowComponent v-for="[key, file] in sortedFiles" :key="key" :render-key="key" :render-file="file"
+              <FileTableRowComponent v-for="[key, file] in sortedFiles" :key="key" :render-key="key" :client-visible-file="file"
                 :is-selected="selectedFiles.has(key)" :show-edit-button="isEditMode"
                 @toggle-select-file="toggleSelectFile" @delete-file="deleteSingleFile" />
             </tbody>
@@ -64,7 +64,7 @@ import ModalComponent from '@/components/ModalComponent.vue'
 import {
   FileStatus,
   type File,
-  type RenderFile,
+  type ClientVisibleFile,
   humanifyFileSize,
   type CompareFunctionType
 } from '@/constants'
@@ -78,7 +78,7 @@ const isShowed = ref(true)
 const storeApp = useAppStore()
 const storeProjectId = useProjectIdStore()
 const storeInitialFileStore = useInitialFilesStore()
-const files: Ref<Map<string, RenderFile>> = ref(new Map())
+const files: Ref<Map<string, ClientVisibleFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
@@ -88,7 +88,7 @@ const toBeDeletedFiles: Ref<Map<string, File>> = ref(new Map())
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 )
-const sortedFiles: Ref<Map<string, RenderFile>> = computed(() =>
+const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
 )
 
@@ -100,9 +100,9 @@ if (storeInitialFileStore.initialFiles.length == 0) {
 }
 
 function sortFiles(
-  files: Map<string, RenderFile>,
+  files: Map<string, ClientVisibleFile>,
   compareFunction: CompareFunctionType
-): Map<string, RenderFile> {
+): Map<string, ClientVisibleFile> {
   return new Map([...files.entries()].sort(compareFunction))
 }
 
@@ -235,9 +235,9 @@ async function deleteSingleFile(key: string, file: File) {
 async function deleteSelectedFiles() {
   toBeDeletedFiles.value.clear()
   selectedFiles.value.forEach((_, key) => {
-    const renderFile = files.value.get(key)
-    if (renderFile?.file != undefined) {
-      toBeDeletedFiles.value.set(key, renderFile.file)
+    const clientVisibleFile = files.value.get(key)
+    if (clientVisibleFile?.file != undefined) {
+      toBeDeletedFiles.value.set(key, clientVisibleFile.file)
     }
   })
   deletionModal.value?.showModal()
