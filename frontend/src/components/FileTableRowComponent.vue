@@ -14,7 +14,7 @@
       {{ fromMime(props.clientVisibleFile.file.type) }}
     </td>
     <td class="align-middle">
-      {{ moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm') }}
+      {{ fileUploadedDate }}
     </td>
     <td class="align-middle ps-4">
       <div v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING" class="spinner-border text-secondary"
@@ -56,7 +56,7 @@
 import { FileStatus, humanifyFileSize, type File, type ClientVisibleFile } from '@/constants'
 import { fromMime } from 'human-filetypes'
 import moment from 'moment'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   isSelected: boolean
@@ -69,6 +69,7 @@ const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: File]
 }>()
+const fileUploadedDate = computed(() => moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm'))
 
 async function toggleSelectFile(key: string) {
   emit('toggleSelectFile', key)
