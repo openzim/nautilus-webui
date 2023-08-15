@@ -237,11 +237,6 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
     return
   }
 
-  if (uploadFileSize == 0) {
-    storeApp.alertsWarning("Uploading file(s)'s size is zero")
-    return
-  }
-
   uploadFiles(fileList)
 }
 
