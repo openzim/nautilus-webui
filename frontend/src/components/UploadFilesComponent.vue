@@ -54,7 +54,7 @@ async function dropFiles(event: DragEvent) {
     }
 
     if (file.type == '') {
-      storeApp.alertsWarning('Folders cannot be uploaded directly')
+      storeApp.alertsWarning('Folders and files without extension cannot be uploaded')
       return
     }
 
