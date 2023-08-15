@@ -169,8 +169,9 @@ async function uploadFiles(uploadFiles: FileList) {
           console.log(error)
           if (axios.isAxiosError(error)) {
             if (files.value.has(newFile.id)) {
-              files.value.get(newFile.id)!.statusCode = error.response?.status
-              files.value.get(newFile.id)!.statusText = error.response?.statusText
+              files.value.get(newFile.id)!.statusCode = error.code
+              files.value.get(newFile.id)!.statusText = error.message
+              files.value.get(newFile.id)!.file.status = FileStatus.FAILURE
             }
           }
         })

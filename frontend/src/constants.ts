@@ -4,7 +4,7 @@ import { partial } from 'filesize'
 export interface RenderFile {
   file: File
   uploadedSize: number
-  statusCode?: number
+  statusCode?: string
   statusText?: string
 }
 
@@ -37,7 +37,8 @@ export interface File {
 export enum FileStatus {
   UPLOADING = 'UPLOADING',
   LOCAL = 'LOCAL',
-  S3 = 'S3'
+  S3 = 'S3',
+  FAILURE = 'failure'
 }
 
 export interface Environ {
