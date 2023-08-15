@@ -5,23 +5,23 @@
         @change.prevent="toggleSelectAllFiles" />
     </th>
     <th scope="col">
-      <SortButton title="Name" :increase-function="increaseByName" :decrease-function="decreaseByName"
+      <SortButton title="Name" :increase-function="sortByName" :decrease-function="sortByNameReversed"
         @update-compare-function="updateCompareFunction" />
     </th>
     <th scope=" col">
-      <SortButton title="File Size" :increase-function="increaseBySize" :decrease-function="decreaseBySize"
+      <SortButton title="File Size" :increase-function="sortBySizeDescending" :decrease-function="sortBySizeAscending"
         @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="col">
-      <SortButton title="Kind" :increase-function="increaseByKind" :decrease-function="decreaseByKind"
+      <SortButton title="Kind" :increase-function="sortByKindNameReversed" :decrease-function="sortByKindName"
         @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="col">
       <SortButton title="Date Uploaded" :increase-function="increaseByUploadedDate"
-        :decrease-function="decreaseByUploadedDate" @update-compare-function="updateCompareFunction" />
+        :decrease-function="sortByUploadedDateAscending" @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="col">
-      <SortButton title="Status" :increase-function="increaseByStatus" :decrease-function="decreaseByStatus"
+      <SortButton title="Status" :increase-function="sortByStatusNameReversed" :decrease-function="sortByStatusName"
         @update-compare-function="updateCompareFunction" />
     </th>
     <th scope="align-middle">Metadata</th>
@@ -60,26 +60,26 @@ const isCheckedAll = computed(
 const isDisableDeleteButton = computed(() => props.selectedFiles.size == 0)
 
 /** Start to define compare functions **/
-const increaseByName: CompareFunctionType = (a, b) => (a[1].file.title > b[1].file.title ? 1 : -1)
-const decreaseByName: CompareFunctionType = (a, b) => (a[1].file.title < b[1].file.title ? 1 : -1)
+const sortByName: CompareFunctionType = (a, b) => (a[1].file.title > b[1].file.title ? 1 : -1)
+const sortByNameReversed: CompareFunctionType = (a, b) => (a[1].file.title < b[1].file.title ? 1 : -1)
 
-const increaseBySize: CompareFunctionType = (a, b) =>
-  a[1].file.filesize < b[1].file.filesize ? 1 : -1
-const decreaseBySize: CompareFunctionType = (a, b) =>
+const sortBySizeAscending: CompareFunctionType = (a, b) =>
   a[1].file.filesize > b[1].file.filesize ? 1 : -1
+const sortBySizeDescending: CompareFunctionType = (a, b) =>
+  a[1].file.filesize < b[1].file.filesize ? 1 : -1
 
-const increaseByKind: CompareFunctionType = (a, b) => (a[1].file.type < b[1].file.type ? 1 : -1)
-const decreaseByKind: CompareFunctionType = (a, b) => (a[1].file.type > b[1].file.type ? 1 : -1)
+const sortByKindName: CompareFunctionType = (a, b) => (a[1].file.type > b[1].file.type ? 1 : -1)
+const sortByKindNameReversed: CompareFunctionType = (a, b) => (a[1].file.type < b[1].file.type ? 1 : -1)
 
+const sortByUploadedDateAscending: CompareFunctionType = (a, b) =>
+  a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 const increaseByUploadedDate: CompareFunctionType = (a, b) =>
   a[1].file.uploaded_on < b[1].file.uploaded_on ? 1 : -1
-const decreaseByUploadedDate: CompareFunctionType = (a, b) =>
-  a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 
-const increaseByStatus: CompareFunctionType = (a, b) =>
-  a[1].file.status < b[1].file.status ? 1 : -1
-const decreaseByStatus: CompareFunctionType = (a, b) =>
+const sortByStatusName: CompareFunctionType = (a, b) =>
   a[1].file.status > b[1].file.status ? 1 : -1
+const sortByStatusNameReversed: CompareFunctionType = (a, b) =>
+  a[1].file.status < b[1].file.status ? 1 : -1
 
 /** End of definition**/
 
