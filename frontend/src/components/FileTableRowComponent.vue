@@ -22,9 +22,13 @@
         role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <font-awesome-icon class="text-danger fs-5" v-else-if="props.clientVisibleFile.statusCode != undefined"
-        :icon="['fas', 'xmark']" />
-      <font-awesome-icon class="text-primary fs-5" v-else :icon="['fas', 'check']" />
+      <span v-else-if="props.clientVisibleFile.file.status == FileStatus.FAILURE" data-bs-toggle="tooltip"
+        :data-bs-title="props.clientVisibleFile.statusText" ref="toolTipsElement">
+        <font-awesome-icon class="text-danger fs-5" :icon="['fas', 'xmark']" />
+      </span>
+      <span v-else>
+        <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />
+      </span>
     </td>
     <td class="align-middle">
       <div class="position-relative" @mouseover.prevent="upHere = true" @mouseleave.prevent="upHere = false">
@@ -57,7 +61,8 @@
 import { FileStatus, humanifyFileSize, type File, type ClientVisibleFile } from '@/constants'
 import { fromMime } from 'human-filetypes'
 import moment from 'moment'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
+import * as bootstrap from 'bootstrap'
 
 const props = defineProps<{
   isSelected: boolean
@@ -65,6 +70,7 @@ const props = defineProps<{
   clientVisibleFile: ClientVisibleFile
   showEditButton: boolean
 }>()
+const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
@@ -79,6 +85,12 @@ const authors = computed(() =>
     ''
   )
 )
+
+watch(toolTipsElement, (newValue) => {
+  if (newValue != null) {
+    new bootstrap.Tooltip(newValue)
+  }
+})
 
 async function toggleSelectFile(key: string) {
   emit('toggleSelectFile', key)
