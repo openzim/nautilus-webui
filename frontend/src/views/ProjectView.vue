@@ -47,9 +47,9 @@
       </UploadFilesComponent>
     </div>
     <ModalComponent title="Are you sure you want to delete:" primary-button-title="Delete" secondary-button-title="Close"
-      @click-primary-button="deleteFiles" @click-secondary-button="beDeletedFiles.clear()" ref="deletionModal">
+      @click-primary-button="deleteFiles" @click-secondary-button="toBeDeletedFiles.clear()" ref="deletionModal">
       <ul>
-        <li v-for="[key, file] in beDeletedFiles" :key="key">
+        <li v-for="[key, file] in toBeDeletedFiles" :key="key">
           {{ file.filename }}
         </li>
       </ul>
@@ -84,7 +84,7 @@ const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
 )
 const deletionModal: Ref<InstanceType<typeof ModalComponent> | null> = ref(null)
-const beDeletedFiles: Ref<Map<string, File>> = ref(new Map())
+const toBeDeletedFiles: Ref<Map<string, File>> = ref(new Map())
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 )
@@ -204,7 +204,7 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
 async function deleteFiles() {
   const deletedFiles: File[] = []
 
-  for (const [key, file] of beDeletedFiles.value) {
+  for (const [key, file] of toBeDeletedFiles.value) {
     try {
       await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
       if (selectedFiles.value.has(key)) {
@@ -227,17 +227,17 @@ async function deleteFiles() {
 }
 
 async function deleteSingleFile(key: string, file: File) {
-  beDeletedFiles.value.clear()
-  beDeletedFiles.value.set(key, file)
+  toBeDeletedFiles.value.clear()
+  toBeDeletedFiles.value.set(key, file)
   deletionModal.value?.showModal()
 }
 
 async function deleteSelectedFiles() {
-  beDeletedFiles.value.clear()
+  toBeDeletedFiles.value.clear()
   selectedFiles.value.forEach((_, key) => {
     const renderFile = files.value.get(key)
     if (renderFile?.file != undefined) {
-      beDeletedFiles.value.set(key, renderFile.file)
+      toBeDeletedFiles.value.set(key, renderFile.file)
     }
   })
   deletionModal.value?.showModal()
