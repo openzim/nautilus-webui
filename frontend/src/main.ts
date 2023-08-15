@@ -7,7 +7,16 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faPlus, faMinus, faXmark, faTrash, faFilePen, faAngleDown, faCheck, faSort } from '@fortawesome/free-solid-svg-icons'
+import {
+  faPlus,
+  faMinus,
+  faXmark,
+  faTrash,
+  faFilePen,
+  faAngleDown,
+  faCheck,
+  faSort
+} from '@fortawesome/free-solid-svg-icons'
 
 /* add icons to the library */
 library.add(faPlus, faMinus, faXmark, faTrash, faFilePen, faAngleDown, faCheck, faSort)
