@@ -17,6 +17,7 @@
       {{ fileUploadedDate }}
     </td>
     <td class="align-middle ps-4">
+      <!-- TODO: Once S3 uploading part is finished, we need to change this part to show better progress. -->
       <div v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING" class="spinner-border text-secondary"
         role="status">
         <span class="visually-hidden">Loading...</span>
