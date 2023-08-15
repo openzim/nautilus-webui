@@ -54,7 +54,9 @@ export interface AlertMessage {
 
 export enum AlertType {
   ERROR = 'danger',
-  WARNING = 'warning'
+  WARNING = 'warning',
+  SUCCESS = 'success',
+  INFO = 'info',
 }
 
 export class Constants {

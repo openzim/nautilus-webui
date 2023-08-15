@@ -220,9 +220,9 @@ async function deleteFiles() {
   }
 
   if (deletedFiles.length == 1) {
-    storeApp.alertsWarning(`File ${deletedFiles[0].filename}has been removed`)
+    storeApp.alertsSuccess(`File ${deletedFiles[0].filename}has been removed`)
   } else {
-    storeApp.alertsWarning(`${deletedFiles.length} files have been removed`)
+    storeApp.alertsSuccess(`${deletedFiles.length} files have been removed`)
   }
 }
 
