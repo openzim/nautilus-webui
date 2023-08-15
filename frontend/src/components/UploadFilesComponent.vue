@@ -1,6 +1,10 @@
 <template>
-  <div @dragenter.prevent="setActive" @dragover.prevent="setActive" @dragleave.prevent="setInactive"
-    @drop.prevent="dropFiles">
+  <div
+    @dragenter.prevent="setActive"
+    @dragover.prevent="setActive"
+    @dragleave.prevent="setInactive"
+    @drop.prevent="dropFiles"
+  >
     <slot />
   </div>
 </template>
@@ -50,7 +54,7 @@ async function dropFiles(event: DragEvent) {
     }
 
     if (file.type == '') {
-      storeApp.alertsWarning("Folders cannot be uploaded directly")
+      storeApp.alertsWarning('Folders cannot be uploaded directly')
       return
     }
 

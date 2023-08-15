@@ -1,8 +1,13 @@
 <template>
   <tr>
     <th scope="row" class="align-middle">
-      <input class="form-check-input" type="checkbox" value="" @change.prevent="toggleSelectFile(props.renderKey)"
-        :checked="props.isSelected" />
+      <input
+        class="form-check-input"
+        type="checkbox"
+        value=""
+        @change.prevent="toggleSelectFile(props.renderKey)"
+        :checked="props.isSelected"
+      />
     </th>
     <td class="align-middle">
       {{ props.clientVisibleFile.file.filename }}
@@ -18,12 +23,19 @@
     </td>
     <td class="align-middle ps-4">
       <!-- TODO: Once S3 uploading part is finished, we need to change this part to show better progress. -->
-      <div v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING" class="spinner-border text-secondary"
-        role="status">
+      <div
+        v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING"
+        class="spinner-border text-secondary"
+        role="status"
+      >
         <span class="visually-hidden">Loading...</span>
       </div>
-      <span v-else-if="props.clientVisibleFile.file.status == FileStatus.FAILURE" data-bs-toggle="tooltip"
-        :data-bs-title="props.clientVisibleFile.statusText" ref="toolTipsElement">
+      <span
+        v-else-if="props.clientVisibleFile.file.status == FileStatus.FAILURE"
+        data-bs-toggle="tooltip"
+        :data-bs-title="props.clientVisibleFile.statusText"
+        ref="toolTipsElement"
+      >
         <font-awesome-icon class="text-danger fs-5" :icon="['fas', 'xmark']" />
       </span>
       <span v-else>
@@ -31,7 +43,11 @@
       </span>
     </td>
     <td class="align-middle">
-      <div class="position-relative" @mouseover.prevent="upHere = true" @mouseleave.prevent="upHere = false">
+      <div
+        class="position-relative"
+        @mouseover.prevent="upHere = true"
+        @mouseleave.prevent="upHere = false"
+      >
         {{ props.clientVisibleFile.file.authors != undefined ? `Authors; ` : '' }}
         {{ props.clientVisibleFile.file.description != undefined ? `Description; ` : '' }}
         <div v-show="upHere" class="card position-absolute bottom-0 start-0 metadata-card">
@@ -47,7 +63,11 @@
       </div>
     </td>
     <td class="align-middle">
-      <button type="button" class="btn" @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)">
+      <button
+        type="button"
+        class="btn"
+        @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)"
+      >
         <font-awesome-icon :icon="['fas', 'trash']" />
       </button>
       <button type="button" class="btn" v-if="props.showEditButton">
@@ -80,10 +100,7 @@ const fileUploadedDate = computed(() =>
   moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm')
 )
 const authors = computed(() =>
-  props.clientVisibleFile.file.authors?.reduce(
-    (prev, author) => prev + author + ',',
-    ''
-  )
+  props.clientVisibleFile.file.authors?.reduce((prev, author) => prev + author + ',', '')
 )
 
 watch(toolTipsElement, (newValue) => {

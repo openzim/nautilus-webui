@@ -1,33 +1,63 @@
 <template>
   <tr>
     <th scope="col">
-      <input class="form-check-input" type="checkbox" value="" :indeterminate="isIndeterminate" :checked="isCheckedAll"
-        @change.prevent="toggleSelectAllFiles" />
+      <input
+        class="form-check-input"
+        type="checkbox"
+        value=""
+        :indeterminate="isIndeterminate"
+        :checked="isCheckedAll"
+        @change.prevent="toggleSelectAllFiles"
+      />
     </th>
     <th scope="col">
-      <SortButton title="Name" :increase-function="sortByName" :decrease-function="sortByNameReversed"
-        @update-compare-function="updateCompareFunction" />
+      <SortButton
+        title="Name"
+        :increase-function="sortByName"
+        :decrease-function="sortByNameReversed"
+        @update-compare-function="updateCompareFunction"
+      />
     </th>
     <th scope=" col">
-      <SortButton title="File Size" :increase-function="sortBySizeDescending" :decrease-function="sortBySizeAscending"
-        @update-compare-function="updateCompareFunction" />
+      <SortButton
+        title="File Size"
+        :increase-function="sortBySizeDescending"
+        :decrease-function="sortBySizeAscending"
+        @update-compare-function="updateCompareFunction"
+      />
     </th>
     <th scope="col">
-      <SortButton title="Kind" :increase-function="sortByKindNameReversed" :decrease-function="sortByKindName"
-        @update-compare-function="updateCompareFunction" />
+      <SortButton
+        title="Kind"
+        :increase-function="sortByKindNameReversed"
+        :decrease-function="sortByKindName"
+        @update-compare-function="updateCompareFunction"
+      />
     </th>
     <th scope="col">
-      <SortButton title="Date Uploaded" :increase-function="sortByUploadedDateDescending"
-        :decrease-function="sortByUploadedDateAscending" @update-compare-function="updateCompareFunction" />
+      <SortButton
+        title="Date Uploaded"
+        :increase-function="sortByUploadedDateDescending"
+        :decrease-function="sortByUploadedDateAscending"
+        @update-compare-function="updateCompareFunction"
+      />
     </th>
     <th scope="col">
-      <SortButton title="Status" :increase-function="sortByStatusNameReversed" :decrease-function="sortByStatusName"
-        @update-compare-function="updateCompareFunction" />
+      <SortButton
+        title="Status"
+        :increase-function="sortByStatusNameReversed"
+        :decrease-function="sortByStatusName"
+        @update-compare-function="updateCompareFunction"
+      />
     </th>
     <th scope="align-middle">Metadata</th>
     <th scope="col">
-      <button type="button" class="btn border-0" :disabled="isDisableDeleteButton"
-        @click.prevent="emit('deleteSelectedFiles')">
+      <button
+        type="button"
+        class="btn border-0"
+        :disabled="isDisableDeleteButton"
+        @click.prevent="emit('deleteSelectedFiles')"
+      >
         <font-awesome-icon :icon="['fas', 'trash']" />
       </button>
     </th>
