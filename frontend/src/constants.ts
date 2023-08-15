@@ -79,8 +79,6 @@ export const EmptyConstants = new Constants({
   NAUTILUS_PROJECT_QUOTA: 100000000
 })
 
-// We need to use 2 as the base instead of the default base.
-// if we use the default base, we will have the file rejected for less than the limit
 // We use jedec, rather than the default iec to make the file size display more readable.
 // After using jedec, the file will display MB instead of MiB
 export const humanifyFileSize = partial({ standard: 'jedec', output: 'string' })
