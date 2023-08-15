@@ -1,4 +1,12 @@
 import { v4 as uuid } from 'uuid'
+import { partial } from 'filesize'
+
+export interface ClientVisibleFile {
+  file: File
+  uploadedSize: number
+  statusCode?: string
+  statusText?: string
+}
 
 export interface Project {
   id: string
@@ -29,7 +37,8 @@ export interface File {
 export enum FileStatus {
   UPLOADING = 'UPLOADING',
   LOCAL = 'LOCAL',
-  S3 = 'S3'
+  S3 = 'S3',
+  FAILURE = 'failure'
 }
 
 export interface Environ {
@@ -45,7 +54,9 @@ export interface AlertMessage {
 
 export enum AlertType {
   ERROR = 'danger',
-  WARNING = 'warning'
+  WARNING = 'warning',
+  SUCCESS = 'success',
+  INFO = 'info'
 }
 
 export class Constants {
@@ -64,6 +75,15 @@ export class Constants {
 
 export const EmptyConstants = new Constants({
   NAUTILUS_WEB_API: 'noapi',
-  NAUTILUS_FILE_QUOTA: 104857600,
-  NAUTILUS_PROJECT_QUOTA: 104857600
+  NAUTILUS_FILE_QUOTA: 100000000,
+  NAUTILUS_PROJECT_QUOTA: 100000000
 })
+
+// We use jedec, rather than the default iec to make the file size display more readable.
+// After using jedec, the file will display MB instead of MiB
+export const humanifyFileSize = partial({ standard: 'jedec', output: 'string' })
+
+export type CompareFunctionType = (
+  a: [string, ClientVisibleFile],
+  b: [string, ClientVisibleFile]
+) => number

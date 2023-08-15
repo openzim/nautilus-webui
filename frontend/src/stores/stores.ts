@@ -29,6 +29,14 @@ export const useAppStore = defineStore('app', () => {
   const constants: Ref<Constants> = ref(EmptyConstants)
   const axiosInstance = ref(axios.create())
 
+  function alertsSuccess(message: string) {
+    alertMessages.value.set(uuid(), { type: AlertType.SUCCESS, message: `SUCCESS: ${message}` })
+  }
+
+  function alertsInfo(message: string) {
+    alertMessages.value.set(uuid(), { type: AlertType.INFO, message: `INFO: ${message}` })
+  }
+
   function alertsError(message: string) {
     alertMessages.value.set(uuid(), { type: AlertType.ERROR, message: `ERROR: ${message}` })
   }
@@ -56,11 +64,13 @@ export const useAppStore = defineStore('app', () => {
   }
 
   return {
+    alertsSuccess,
+    alertsInfo,
+    alertsError,
+    alertsWarning,
     alertMessages,
     constants,
     axiosInstance,
-    alertsError,
-    alertsWarning,
     clearError,
     initConstants
   }

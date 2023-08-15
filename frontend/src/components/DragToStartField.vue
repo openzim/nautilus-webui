@@ -1,62 +1,33 @@
 <template>
   <div class="d-flex justify-content-md-center">
-    <div
-      class="card border-3 border-3 rounded-3 drop"
-      :data-active="isActive"
-      @dragenter.prevent="setActive"
-      @dragover.prevent="setActive"
-      @dragleave.prevent="setInactive"
-      @drop.prevent="dropFiles"
-      :class="{ 'bg-light': isActive }"
-    >
-      <div class="card-body d-flex justify-content-center align-items-center">
-        <h3 class="card-title">Drop File to Start!</h3>
+    <UploadFilesComponent @drop-files-handler="dropFiles" @update-is-active="updateIsActive">
+      <div
+        class="card border-3 rounded-3 drop"
+        :data-active="isActive"
+        :class="{ 'bg-light': isActive }"
+      >
+        <div class="card-body d-flex justify-content-center align-items-center">
+          <h3 class="card-title">Drop File to Start!</h3>
+        </div>
       </div>
-    </div>
+    </UploadFilesComponent>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores/stores'
 import { ref } from 'vue'
+import UploadFilesComponent from './UploadFilesComponent.vue'
 const isActive = ref(false)
-const storeApp = useAppStore()
 
+function updateIsActive(newValue: boolean) {
+  isActive.value = newValue
+}
 const emit = defineEmits<{
   dropFilesHandler: [files: FileList, uploadFileSize: number]
 }>()
 
-function setActive() {
-  isActive.value = true
-}
-function setInactive() {
-  isActive.value = false
-}
-async function dropFiles(event: DragEvent) {
-  isActive.value = false
-  let files = event.dataTransfer?.files
-
-  if (files == undefined) {
-    return
-  }
-
-  let totalSize = 0
-
-  for (const file of files) {
-    if (file.size > storeApp.constants.env.NAUTILUS_FILE_QUOTA) {
-      storeApp.alertsWarning(`${file.name}'s exceeds the quota`)
-      return
-    }
-
-    if (file.size + totalSize > storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) {
-      storeApp.alertsWarning('Uploading files exceed the quota')
-      return
-    }
-
-    totalSize += file.size
-  }
-
-  emit('dropFilesHandler', files, totalSize)
+async function dropFiles(files: FileList, uploadFileSize: number) {
+  emit('dropFilesHandler', files, uploadFileSize)
 }
 </script>
 
@@ -67,10 +38,5 @@ async function dropFiles(event: DragEvent) {
   border-style: dashed;
   border-color: var(--main-color);
   color: var(--main-color);
-}
-
-.isActive {
-  background-color: var(--main-color);
-  opacity: 0.6;
 }
 </style>
