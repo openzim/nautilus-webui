@@ -1,13 +1,8 @@
 <template>
   <tr>
-    <th scope="row">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        value=""
-        @change.prevent="toggleSelectFile(props.renderKey)"
-        :checked="props.isSelected"
-      />
+    <th scope="row" class="align-middle">
+      <input class="form-check-input" type="checkbox" value="" @change.prevent="toggleSelectFile(props.renderKey)"
+        :checked="props.isSelected" />
     </th>
     <td class="align-middle">
       {{ props.clientVisibleFile.file.filename }}
@@ -22,26 +17,16 @@
       {{ moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm') }}
     </td>
     <td class="align-middle ps-4">
-      <div
-        v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING"
-        class="spinner-border text-secondary"
-        role="status"
-      >
+      <div v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING" class="spinner-border text-secondary"
+        role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <font-awesome-icon
-        class="text-danger fs-5"
-        v-else-if="props.clientVisibleFile.statusCode != undefined"
-        :icon="['fas', 'xmark']"
-      />
+      <font-awesome-icon class="text-danger fs-5" v-else-if="props.clientVisibleFile.statusCode != undefined"
+        :icon="['fas', 'xmark']" />
       <font-awesome-icon class="text-primary fs-5" v-else :icon="['fas', 'check']" />
     </td>
     <td class="align-middle">
-      <div
-        class="position-relative"
-        @mouseover.prevent="upHere = true"
-        @mouseleave.prevent="upHere = false"
-      >
+      <div class="position-relative" @mouseover.prevent="upHere = true" @mouseleave.prevent="upHere = false">
         {{ props.clientVisibleFile.file.authors != undefined ? `Authors; ` : '' }}
         {{ props.clientVisibleFile.file.description != undefined ? `Description; ` : '' }}
         <div v-show="upHere" class="card position-absolute bottom-0 start-0 metadata-card">
@@ -57,11 +42,7 @@
       </div>
     </td>
     <td class="align-middle">
-      <button
-        type="button"
-        class="btn"
-        @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)"
-      >
+      <button type="button" class="btn" @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)">
         <font-awesome-icon :icon="['fas', 'trash']" />
       </button>
       <button type="button" class="btn" v-if="props.showEditButton">
