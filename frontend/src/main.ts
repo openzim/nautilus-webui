@@ -15,11 +15,12 @@ import {
   faFilePen,
   faAngleDown,
   faCheck,
-  faSort
+  faSort,
+  faFile,
 } from '@fortawesome/free-solid-svg-icons'
 
 /* add icons to the library */
-library.add(faPlus, faMinus, faXmark, faTrash, faFilePen, faAngleDown, faCheck, faSort)
+library.add(faPlus, faMinus, faXmark, faTrash, faFilePen, faAngleDown, faCheck, faSort, faFile)
 
 import App from './App.vue'
 import router from './router'

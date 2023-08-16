@@ -1,10 +1,10 @@
 <template>
   <div class="container-fluid vh-100">
     <div class="row">
-      <div class="col sticky-top test">
+      <div class="col col-3 sticky-top test">
         <SideBarComponent />
       </div>
-      <div class="col col-10 content d-flex flex-column justify-content-between">
+      <div class="col content d-flex flex-column justify-content-between">
         <div>
           <ProjectView />
         </div>

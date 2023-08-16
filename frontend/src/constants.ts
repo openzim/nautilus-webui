@@ -87,3 +87,4 @@ export type CompareFunctionType = (
   a: [string, ClientVisibleFile],
   b: [string, ClientVisibleFile]
 ) => number
+

@@ -9,15 +9,13 @@ import DragToStartField from '@/components/DragToStartField.vue'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
+import { createNewProject } from '@/utils';
 
 const storeProjectId = useProjectIdStore()
 const storeApp = useAppStore()
 const storeInitialFiles = useInitialFilesStore()
 
 async function createUserAndProject(): Promise<[User | null, Project | null]> {
-  const projectRequestData = {
-    name: 'First Project'
-  }
   var user: User | null = null
   var project: Project | null = null
 
@@ -30,16 +28,7 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     return [user, project]
   }
 
-  try {
-    const createProjectResponse = await storeApp.axiosInstance.post<Project>(
-      '/projects',
-      projectRequestData
-    )
-    project = createProjectResponse.data
-  } catch (error: any) {
-    console.log('Unable to create a new project.', error)
-    storeApp.alertsError('Unable to create a new project.')
-  }
+  project = await createNewProject("First Project")
 
   return [user, project]
 }

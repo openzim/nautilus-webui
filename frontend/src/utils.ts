@@ -29,3 +29,21 @@ export async function validateUser() {
   }
   return result
 }
+
+export async function createNewProject(name: string): Promise<Project | null> {
+  const storeApp = useAppStore()
+  const projectRequestData = {
+    name: name
+  }
+  try {
+    const createProjectResponse = await storeApp.axiosInstance.post<Project>(
+      '/projects',
+      projectRequestData
+    )
+    return createProjectResponse.data
+  } catch (error: any) {
+    console.log('Unable to create a new project.', error)
+    storeApp.alertsError('Unable to create a new project.')
+    return null
+  }
+}
