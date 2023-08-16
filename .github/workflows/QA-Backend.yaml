@@ -2,8 +2,8 @@ name: QA-Backend
 
 on:
   pull_request:
-    path:
-      - backend/**
+    paths:
+      - 'backend/**'
   push:
     branches: [ main ]
 
