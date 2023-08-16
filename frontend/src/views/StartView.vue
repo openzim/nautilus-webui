@@ -1,9 +1,17 @@
 <template>
-  <ProjectView v-if="isVaildProjectID" />
-  <HomeView v-else />
+  <div class="d-flex flex-column vh-100">
+    <div class="flex-shrink-1">
+      <Suspense>
+        <ProjectView v-if="isVaildProjectID" />
+        <HomeView v-else />
+      </Suspense>
+    </div>
+    <FooterComponent />
+  </div>
 </template>
 
 <script setup lang="ts">
+import FooterComponent from '@/components/FooterComponent.vue'
 import ProjectView from '@/views/ProjectView.vue'
 import HomeView from '@/views/HomeView.vue'
 import { type Project } from '@/constants'
