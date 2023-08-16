@@ -1,6 +1,10 @@
 <template>
-  <div @dragenter.prevent="setActive" @dragover.prevent="setActive" @dragleave.prevent="setInactive"
-    @drop.prevent="dropFiles">
+  <div
+    @dragenter.prevent="setActive"
+    @dragover.prevent="setActive"
+    @dragleave.prevent="setInactive"
+    @drop.prevent="dropFiles"
+  >
     <slot />
   </div>
 </template>
@@ -45,7 +49,7 @@ async function dropFiles(event: DragEvent) {
     }
 
     if (file.size == 0) {
-      storeApp.alertsWarning("Empty files cannot be uploaded")
+      storeApp.alertsWarning('Empty files cannot be uploaded')
       return
     }
 
