@@ -1,12 +1,14 @@
-name: QA
+name: QA-Backend
 
 on:
   pull_request:
+    path:
+      - 'backend'
   push:
     branches: [ main ]
 
 jobs:
-  check-qa:
+  check-backend-qa:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3

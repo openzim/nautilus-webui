@@ -1,0 +1,35 @@
+name: QA-Frontend
+
+on:
+  pull_request:
+    path:
+      - 'frontend'
+  push:
+    branches: [ main ]
+
+jobs:
+  check-frontend-qa:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: 'frontend/.nvmrc'
+          architecture: x64
+
+      - name: Install dependencies (and project)
+        working-directory: frontend
+        run: |
+            corepack enable
+            yarn cache clean
+            yarn install
+
+      - name: Check format
+        working-directory: frontend
+        run: yarn run format:check
+
+      - name: Check eslint
+        working-directory: frontend
+        run: yarn run lint:check
