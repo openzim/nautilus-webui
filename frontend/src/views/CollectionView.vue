@@ -26,7 +26,7 @@ import ProjectView from './ProjectView.vue';
 }
 
 .test {
-  background-color: orange;
+  background-color: var(--main-color);
   height: 100vh;
 }
 
