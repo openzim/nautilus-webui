@@ -1,12 +1,24 @@
 <template>
-  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center" :class="{ 'active': isActive }"
-    @click.prevent="setupProject" @dblclick.prevent="enableEditMode" @mouseover.native="isHover = true"
-    @mouseleave.native="isHover = false">
-    <div class="d-flex align-items-center ">
+  <div
+    class="px-2 py-2 my-2 d-flex justify-content-between align-items-center"
+    :class="{ active: isActive }"
+    @click.prevent="setupProject"
+    @dblclick.prevent="enableEditMode"
+    @mouseover="isHover = true"
+    @mouseleave="isHover = false"
+  >
+    <div class="d-flex align-items-center">
       <div v-if="!isEditMode" class="text-light fs-4 pe-1 me-1">
         <font-awesome-icon :icon="['fa', 'file']" />
       </div>
-      <input ref="inputElement" v-else type="text" class="form-control" v-model="projectName" @blur="disableEditMode">
+      <input
+        ref="inputElement"
+        v-else
+        type="text"
+        class="form-control"
+        v-model="projectName"
+        @blur="disableEditMode"
+      />
       <div v-if="!isEditMode" class="fw-semibold text-light">
         {{ projectName }}
       </div>
@@ -21,15 +33,17 @@
 </template>
 
 <script setup lang="ts">
-import type { Project } from '@/constants';
-import { useAppStore, useProjectIdStore } from '@/stores/stores';
-import moment from 'moment';
-import { computed, ref, watch, type Ref } from 'vue';
+import type { Project } from '@/constants'
+import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import moment from 'moment'
+import { computed, ref, watch, type Ref } from 'vue'
 
 const props = defineProps<{ project: Project }>()
 const emit = defineEmits<{ deleteProject: [Project] }>()
 
-const leftDays = computed(() => props.project.expire_on ? `Expire ${moment.utc(props.project.expire_on).fromNow()}` : '')
+const leftDays = computed(() =>
+  props.project.expire_on ? `Expire ${moment.utc(props.project.expire_on).fromNow()}` : ''
+)
 const storeProjectId = useProjectIdStore()
 const isActive = computed(() => storeProjectId.projectId == props.project.id)
 const isEditMode = ref(false)
@@ -60,10 +74,7 @@ async function updateProjectName(projectId: string, newName: string) {
     name: newName
   }
   try {
-    await storeApp.axiosInstance.patch<Project>(
-      `/projects/${projectId}`,
-      projectRequestData
-    )
+    await storeApp.axiosInstance.patch<Project>(`/projects/${projectId}`, projectRequestData)
   } catch (error: any) {
     console.log('Unable to update project name.', error, projectId)
     storeApp.alertsError(`Unable to update project name, project id: ${projectId}`)

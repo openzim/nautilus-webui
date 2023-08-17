@@ -41,7 +41,7 @@ export async function createNewProject(name: string): Promise<Project | null> {
       projectRequestData
     )
     return createProjectResponse.data
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('Unable to create a new project.', error)
     storeApp.alertsError('Unable to create a new project.')
     return null

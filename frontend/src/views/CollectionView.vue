@@ -17,9 +17,9 @@
 <script setup lang="ts">
 import SideBarComponent from '@/components/SideBarComponent.vue'
 import FooterComponent from '@/components/FooterComponent.vue'
-import ProjectView from './ProjectView.vue';
-import { useProjectIdStore } from '@/stores/stores';
-import { computed } from 'vue';
+import ProjectView from './ProjectView.vue'
+import { useProjectIdStore } from '@/stores/stores'
+import { computed } from 'vue'
 const storeProjectId = useProjectIdStore()
 const hasActivatedProject = computed(() => storeProjectId.projectId != null)
 </script>
@@ -39,7 +39,6 @@ const hasActivatedProject = computed(() => storeProjectId.projectId != null)
 }
 
 .content {
-
   min-height: 100vh;
 }
 </style>

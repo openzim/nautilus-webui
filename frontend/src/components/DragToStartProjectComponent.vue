@@ -9,7 +9,7 @@ import DragToStartField from '@/components/DragToStartField.vue'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
 import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
-import { createNewProject } from '@/utils';
+import { createNewProject } from '@/utils'
 
 const storeProjectId = useProjectIdStore()
 const storeApp = useAppStore()
@@ -28,7 +28,7 @@ async function createUserAndProject(): Promise<[User | null, Project | null]> {
     return [user, project]
   }
 
-  project = await createNewProject("First Project")
+  project = await createNewProject('First Project')
 
   return [user, project]
 }
