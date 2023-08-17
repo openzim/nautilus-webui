@@ -7,7 +7,8 @@
       </button>
     </div>
     <div class="flex-grow-1 py-2 overflow-x-auto">
-      <ProjectColumnComponent v-for="project in projects" :key="project.id" :project="project" />
+      <ProjectColumnComponent v-for="project in projects" :key="project.id" :project="project"
+        @delete-project="deleteProject" />
     </div>
     <div class="border-top border-2 border-white py-2">
       <p class="text-light">FAQ</p>
@@ -40,5 +41,9 @@ async function updateProjects() {
 async function createAndUpdateProject() {
   await createNewProject("New Project")
   await updateProjects()
+}
+
+function deleteProject(project: Project) {
+  projects.value = projects.value.filter(element => element.id != project.id)
 }
 </script>

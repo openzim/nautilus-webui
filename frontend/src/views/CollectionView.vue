@@ -6,7 +6,7 @@
       </div>
       <div class="col content d-flex flex-column justify-content-between">
         <div>
-          <ProjectView />
+          <ProjectView v-if="hasActivatedProject" />
         </div>
         <FooterComponent />
       </div>
@@ -18,6 +18,10 @@
 import SideBarComponent from '@/components/SideBarComponent.vue'
 import FooterComponent from '@/components/FooterComponent.vue'
 import ProjectView from './ProjectView.vue';
+import { useProjectIdStore } from '@/stores/stores';
+import { computed } from 'vue';
+const storeProjectId = useProjectIdStore()
+const hasActivatedProject = computed(() => storeProjectId.projectId != null)
 </script>
 
 <style scoped>
