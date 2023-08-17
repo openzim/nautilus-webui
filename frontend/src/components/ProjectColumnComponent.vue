@@ -71,10 +71,13 @@ async function updateProjectName(projectId: string, newName: string) {
 }
 
 async function deleteProject() {
+  const toBeDeletedProject = props.project
+  if (isActive.value) {
+    storeProjectId.clearProjectId()
+  }
+  emit('deleteProject', toBeDeletedProject)
   try {
-    await storeApp.axiosInstance.delete(`/projects/${props.project.id}`)
-    storeProjectId.clearProjectId()``
-    emit('deleteProject', props.project)
+    await storeApp.axiosInstance.delete(`/projects/${toBeDeletedProject.id}`)
   } catch (error: any) {
     console.log('Unable to delete project.', error, props.project.id)
     storeApp.alertsError(`Unable to delete project, project id: ${props.project.id}`)
