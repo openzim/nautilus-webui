@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid vh-100">
     <div class="row">
-      <div class="col col-3 sticky-top test">
+      <div class="col col-3 sticky-top sidebar">
         <SideBarComponent />
       </div>
       <div class="col content d-flex flex-column justify-content-between">
@@ -29,13 +29,9 @@ const hasActivatedProject = computed(() => storeProjectId.projectId != null)
   height: 100vh;
 }
 
-.test {
+.sidebar {
   background-color: var(--main-color);
   height: 100vh;
-}
-
-.test2 {
-  min-height: 100vh;
 }
 
 .content {
