@@ -12,8 +12,8 @@ const router = createRouter({
       component: StartView
     },
     {
-      path: '/test',
-      name: 'test',
+      path: '/collection',
+      name: 'collection',
       component: CollectionView
     },
     {

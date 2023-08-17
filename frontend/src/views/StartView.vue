@@ -20,6 +20,7 @@ import { useAppStore, useProjectIdStore } from '@/stores/stores'
 import { validProjectID } from '@/utils'
 import { validateUser } from '@/utils'
 import { storeToRefs } from 'pinia'
+import router from '@/router'
 
 const storeProjectId = useProjectIdStore()
 const { projectId } = storeToRefs(storeProjectId)
@@ -48,5 +49,8 @@ if (
   (await validateUser())
 ) {
   setupProjectId()
+  if (await validateUser()) {
+    router.push("/collection")
+  }
 }
 </script>
