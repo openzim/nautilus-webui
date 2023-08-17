@@ -1,5 +1,5 @@
 <template>
-  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center border" :class="{ 'active': isActive }"
+  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center" :class="{ 'active': isActive }"
     @click.prevent="setupProject" @dblclick.prevent="enableEditMode" @mouseover.native="isHover = true"
     @mouseleave.native="isHover = false">
     <div class="d-flex align-items-center ">
@@ -73,7 +73,7 @@ async function updateProjectName(projectId: string, newName: string) {
 async function deleteProject() {
   try {
     await storeApp.axiosInstance.delete(`/projects/${props.project.id}`)
-    storeProjectId.clearProjectId()
+    storeProjectId.clearProjectId()``
     emit('deleteProject', props.project)
   } catch (error: any) {
     console.log('Unable to delete project.', error, props.project.id)
