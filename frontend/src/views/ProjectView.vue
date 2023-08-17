@@ -98,7 +98,6 @@ watch(projectId, async () => {
   files.value.clear()
   const apiFiles = await getAllFiles(storeProjectId.projectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
-  console.log("HHHHH")
 })
 
 if (storeInitialFileStore.initialFiles.length == 0) {
