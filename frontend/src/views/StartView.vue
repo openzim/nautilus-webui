@@ -50,7 +50,7 @@ if (
 ) {
   setupProjectId()
   if (await validateUser()) {
-    router.push('/collection')
+    router.push('/collections')
   }
 }
 </script>
