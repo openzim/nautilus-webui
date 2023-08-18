@@ -54,7 +54,7 @@ export async function updateProjects() {
   try {
     const response = await storeApp.axiosInstance.get<Project[]>('/projects')
     storeProject.setProjects(response.data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('Unable to retrieve projects info', error)
     storeApp.alertsError('Unable to retrieve projects info')
   }

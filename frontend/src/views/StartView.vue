@@ -44,7 +44,8 @@ async function setupProjectId() {
 }
 
 if (
-  (storeProject.lastProjectId != undefined && !(await validProjectID(storeProject.lastProjectId))) ||
+  (storeProject.lastProjectId != undefined &&
+    !(await validProjectID(storeProject.lastProjectId))) ||
   (await validateUser())
 ) {
   setupProjectId()

@@ -2,13 +2,21 @@
   <div class="d-flex flex-column" style="height: 100%">
     <div class="d-flex justify-content-between mt-2 border-bottom border-2 border-white">
       <div class="fw-bold fs-4 text-light">Collection:</div>
-      <button type="button" class="btn fw-bold fs-5 text-light p-1" @click.prevent="createAndUpdateProject">
+      <button
+        type="button"
+        class="btn fw-bold fs-5 text-light p-1"
+        @click.prevent="createAndUpdateProject"
+      >
         <font-awesome-icon :icon="['fas', 'plus']" />
       </button>
     </div>
     <div class="flex-grow-1 py-2 overflow-x-auto">
-      <ProjectColumnComponent v-for="project in storeProject.projects" :key="project.id" :project="project"
-        @delete-project="removeProjectFromList" />
+      <ProjectColumnComponent
+        v-for="project in storeProject.projects"
+        :key="project.id"
+        :project="project"
+        @delete-project="removeProjectFromList"
+      />
     </div>
     <div class="border-top border-2 border-white py-2">
       <p class="text-light"><router-link to="/faq" class="link-light">FAQ</router-link></p>

@@ -1,6 +1,13 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { Constants, EmptyConstants, type AlertMessage, type Environ, AlertType, type Project } from '@/constants'
+import {
+  Constants,
+  EmptyConstants,
+  type AlertMessage,
+  type Environ,
+  AlertType,
+  type Project
+} from '@/constants'
 import { v4 as uuid } from 'uuid'
 import axios from 'axios'
 
@@ -95,8 +102,8 @@ export const useModalStore = defineStore('modal', () => {
   const title = ref('')
   const primaryButtonTitle = ref('')
   const secondaryButtonTitle = ref('')
-  const clickPrimaryButton = ref(async () => { })
-  const clickSecondaryButton = ref(async () => { })
+  const clickPrimaryButton = ref(async () => {})
+  const clickSecondaryButton = ref(async () => {})
   const content: Ref<string[]> = ref([])
 
   function showModal(
@@ -120,6 +127,14 @@ export const useModalStore = defineStore('modal', () => {
     isShow.value = false
   }
   return {
-    title, primaryButtonTitle, secondaryButtonTitle, clickPrimaryButton, clickSecondaryButton, content, isShow, showModal, dismissModal
+    title,
+    primaryButtonTitle,
+    secondaryButtonTitle,
+    clickPrimaryButton,
+    clickSecondaryButton,
+    content,
+    isShow,
+    showModal,
+    dismissModal
   }
 })

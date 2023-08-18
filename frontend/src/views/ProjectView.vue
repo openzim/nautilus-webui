@@ -1,7 +1,13 @@
 <template>
-  <div class="card m-5" :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }">
+  <div
+    class="card m-5"
+    :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }"
+  >
     <div class="card-body">
-      <div class="card-title d-flex justify-content-between align-items-baseline" :class="{ 'border-bottom': isShowed }">
+      <div
+        class="card-title d-flex justify-content-between align-items-baseline"
+        :class="{ 'border-bottom': isShowed }"
+      >
         <h4>
           <button type="button" class="btn text-secondary" @click.prevent="isShowed = !isShowed">
             <font-awesome-icon v-if="isShowed" :icon="['fas', 'minus']" />
@@ -15,32 +21,64 @@
           {{ humanifyFileSize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA) }}
         </div>
       </div>
-      <UploadFilesComponent @drop-files-handler="dropFilesHandler" @update-is-active="updateIsActive" v-show="isShowed">
+      <UploadFilesComponent
+        @drop-files-handler="dropFilesHandler"
+        @update-is-active="updateIsActive"
+        v-show="isShowed"
+      >
         <div>
           <div class="d-flex flex-row-reverse">
             <div class="btn-group btn-group-sm custom-btn-outline-primary" role="group">
-              <input type="radio" class="btn-check" name="btnradio" id="edit" autocomplete="off"
-                @change="isEditMode = true" :checked="isEditMode" />
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="edit"
+                autocomplete="off"
+                @change="isEditMode = true"
+                :checked="isEditMode"
+              />
               <label class="btn btn-outline-primary" for="edit">Edit</label>
 
-              <input type="radio" class="btn-check" name="btnradio" id="upload" autocomplete="off"
-                @change="isEditMode = false" :checked="!isEditMode" />
+              <input
+                type="radio"
+                class="btn-check"
+                name="btnradio"
+                id="upload"
+                autocomplete="off"
+                @change="isEditMode = false"
+                :checked="!isEditMode"
+              />
               <label class="btn btn-outline-primary" for="upload">Upload</label>
             </div>
           </div>
           <table class="table">
             <thead>
-              <FileTableHeaderComponent :selected-files="selectedFiles" :files="files"
-                @update-select-files="updateSelectFiles" @delete-selected-files="deleteSelectedFiles"
-                @update-compare-function="updateCompareFunction" />
+              <FileTableHeaderComponent
+                :selected-files="selectedFiles"
+                :files="files"
+                @update-select-files="updateSelectFiles"
+                @delete-selected-files="deleteSelectedFiles"
+                @update-compare-function="updateCompareFunction"
+              />
             </thead>
             <tbody>
-              <FileTableRowComponent v-for="[key, file] in sortedFiles" :key="key" :render-key="key"
-                :client-visible-file="file" :is-selected="selectedFiles.has(key)" :show-edit-button="isEditMode"
-                @toggle-select-file="toggleSelectFile" @delete-file="deleteSingleFile" />
+              <FileTableRowComponent
+                v-for="[key, file] in sortedFiles"
+                :key="key"
+                :render-key="key"
+                :client-visible-file="file"
+                :is-selected="selectedFiles.has(key)"
+                :show-edit-button="isEditMode"
+                @toggle-select-file="toggleSelectFile"
+                @delete-file="deleteSingleFile"
+              />
             </tbody>
           </table>
-          <div class="drag-field d-flex justify-content-center align-items-center" v-if="files.size <= 10">
+          <div
+            class="drag-field d-flex justify-content-center align-items-center"
+            v-if="files.size <= 10"
+          >
             <h4 style="color: var(--main-color); opacity: 0.6">Drag Files to here</h4>
           </div>
         </div>
@@ -203,7 +241,9 @@ async function deleteFiles() {
 
   for (const [key, file] of toBeDeletedFiles.value) {
     try {
-      await storeApp.axiosInstance.delete(`/projects/${storeProject.lastProjectId}/files/${file.id}`)
+      await storeApp.axiosInstance.delete(
+        `/projects/${storeProject.lastProjectId}/files/${file.id}`
+      )
       if (selectedFiles.value.has(key)) {
         selectedFiles.value.delete(key)
       }
@@ -226,8 +266,15 @@ async function deleteFiles() {
 async function deleteSingleFile(key: string, file: File) {
   toBeDeletedFiles.value.clear()
   toBeDeletedFiles.value.set(key, file)
-  storeModal.showModal("Are you sure you want to delete:", "Delete", "Close",
-    deleteFiles, async () => { toBeDeletedFiles.value.clear() }, [file.title]
+  storeModal.showModal(
+    'Are you sure you want to delete:',
+    'Delete',
+    'Close',
+    deleteFiles,
+    async () => {
+      toBeDeletedFiles.value.clear()
+    },
+    [file.title]
   )
 }
 
@@ -243,8 +290,15 @@ async function deleteSelectedFiles() {
   for (let file of toBeDeletedFiles.value.values()) {
     toBeDeletedFilesName.push(file.title)
   }
-  storeModal.showModal("Are you sure you want to delete:", "Delete", "Close",
-    deleteFiles, async () => { toBeDeletedFiles.value.clear() }, toBeDeletedFilesName
+  storeModal.showModal(
+    'Are you sure you want to delete:',
+    'Delete',
+    'Close',
+    deleteFiles,
+    async () => {
+      toBeDeletedFiles.value.clear()
+    },
+    toBeDeletedFilesName
   )
 }
 

@@ -1,13 +1,26 @@
 <template>
-  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center project-column"
-    :class="{ active: isActive }" @click.prevent="setupProject" @dblclick.prevent="enableEditMode"
-    @mouseover="isHover = true" @mouseleave="isHover = false">
+  <div
+    class="px-2 py-2 my-2 d-flex justify-content-between align-items-center project-column"
+    :class="{ active: isActive }"
+    @click.prevent="setupProject"
+    @dblclick.prevent="enableEditMode"
+    @mouseover="isHover = true"
+    @mouseleave="isHover = false"
+  >
     <div class="d-flex align-items-center">
       <div v-if="!isEditMode" class="text-light fs-4 pe-1 me-1">
         <font-awesome-icon :icon="['fa', 'file']" />
       </div>
-      <input ref="inputElement" v-else type="text" class="form-control" v-model="projectName"
-        @blur="exitEditModeWithChange" @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" />
+      <input
+        ref="inputElement"
+        v-else
+        type="text"
+        class="form-control"
+        v-model="projectName"
+        @blur="exitEditModeWithChange"
+        @keyup.esc="exitEditModeWithoutChange"
+        @keyup.enter="exitEditModeWithChange"
+      />
       <div v-if="!isEditMode" class="fw-semibold text-light">
         {{ projectName }}
       </div>
@@ -87,7 +100,14 @@ async function deleteProject() {
 }
 
 async function clickDeleteProjectButton() {
-  storeModal.showModal("Are you sure you want to delete:", "Delete", "Close", deleteProject, async () => { }, [props.project.name])
+  storeModal.showModal(
+    'Are you sure you want to delete:',
+    'Delete',
+    'Close',
+    deleteProject,
+    async () => {},
+    [props.project.name]
+  )
 }
 </script>
 
