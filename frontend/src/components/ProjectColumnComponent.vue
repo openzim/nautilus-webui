@@ -14,7 +14,7 @@
     <div v-if="!isHover" class="expire text-white-50">
       {{ leftDays }}
     </div>
-    <button v-else type="button" class="btn text-light" @click.stop="clickDeleteProjectButton">
+    <button v-else type="button" class="btn text-light py-0" @click.stop="clickDeleteProjectButton">
       <font-awesome-icon :icon="['fas', 'trash']" />
     </button>
   </div>
