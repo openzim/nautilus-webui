@@ -15,7 +15,7 @@
         v-for="project in projects"
         :key="project.id"
         :project="project"
-        @delete-project="deleteProject"
+        @delete-project="removeProjectFromList"
       />
     </div>
     <div class="border-top border-2 border-white py-2">
@@ -51,7 +51,7 @@ async function createAndUpdateProject() {
   await updateProjects()
 }
 
-function deleteProject(project: Project) {
+function removeProjectFromList(project: Project) {
   projects.value = projects.value.filter((element) => element.id != project.id)
 }
 </script>

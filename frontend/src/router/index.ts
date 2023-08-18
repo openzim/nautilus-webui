@@ -1,7 +1,7 @@
 import PrivacyAndCookieStatement from '@/views/PrivacyAndCookieStatement.vue'
 import StartView from '@/views/StartView.vue'
 import TermsOfService from '@/views/TermsOfService.vue'
-import CollectionView from '@/views/CollectionView.vue'
+import CollectionsView from '@/views/CollectionsView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,9 +12,9 @@ const router = createRouter({
       component: StartView
     },
     {
-      path: '/collection',
-      name: 'collection',
-      component: CollectionView
+      path: '/collections',
+      name: 'collections',
+      component: CollectionsView
     },
     {
       path: '/privacy-and-cookie-statement',

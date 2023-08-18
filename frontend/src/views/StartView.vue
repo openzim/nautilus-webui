@@ -2,7 +2,7 @@
   <div class="d-flex flex-column vh-100">
     <div class="flex-shrink-1">
       <Suspense>
-        <ProjectView v-if="isVaildProjectID" />
+        <ProjectView v-if="isValidProjectId" />
         <HomeView v-else />
       </Suspense>
     </div>
@@ -25,10 +25,10 @@ import router from '@/router'
 const storeProjectId = useProjectIdStore()
 const { projectId } = storeToRefs(storeProjectId)
 const storeApp = useAppStore()
-const isVaildProjectID = ref(await validProjectID(storeProjectId.projectId))
+const isValidProjectId = ref(await validProjectID(storeProjectId.projectId))
 
 watch(projectId, async (newId) => {
-  isVaildProjectID.value = await validProjectID(newId)
+  isValidProjectId.value = await validProjectID(newId)
 })
 
 async function setupProjectId() {

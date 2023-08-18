@@ -6,7 +6,7 @@
       </div>
       <div class="col content d-flex flex-column justify-content-between">
         <div>
-          <ProjectView v-if="hasActivatedProject" />
+          <ProjectView v-if="hasValidProjectId" />
         </div>
         <FooterComponent />
       </div>
@@ -21,7 +21,7 @@ import ProjectView from './ProjectView.vue'
 import { useProjectIdStore } from '@/stores/stores'
 import { computed } from 'vue'
 const storeProjectId = useProjectIdStore()
-const hasActivatedProject = computed(() => storeProjectId.projectId != null)
+const hasValidProjectId = computed(() => storeProjectId.projectId != null)
 </script>
 
 <style scoped>
