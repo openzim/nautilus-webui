@@ -1,4 +1,4 @@
-import { useAppStore } from './stores/stores'
+import { useAppStore, useProjectStore } from './stores/stores'
 import type { Project } from '@/constants'
 
 /** Checks if a given project ID is valid */
@@ -45,5 +45,17 @@ export async function createNewProject(name: string): Promise<Project | null> {
     console.log('Unable to create a new project.', error)
     storeApp.alertsError('Unable to create a new project.')
     return null
+  }
+}
+
+export async function updateProjects() {
+  const storeProject = useProjectStore()
+  const storeApp = useAppStore()
+  try {
+    const response = await storeApp.axiosInstance.get<Project[]>('/projects')
+    storeProject.setProjects(response.data)
+  } catch (error: any) {
+    console.log('Unable to retrieve projects info', error)
+    storeApp.alertsError('Unable to retrieve projects info')
   }
 }

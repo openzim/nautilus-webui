@@ -20,22 +20,11 @@
 <script setup lang="ts">
 import ProjectColumnComponent from './ProjectColumnComponent.vue'
 import type { Project } from '@/constants'
-import { useAppStore, useProjectStore } from '@/stores/stores'
-import { createNewProject } from '@/utils'
-const storeApp = useAppStore()
+import { useProjectStore } from '@/stores/stores'
+import { createNewProject, updateProjects } from '@/utils'
 const storeProject = useProjectStore()
 
 await updateProjects()
-
-async function updateProjects() {
-  try {
-    const response = await storeApp.axiosInstance.get<Project[]>('/projects')
-    storeProject.setProjects(response.data)
-  } catch (error: any) {
-    console.log('Unable to retrieve projects info', error)
-    storeApp.alertsError('Unable to retrieve projects info')
-  }
-}
 
 async function createAndUpdateProject() {
   await createNewProject('New Project')

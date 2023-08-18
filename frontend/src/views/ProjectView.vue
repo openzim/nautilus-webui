@@ -63,6 +63,7 @@ import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } fro
 import axios from 'axios'
 import { ref, type Ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { updateProjects } from '@/utils'
 
 const isActive = ref(false)
 const isEditMode = ref(false)
@@ -152,7 +153,6 @@ async function uploadFiles(uploadFiles: FileList) {
         if (files.value.has(newFile.id)) {
           files.value.get(newFile.id)!.uploadedSize = progressEvent.loaded
         }
-        console.log(progressEvent.loaded)
       }
     }
 
@@ -176,7 +176,10 @@ async function uploadFiles(uploadFiles: FileList) {
         })
     )
 
-    axios.all(uploadFileRequestsList)
+    // After files are uploaded, check the project expiration date.
+    axios.all(uploadFileRequestsList).finally(() => {
+      updateProjects()
+    })
   }
 }
 
