@@ -1,7 +1,7 @@
 <template>
-  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center" :class="{ active: isActive }"
-    @click.prevent="setupProject" @dblclick.prevent="enableEditMode" @mouseover="isHover = true"
-    @mouseleave="isHover = false">
+  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center project-column"
+    :class="{ active: isActive }" @click.prevent="setupProject" @dblclick.prevent="enableEditMode"
+    @mouseover="isHover = true" @mouseleave="isHover = false">
     <div class="d-flex align-items-center">
       <div v-if="!isEditMode" class="text-light fs-4 pe-1 me-1">
         <font-awesome-icon :icon="['fa', 'file']" />
@@ -14,7 +14,7 @@
     <div v-if="!isHover" class="expire text-white-50">
       {{ leftDays }}
     </div>
-    <button v-else type="button" class="btn text-light py-0" @click.stop="clickDeleteProjectButton">
+    <button v-else type="button" class="btn text-light py-9" @click.stop="clickDeleteProjectButton">
       <font-awesome-icon :icon="['fas', 'trash']" />
     </button>
   </div>
@@ -96,5 +96,10 @@ async function clickDeleteProjectButton() {
 
 .active {
   background-color: orange;
+}
+
+.project-column {
+  cursor: pointer;
+  height: 3em;
 }
 </style>
