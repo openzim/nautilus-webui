@@ -6,7 +6,8 @@
       <div v-if="!isEditMode" class="text-light fs-4 pe-1 me-1">
         <font-awesome-icon :icon="['fa', 'file']" />
       </div>
-      <input ref="inputElement" v-else type="text" class="form-control" v-model="projectName" @blur="disableEditMode" />
+      <input ref="inputElement" v-else type="text" class="form-control" v-model="projectName"
+        @blur="exitEditModeWithChange" @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" />
       <div v-if="!isEditMode" class="fw-semibold text-light">
         {{ projectName }}
       </div>
@@ -53,9 +54,14 @@ function enableEditMode() {
   isEditMode.value = true
 }
 
-async function disableEditMode() {
+async function exitEditModeWithChange() {
   isEditMode.value = false
   await updateProjectName(props.project.id, projectName.value)
+}
+
+async function exitEditModeWithoutChange() {
+  isEditMode.value = false
+  projectName.value = props.project.name
 }
 
 async function updateProjectName(projectId: string, newName: string) {
