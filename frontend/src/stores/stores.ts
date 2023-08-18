@@ -84,3 +84,30 @@ export const useInitialFilesStore = defineStore('initialFiles', () => {
   }
   return { initialFiles, setInitialFiles }
 })
+
+export const useModalStore = defineStore('modal', () => {
+  const isShow = ref(false)
+  const title = ref('')
+  const primaryButtonTitle = ref('')
+  const secondaryButtonTitle = ref('')
+  const clickPrimaryButton = ref(async () => { })
+  const clickSecondaryButton = ref(async () => { })
+  const content: Ref<string[]> = ref([])
+
+  function showModal(newTitle: string, newPrimaryButtonTitle: string, newSecondaryButtonTitle: string, newClickPrimaryButton: () => Promise<void>, newClickSecondaryButton: () => Promise<void>, newContent: string[]) {
+    title.value = newTitle
+    primaryButtonTitle.value = newPrimaryButtonTitle
+    secondaryButtonTitle.value = newSecondaryButtonTitle
+    clickPrimaryButton.value = newClickPrimaryButton
+    clickSecondaryButton.value = newClickSecondaryButton
+    content.value = newContent
+    isShow.value = true
+  }
+
+  function dismissModal() {
+    isShow.value = false
+  }
+  return {
+    title, primaryButtonTitle, secondaryButtonTitle, clickPrimaryButton, clickSecondaryButton, content, isShow, showModal, dismissModal
+  }
+})
