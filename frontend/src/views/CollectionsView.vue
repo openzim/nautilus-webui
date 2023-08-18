@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid vh-100">
     <div class="row">
-      <div class="col col-3 sticky-top sidebar">
+      <div class="col col-2 sticky-top sidebar">
         <SideBarComponent />
       </div>
       <div class="col content d-flex flex-column justify-content-between">
