@@ -7,7 +7,7 @@
       </button>
     </div>
     <div class="flex-grow-1 py-2 overflow-x-auto">
-      <ProjectColumnComponent v-for="project in projects" :key="project.id" :project="project"
+      <ProjectColumnComponent v-for="project in storeProject.projects" :key="project.id" :project="project"
         @delete-project="removeProjectFromList" />
     </div>
     <div class="border-top border-2 border-white py-2">
@@ -20,18 +20,17 @@
 <script setup lang="ts">
 import ProjectColumnComponent from './ProjectColumnComponent.vue'
 import type { Project } from '@/constants'
-import { useAppStore } from '@/stores/stores'
+import { useAppStore, useProjectStore } from '@/stores/stores'
 import { createNewProject } from '@/utils'
-import { ref, type Ref } from 'vue'
 const storeApp = useAppStore()
-const projects: Ref<Project[]> = ref([])
+const storeProject = useProjectStore()
 
 await updateProjects()
 
 async function updateProjects() {
   try {
     const response = await storeApp.axiosInstance.get<Project[]>('/projects')
-    projects.value = response.data
+    storeProject.setProjects(response.data)
   } catch (error: any) {
     console.log('Unable to retrieve projects info', error)
     storeApp.alertsError('Unable to retrieve projects info')
@@ -44,6 +43,11 @@ async function createAndUpdateProject() {
 }
 
 function removeProjectFromList(project: Project) {
-  projects.value = projects.value.filter((element) => element.id != project.id)
+  storeProject.setProjects(storeProject.projects.filter((element) => element.id != project.id))
+  if (storeProject.projects.length != 0) {
+    storeProject.setLastProjectId(storeProject.projects[0].id)
+  } else {
+    storeProject.clearLastProjectId()
+  }
 }
 </script>

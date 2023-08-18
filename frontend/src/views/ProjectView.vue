@@ -52,7 +52,6 @@
 import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
-import ModalComponent from '@/components/ModalComponent.vue'
 import {
   FileStatus,
   type File,
@@ -60,7 +59,7 @@ import {
   humanifyFileSize,
   type CompareFunctionType
 } from '@/constants'
-import { useAppStore, useProjectIdStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
+import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
 import { ref, type Ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -69,9 +68,9 @@ const isActive = ref(false)
 const isEditMode = ref(false)
 const isShowed = ref(true)
 const storeApp = useAppStore()
-const storeProjectId = useProjectIdStore()
+const storeProject = useProjectStore()
 const storeModal = useModalStore()
-const { projectId } = storeToRefs(storeProjectId)
+const { lastProjectId } = storeToRefs(storeProject)
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, ClientVisibleFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
@@ -86,14 +85,14 @@ const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
 )
 
-watch(projectId, async () => {
+watch(lastProjectId, async () => {
   files.value.clear()
-  const apiFiles = await getAllFiles(storeProjectId.projectId)
+  const apiFiles = await getAllFiles(storeProject.lastProjectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 })
 
 if (storeInitialFileStore.initialFiles.length == 0) {
-  const apiFiles = await getAllFiles(storeProjectId.projectId)
+  const apiFiles = await getAllFiles(storeProject.lastProjectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
@@ -126,14 +125,14 @@ async function getAllFiles(projectId: string | null) {
 }
 
 async function uploadFiles(uploadFiles: FileList) {
-  if (storeProjectId.projectId == null) {
+  if (storeProject.lastProjectId == null) {
     return
   }
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
     const newFile: File = {
       id: storeApp.constants.genFakeId,
-      project_id: storeProjectId.projectId,
+      project_id: storeProject.lastProjectId,
       filename: uploadFile.name,
       filesize: uploadFile.size,
       title: uploadFile.name,
@@ -145,7 +144,7 @@ async function uploadFiles(uploadFiles: FileList) {
     files.value.set(newFile.id, { file: newFile, uploadedSize: 0 })
 
     const requestData = new FormData()
-    requestData.append('project_id', storeProjectId.projectId)
+    requestData.append('project_id', storeProject.lastProjectId)
     requestData.append('uploaded_file', uploadFile)
 
     const config = {
@@ -159,7 +158,7 @@ async function uploadFiles(uploadFiles: FileList) {
 
     uploadFileRequestsList.push(
       storeApp.axiosInstance
-        .post<File>(`/projects/${storeProjectId.projectId}/files`, requestData, config)
+        .post<File>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
         .then((response) => {
           if (files.value.has(newFile.id)) {
             files.value.get(newFile.id)!.file = response.data
@@ -201,7 +200,7 @@ async function deleteFiles() {
 
   for (const [key, file] of toBeDeletedFiles.value) {
     try {
-      await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
+      await storeApp.axiosInstance.delete(`/projects/${storeProject.lastProjectId}/files/${file.id}`)
       if (selectedFiles.value.has(key)) {
         selectedFiles.value.delete(key)
       }
@@ -209,7 +208,7 @@ async function deleteFiles() {
 
       deletedFiles.push(file)
     } catch (error: any) {
-      console.log('Unable to delete the file', storeProjectId.projectId, error)
+      console.log('Unable to delete the file', storeProject.lastProjectId, error)
       storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
     }
   }

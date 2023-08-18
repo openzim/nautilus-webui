@@ -18,10 +18,10 @@
 import SideBarComponent from '@/components/SideBarComponent.vue'
 import FooterComponent from '@/components/FooterComponent.vue'
 import ProjectView from './ProjectView.vue'
-import { useProjectIdStore } from '@/stores/stores'
+import { useProjectStore } from '@/stores/stores'
 import { computed } from 'vue'
-const storeProjectId = useProjectIdStore()
-const hasValidProjectId = computed(() => storeProjectId.projectId != null)
+const storeProject = useProjectStore()
+const hasValidProjectId = computed(() => storeProject.lastProjectId != null)
 </script>
 
 <style scoped>

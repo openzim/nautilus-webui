@@ -9,11 +9,6 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'start',
-      component: StartView
-    },
-    {
       path: '/collections',
       name: 'collections',
       component: CollectionsView
@@ -37,7 +32,12 @@ const router = createRouter({
       path: '/contact',
       name: 'contact',
       component: ContactPage
-    }
+    },
+    {
+      path: '/',
+      name: 'start',
+      component: StartView
+    },
   ]
 })
 

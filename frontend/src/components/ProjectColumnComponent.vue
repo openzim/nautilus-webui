@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import type { Project } from '@/constants'
-import { useAppStore, useModalStore, useProjectIdStore } from '@/stores/stores'
+import { useAppStore, useModalStore, useProjectStore } from '@/stores/stores'
 import moment from 'moment'
 import { computed, ref, watch, type Ref } from 'vue'
 
@@ -33,9 +33,9 @@ const emit = defineEmits<{ deleteProject: [Project] }>()
 const leftDays = computed(() =>
   props.project.expire_on ? `Expire ${moment.utc(props.project.expire_on).fromNow()}` : ''
 )
-const storeProjectId = useProjectIdStore()
+const storeProject = useProjectStore()
 const storeModal = useModalStore()
-const isActive = computed(() => storeProjectId.projectId == props.project.id)
+const isActive = computed(() => storeProject.lastProjectId == props.project.id)
 const isEditMode = ref(false)
 const isHover = ref(false)
 const projectName = ref(props.project.name)
@@ -47,7 +47,7 @@ watch(inputElement, (newElement) => {
 })
 
 function setupProject() {
-  storeProjectId.setProjectId(props.project.id)
+  storeProject.setLastProjectId(props.project.id)
 }
 
 function enableEditMode() {
@@ -77,17 +77,13 @@ async function updateProjectName(projectId: string, newName: string) {
 }
 
 async function deleteProject() {
-  const toBeDeletedProject = props.project
-  if (isActive.value) {
-    storeProjectId.clearProjectId()
-  }
   try {
-    await storeApp.axiosInstance.delete(`/projects/${toBeDeletedProject.id}`)
+    await storeApp.axiosInstance.delete(`/projects/${props.project.id}`)
   } catch (error: any) {
     console.log('Unable to delete project.', error, props.project.id)
     storeApp.alertsError(`Unable to delete project, project id: ${props.project.id}`)
   }
-  emit('deleteProject', toBeDeletedProject)
+  emit('deleteProject', props.project)
 }
 
 async function clickDeleteProjectButton() {

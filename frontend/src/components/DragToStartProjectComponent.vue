@@ -8,10 +8,10 @@
 import DragToStartField from '@/components/DragToStartField.vue'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
-import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
+import { useAppStore, useProjectStore, useInitialFilesStore } from '@/stores/stores'
 import { createNewProject } from '@/utils'
 
-const storeProjectId = useProjectIdStore()
+const storeProject = useProjectStore()
 const storeApp = useAppStore()
 const storeInitialFiles = useInitialFilesStore()
 
@@ -43,6 +43,7 @@ function setProjectId(project: Project | null) {
   if (project == null) {
     return
   }
-  storeProjectId.setProjectId(project.id)
+  storeProject.setProjects([project])
+  storeProject.setLastProjectId(project.id)
 }
 </script>
