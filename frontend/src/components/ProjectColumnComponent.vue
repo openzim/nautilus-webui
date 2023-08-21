@@ -6,8 +6,8 @@
       <div v-if="!isEditMode" class="text-light fs-4 pe-1 me-1">
         <font-awesome-icon :icon="['fa', 'file']" />
       </div>
-      <input ref="inputElement" v-else type="text" class="form-control" v-model="projectName"
-        @blur="exitEditModeWithChange" @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" />
+      <input ref="inputElement" v-else type="text" class="form-control" @blur="exitEditModeWithoutChange"
+        @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" :value="projectName" />
       <div v-if="!isEditMode" class="fw-semibold text-light project-name">
         {{ projectName }}
       </div>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Project } from '@/constants' 
+import type { Project } from '@/constants'
 import { useAppStore, useModalStore, useProjectStore } from '@/stores/stores'
 import moment from 'moment'
 import { computed, ref, watch, type Ref } from 'vue'
@@ -54,14 +54,14 @@ function enableEditMode() {
   isEditMode.value = true
 }
 
-async function exitEditModeWithChange() {
+async function exitEditModeWithChange(event: Event) {
   isEditMode.value = false
+  projectName.value = event.target != null ? (event.target as HTMLInputElement).value : projectName.value
   await updateProjectName(props.project.id, projectName.value)
 }
 
 async function exitEditModeWithoutChange() {
   isEditMode.value = false
-  projectName.value = props.project.name
 }
 
 async function updateProjectName(projectId: string, newName: string) {
