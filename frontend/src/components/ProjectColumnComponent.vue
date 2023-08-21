@@ -57,7 +57,6 @@ function enableEditMode() {
 
 async function exitEditModeWithChange() {
   isEditMode.value = false
-  projectName.value = editingProjectName.value
   await updateProjectName(props.project.id, projectName.value)
 }
 
@@ -75,7 +74,9 @@ async function updateProjectName(projectId: string, newName: string) {
   } catch (error: any) {
     console.log('Unable to update project name.', error, projectId)
     storeApp.alertsError(`Unable to update project name, project id: ${projectId}`)
+    editingProjectName.value = projectName.value
   }
+  projectName.value = editingProjectName.value
 }
 
 async function deleteProject() {
