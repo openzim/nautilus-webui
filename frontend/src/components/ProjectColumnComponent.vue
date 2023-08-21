@@ -8,7 +8,7 @@
       </div>
       <input ref="inputElement" v-else type="text" class="form-control" @blur="exitEditModeWithoutChange"
         @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" v-model="editingProjectName" />
-      <div v-if="!isEditMode" class="fw-semibold text-light project-name">
+      <div v-if="!isEditMode" class="fw-semibold text-light text-truncate project-name">
         {{ projectName }}
       </div>
     </div>
@@ -116,5 +116,6 @@ async function clickDeleteProjectButton() {
 
 .project-name {
   cursor: text;
+  max-width: 8em;
 }
 </style>
