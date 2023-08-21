@@ -7,7 +7,7 @@
         <font-awesome-icon :icon="['fa', 'file']" />
       </div>
       <input ref="inputElement" v-else type="text" class="form-control" @blur="exitEditModeWithoutChange"
-        @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" :value="projectName" />
+        @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" v-model="editingProjectName" />
       <div v-if="!isEditMode" class="fw-semibold text-light project-name">
         {{ projectName }}
       </div>
@@ -39,6 +39,7 @@ const isActive = computed(() => storeProject.lastProjectId == props.project.id)
 const isEditMode = ref(false)
 const isHover = ref(false)
 const projectName = ref(props.project.name)
+const editingProjectName = ref(projectName)
 const inputElement: Ref<HTMLInputElement | null> = ref(null)
 const storeApp = useAppStore()
 
@@ -54,14 +55,15 @@ function enableEditMode() {
   isEditMode.value = true
 }
 
-async function exitEditModeWithChange(event: Event) {
+async function exitEditModeWithChange() {
   isEditMode.value = false
-  projectName.value = event.target != null ? (event.target as HTMLInputElement).value : projectName.value
+  projectName.value = editingProjectName.value
   await updateProjectName(props.project.id, projectName.value)
 }
 
 async function exitEditModeWithoutChange() {
   isEditMode.value = false
+  editingProjectName.value = projectName.value
 }
 
 async function updateProjectName(projectId: string, newName: string) {
@@ -93,7 +95,7 @@ async function clickDeleteProjectButton() {
     'Close',
     deleteProject,
     async () => { },
-    [props.project.name]
+    [projectName.value]
   )
 }
 </script>
