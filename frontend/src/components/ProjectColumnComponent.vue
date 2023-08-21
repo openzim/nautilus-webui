@@ -1,27 +1,14 @@
 <template>
-  <div
-    class="px-2 py-2 my-2 d-flex justify-content-between align-items-center project-column"
-    :class="{ active: isActive }"
-    @click.prevent="setupProject"
-    @dblclick.prevent="enableEditMode"
-    @mouseover="isHover = true"
-    @mouseleave="isHover = false"
-  >
+  <div class="px-2 py-2 my-2 d-flex justify-content-between align-items-center project-column"
+    :class="{ active: isActive }" @click.prevent="setupProject" @dblclick.prevent="enableEditMode"
+    @mouseover="isHover = true" @mouseleave="isHover = false">
     <div class="d-flex align-items-center">
       <div v-if="!isEditMode" class="text-light fs-4 pe-1 me-1">
         <font-awesome-icon :icon="['fa', 'file']" />
       </div>
-      <input
-        ref="inputElement"
-        v-else
-        type="text"
-        class="form-control"
-        v-model="projectName"
-        @blur="exitEditModeWithChange"
-        @keyup.esc="exitEditModeWithoutChange"
-        @keyup.enter="exitEditModeWithChange"
-      />
-      <div v-if="!isEditMode" class="fw-semibold text-light">
+      <input ref="inputElement" v-else type="text" class="form-control" v-model="projectName"
+        @blur="exitEditModeWithChange" @keyup.esc="exitEditModeWithoutChange" @keyup.enter="exitEditModeWithChange" />
+      <div v-if="!isEditMode" class="fw-semibold text-light project-name">
         {{ projectName }}
       </div>
     </div>
@@ -35,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Project } from '@/constants'
+import type { Project } from '@/constants' 
 import { useAppStore, useModalStore, useProjectStore } from '@/stores/stores'
 import moment from 'moment'
 import { computed, ref, watch, type Ref } from 'vue'
@@ -105,7 +92,7 @@ async function clickDeleteProjectButton() {
     'Delete',
     'Close',
     deleteProject,
-    async () => {},
+    async () => { },
     [props.project.name]
   )
 }
@@ -123,5 +110,9 @@ async function clickDeleteProjectButton() {
 .project-column {
   cursor: pointer;
   height: 3em;
+}
+
+.project-name {
+  cursor: text;
 }
 </style>
