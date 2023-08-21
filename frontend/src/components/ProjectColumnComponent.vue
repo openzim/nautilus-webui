@@ -39,7 +39,7 @@ const isActive = computed(() => storeProject.lastProjectId == props.project.id)
 const isEditMode = ref(false)
 const isHover = ref(false)
 const projectName = ref(props.project.name)
-const editingProjectName = ref(projectName)
+const editingProjectName = ref(projectName.value)
 const inputElement: Ref<HTMLInputElement | null> = ref(null)
 const storeApp = useAppStore()
 
