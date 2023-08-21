@@ -18,16 +18,31 @@ services:
       test: pg_isready -U nautilus
       interval: 3s
       retries: 10
+  redis:
+    image: redis:7.2
+    container_name: nautilus-redis
+    restart: always
+    volumes:
+      - pg_data_redis:/data
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: redis-cli ping
+      interval: 3s
+      retries: 10
   backend:
     build: ../backend
     container_name: nautilus-backend
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+      - REDIS_URI=redis://redis:6379/0
       - ALLOWED_ORIGINS=*
     ports:
       - 8080:80
     depends_on:
       database:
+        condition: service_healthy
+      redis:
         condition: service_healthy
   frontend:
     build: ../frontend
@@ -39,7 +54,7 @@ services:
       - NAUTILUS_FILE_QUOTA=100000000
       - NAUTILUS_PROJECT_QUOTA=100000000
     depends_on:
-      - database
+      - backend
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -48,8 +63,10 @@ services:
     command: /bin/sh -c "sleep Infinity"
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+      - REDIS_URI=redis://redis:6379/0
     depends_on:
       - database
+      - redis
   backend-tests:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -58,7 +75,10 @@ services:
     command: /bin/sh -c "sleep Infinity"
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus-test
+      - REDIS_URI=redis://redis:6379/0
     depends_on:
       - database
+      - redis
 volumes:
   pg_data_nautilus:
+  pg_data_redis:
