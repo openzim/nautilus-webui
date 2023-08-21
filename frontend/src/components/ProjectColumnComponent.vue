@@ -12,10 +12,11 @@
         {{ projectName }}
       </div>
     </div>
-    <div v-if="!isHover" class="expire text-white-50">
+    <div v-show="!isHover" class="expire text-white-50">
       {{ leftDays }}
     </div>
-    <button v-else type="button" class="btn text-light py-9" @click.stop="clickDeleteProjectButton">
+    <button v-show="isHover && !isEditMode" type="button" class="btn text-light py-9"
+      @click.stop="clickDeleteProjectButton">
       <font-awesome-icon :icon="['fas', 'trash']" />
     </button>
   </div>
