@@ -1,23 +1,35 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { Constants, EmptyConstants, type AlertMessage, type Environ, AlertType } from '@/constants'
+import {
+  Constants,
+  EmptyConstants,
+  type AlertMessage,
+  type Environ,
+  AlertType,
+  type Project
+} from '@/constants'
 import { v4 as uuid } from 'uuid'
 import axios from 'axios'
 
-export const useProjectIdStore = defineStore(
+export const useProjectStore = defineStore(
   'projectId',
   () => {
-    const projectId: Ref<string | null> = ref(null)
+    const lastProjectId: Ref<string | null> = ref(null)
+    const projects: Ref<Project[]> = ref([])
 
-    function setProjectId(newId: string) {
-      projectId.value = newId
+    function setProjects(newIds: Project[]) {
+      projects.value = newIds
     }
 
-    function clearProjectId() {
-      projectId.value = null
+    function setLastProjectId(newId: string) {
+      lastProjectId.value = newId
     }
 
-    return { projectId, setProjectId, clearProjectId }
+    function clearLastProjectId() {
+      lastProjectId.value = null
+    }
+
+    return { projects, lastProjectId, setLastProjectId, clearLastProjectId, setProjects }
   },
   {
     persist: true
@@ -83,4 +95,46 @@ export const useInitialFilesStore = defineStore('initialFiles', () => {
     initialFiles.value = files
   }
   return { initialFiles, setInitialFiles }
+})
+
+export const useModalStore = defineStore('modal', () => {
+  const isShown = ref(false)
+  const title = ref('')
+  const primaryButtonTitle = ref('')
+  const secondaryButtonTitle = ref('')
+  const clickPrimaryButton = ref(async () => {})
+  const clickSecondaryButton = ref(async () => {})
+  const content: Ref<string[]> = ref([])
+
+  function showModal(
+    newTitle: string,
+    newPrimaryButtonTitle: string,
+    newSecondaryButtonTitle: string,
+    newClickPrimaryButton: () => Promise<void>,
+    newClickSecondaryButton: () => Promise<void>,
+    newContent: string[]
+  ) {
+    title.value = newTitle
+    primaryButtonTitle.value = newPrimaryButtonTitle
+    secondaryButtonTitle.value = newSecondaryButtonTitle
+    clickPrimaryButton.value = newClickPrimaryButton
+    clickSecondaryButton.value = newClickSecondaryButton
+    content.value = newContent
+    isShown.value = true
+  }
+
+  function dismissModal() {
+    isShown.value = false
+  }
+  return {
+    title,
+    primaryButtonTitle,
+    secondaryButtonTitle,
+    clickPrimaryButton,
+    clickSecondaryButton,
+    content,
+    isShown,
+    showModal,
+    dismissModal
+  }
 })

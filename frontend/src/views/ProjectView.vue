@@ -84,27 +84,12 @@
         </div>
       </UploadFilesComponent>
     </div>
-    <ModalComponent
-      title="Are you sure you want to delete:"
-      primary-button-title="Delete"
-      secondary-button-title="Close"
-      @click-primary-button="deleteFiles"
-      @click-secondary-button="toBeDeletedFiles.clear()"
-      ref="deletionModal"
-    >
-      <ul>
-        <li v-for="[key, file] in toBeDeletedFiles" :key="key">
-          {{ file.filename }}
-        </li>
-      </ul>
-    </ModalComponent>
   </div>
 </template>
 <script setup lang="ts">
 import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
-import ModalComponent from '@/components/ModalComponent.vue'
 import {
   FileStatus,
   type File,
@@ -112,22 +97,25 @@ import {
   humanifyFileSize,
   type CompareFunctionType
 } from '@/constants'
-import { useAppStore, useProjectIdStore, useInitialFilesStore } from '@/stores/stores'
+import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
-import { ref, type Ref, computed } from 'vue'
+import { ref, type Ref, computed, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { updateProjects } from '@/utils'
 
 const isActive = ref(false)
 const isEditMode = ref(false)
 const isShowed = ref(true)
 const storeApp = useAppStore()
-const storeProjectId = useProjectIdStore()
+const storeProject = useProjectStore()
+const storeModal = useModalStore()
+const { lastProjectId } = storeToRefs(storeProject)
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, ClientVisibleFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
 )
-const deletionModal: Ref<InstanceType<typeof ModalComponent> | null> = ref(null)
 const toBeDeletedFiles: Ref<Map<string, File>> = ref(new Map())
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
@@ -136,8 +124,14 @@ const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
 )
 
+watch(lastProjectId, async () => {
+  files.value.clear()
+  const apiFiles = await getAllFiles(storeProject.lastProjectId)
+  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
+})
+
 if (storeInitialFileStore.initialFiles.length == 0) {
-  const apiFiles = await getAllFiles(storeProjectId.projectId)
+  const apiFiles = await getAllFiles(storeProject.lastProjectId)
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
@@ -170,14 +164,14 @@ async function getAllFiles(projectId: string | null) {
 }
 
 async function uploadFiles(uploadFiles: FileList) {
-  if (storeProjectId.projectId == null) {
+  if (storeProject.lastProjectId == null) {
     return
   }
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
     const newFile: File = {
       id: storeApp.constants.genFakeId,
-      project_id: storeProjectId.projectId,
+      project_id: storeProject.lastProjectId,
       filename: uploadFile.name,
       filesize: uploadFile.size,
       title: uploadFile.name,
@@ -189,7 +183,7 @@ async function uploadFiles(uploadFiles: FileList) {
     files.value.set(newFile.id, { file: newFile, uploadedSize: 0 })
 
     const requestData = new FormData()
-    requestData.append('project_id', storeProjectId.projectId)
+    requestData.append('project_id', storeProject.lastProjectId)
     requestData.append('uploaded_file', uploadFile)
 
     const config = {
@@ -197,13 +191,12 @@ async function uploadFiles(uploadFiles: FileList) {
         if (files.value.has(newFile.id)) {
           files.value.get(newFile.id)!.uploadedSize = progressEvent.loaded
         }
-        console.log(progressEvent.loaded)
       }
     }
 
     uploadFileRequestsList.push(
       storeApp.axiosInstance
-        .post<File>(`/projects/${storeProjectId.projectId}/files`, requestData, config)
+        .post<File>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
         .then((response) => {
           if (files.value.has(newFile.id)) {
             files.value.get(newFile.id)!.file = response.data
@@ -221,7 +214,10 @@ async function uploadFiles(uploadFiles: FileList) {
         })
     )
 
-    axios.all(uploadFileRequestsList)
+    // After files are uploaded, check the project expiration date.
+    axios.all(uploadFileRequestsList).finally(() => {
+      updateProjects()
+    })
   }
 }
 
@@ -245,7 +241,9 @@ async function deleteFiles() {
 
   for (const [key, file] of toBeDeletedFiles.value) {
     try {
-      await storeApp.axiosInstance.delete(`/projects/${storeProjectId.projectId}/files/${file.id}`)
+      await storeApp.axiosInstance.delete(
+        `/projects/${storeProject.lastProjectId}/files/${file.id}`
+      )
       if (selectedFiles.value.has(key)) {
         selectedFiles.value.delete(key)
       }
@@ -253,7 +251,7 @@ async function deleteFiles() {
 
       deletedFiles.push(file)
     } catch (error: any) {
-      console.log('Unable to delete the file', storeProjectId.projectId, error)
+      console.log('Unable to delete the file', storeProject.lastProjectId, error)
       storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
     }
   }
@@ -268,7 +266,16 @@ async function deleteFiles() {
 async function deleteSingleFile(key: string, file: File) {
   toBeDeletedFiles.value.clear()
   toBeDeletedFiles.value.set(key, file)
-  deletionModal.value?.showModal()
+  storeModal.showModal(
+    'Are you sure you want to delete:',
+    'Delete',
+    'Close',
+    deleteFiles,
+    async () => {
+      toBeDeletedFiles.value.clear()
+    },
+    [file.title]
+  )
 }
 
 async function deleteSelectedFiles() {
@@ -279,7 +286,20 @@ async function deleteSelectedFiles() {
       toBeDeletedFiles.value.set(key, clientVisibleFile.file)
     }
   })
-  deletionModal.value?.showModal()
+  let toBeDeletedFilesName = []
+  for (let file of toBeDeletedFiles.value.values()) {
+    toBeDeletedFilesName.push(file.title)
+  }
+  storeModal.showModal(
+    'Are you sure you want to delete:',
+    'Delete',
+    'Close',
+    deleteFiles,
+    async () => {
+      toBeDeletedFiles.value.clear()
+    },
+    toBeDeletedFilesName
+  )
 }
 
 async function toggleSelectFile(key: string) {

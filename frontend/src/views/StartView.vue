@@ -1,44 +1,56 @@
 <template>
-  <ProjectView v-if="isVaildProjectID" />
-  <HomeView v-else />
+  <div class="d-flex flex-column vh-100">
+    <div class="flex-shrink-1">
+      <Suspense>
+        <CollectionsView v-if="isValidProjectId" />
+        <HomeView v-else />
+      </Suspense>
+    </div>
+    <FooterComponent />
+  </div>
 </template>
 
 <script setup lang="ts">
-import ProjectView from '@/views/ProjectView.vue'
+import CollectionsView from './CollectionsView.vue'
 import HomeView from '@/views/HomeView.vue'
 import { type Project } from '@/constants'
 import { ref, watch } from 'vue'
-import { useAppStore, useProjectIdStore } from '@/stores/stores'
+import { useAppStore, useProjectStore } from '@/stores/stores'
 import { validProjectID } from '@/utils'
 import { validateUser } from '@/utils'
 import { storeToRefs } from 'pinia'
+import router from '@/router'
 
-const storeProjectId = useProjectIdStore()
-const { projectId } = storeToRefs(storeProjectId)
+const storeProject = useProjectStore()
+const { lastProjectId } = storeToRefs(storeProject)
 const storeApp = useAppStore()
-const isVaildProjectID = ref(await validProjectID(storeProjectId.projectId))
+const isValidProjectId = ref(await validProjectID(storeProject.lastProjectId))
 
-watch(projectId, async (newId) => {
-  isVaildProjectID.value = await validProjectID(newId)
+watch(lastProjectId, async (newId) => {
+  isValidProjectId.value = await validProjectID(newId)
 })
 
 async function setupProjectId() {
   try {
     const lastProject = (await storeApp.axiosInstance.get<Project[]>('/projects')).data.pop()
     if (lastProject && (await validProjectID(lastProject?.id))) {
-      storeProjectId.setProjectId(lastProject.id)
+      storeProject.setLastProjectId(lastProject.id)
     }
   } catch (error: any) {
     console.log('Unable to retrieve the last project id', error)
     storeApp.alertsWarning('Unable to the retrieve last project id.')
-    storeProjectId.clearProjectId()
+    storeProject.clearLastProjectId()
   }
 }
 
 if (
-  (storeProjectId.projectId != undefined && !(await validProjectID(storeProjectId.projectId))) ||
+  (storeProject.lastProjectId != undefined &&
+    !(await validProjectID(storeProject.lastProjectId))) ||
   (await validateUser())
 ) {
   setupProjectId()
+  if (await validateUser()) {
+    router.push('/collections')
+  }
 }
 </script>
