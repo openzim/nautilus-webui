@@ -53,7 +53,7 @@ const modal: Ref<Element | null> = ref(null)
 defineExpose({ showModal })
 
 watch(
-  () => storeModal.isShow,
+  () => storeModal.isShown,
   (newValue) => {
     if (newValue) {
       showModal()

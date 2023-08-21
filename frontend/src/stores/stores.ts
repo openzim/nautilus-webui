@@ -98,7 +98,7 @@ export const useInitialFilesStore = defineStore('initialFiles', () => {
 })
 
 export const useModalStore = defineStore('modal', () => {
-  const isShow = ref(false)
+  const isShown = ref(false)
   const title = ref('')
   const primaryButtonTitle = ref('')
   const secondaryButtonTitle = ref('')
@@ -120,11 +120,11 @@ export const useModalStore = defineStore('modal', () => {
     clickPrimaryButton.value = newClickPrimaryButton
     clickSecondaryButton.value = newClickSecondaryButton
     content.value = newContent
-    isShow.value = true
+    isShown.value = true
   }
 
   function dismissModal() {
-    isShow.value = false
+    isShown.value = false
   }
   return {
     title,
@@ -133,7 +133,7 @@ export const useModalStore = defineStore('modal', () => {
     clickPrimaryButton,
     clickSecondaryButton,
     content,
-    isShow,
+    isShown,
     showModal,
     dismissModal
   }
