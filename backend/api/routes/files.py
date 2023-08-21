@@ -16,7 +16,9 @@ from zimscraperlib import filesystem
 from api.constants import constants, logger
 from api.database import gen_session, get_local_fpath_for
 from api.database.models import File, Project
+from api.redis import task_queue
 from api.routes import validated_project
+from api.workers import upload_file_to_s3
 
 router = APIRouter()
 
@@ -199,6 +201,7 @@ async def create_file(
     session.add(new_file)
     session.flush()
     session.refresh(new_file)
+    job = task_queue.enqueue(upload_file_to_s3)
     return FileModel.model_validate(new_file)
 
 

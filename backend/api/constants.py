@@ -24,6 +24,8 @@ class BackendConf:
     transient_storage_path = Path(
         os.getenv("TRANSIENT_STORAGE_PATH", tempfile.gettempdir())
     ).resolve()
+    redis_uri = os.getenv("REDIS_URI", "redis://localhost:6379/0")
+    channel_name = os.getenv("CHANNEL_NAME", "s3_upload")
 
     authentication_cookie_name: str = "user_id"
     cookie_domain = os.getenv("COOKIE_DOMAIN", None)
