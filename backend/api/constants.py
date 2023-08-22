@@ -20,7 +20,9 @@ class BackendConf:
     logger: logging.Logger = field(init=False)
 
     postgres_uri = os.getenv("POSTGRES_URI", "nodb")
-    s3_uri = os.getenv("S3_URI")
+    s3_url_with_credentials = os.getenv("S3_URL_WITH_CREDENTIALS")
+    s3_max_tries = int(os.getenv("S3_MAX_TRIES", "3"))
+    s3_retry_wait = humanfriendly.parse_timespan(os.getenv("S3_RETRY_TIMES", "10s"))
     transient_storage_path = Path(
         os.getenv("TRANSIENT_STORAGE_PATH", tempfile.gettempdir())
     ).resolve()

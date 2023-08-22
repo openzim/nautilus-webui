@@ -4,6 +4,7 @@ from collections.abc import Iterator
 from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
+from time import sleep
 from typing import BinaryIO
 from uuid import UUID
 
@@ -18,7 +19,7 @@ from api.database import gen_session, get_local_fpath_for
 from api.database.models import File, Project
 from api.redis import task_queue
 from api.routes import validated_project
-from api.workers import upload_file_to_s3
+from api.s3 import s3_storage
 
 router = APIRouter()
 
@@ -50,6 +51,7 @@ class FileModel(BaseModel):
 class FileStatus(Enum):
     LOCAL = "LOCAL"
     S3 = "S3"
+    FAILURE = "Failure"
 
 
 def validated_file(
@@ -149,6 +151,40 @@ def validate_project_quota(file_size: int, project: Project):
         )
 
 
+def s3_file_key(project_id: UUID, path: str) -> str:
+    """Generate s3 file key."""
+    return f"{project_id}-{path}"
+
+
+def update_file_status_and_path(file: File, status: FileStatus, path: str):
+    """Update file's Status and Path."""
+    session = next(gen_session())
+    stmt = update(File).filter_by(id=file.id).values(status=status, path=path)
+    session.execute(stmt)
+    session.commit()
+
+
+def upload_file_to_s3(new_file: File):
+    """Update local file to S3 storage and update file status"""
+    s3_key = s3_file_key(new_file.project_id, new_file.hash)
+
+    if s3_storage.has_object(s3_key):
+        update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+        return
+
+    for i in range(constants.s3_max_tries):
+        try:
+            s3_storage.upload_file(fpath=new_file.path, key=s3_key)
+            update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+            return
+        except Exception as exc:
+            logger.error(f"{new_file.hash} failed to upload to cache: {exc}")
+            logger.error(f"retry {i+1} in {constants.s3_max_tries} times")
+            sleep(constants.s3_retry_wait)
+
+    update_file_status_and_path(new_file, FileStatus.FAILURE, new_file.path)
+
+
 @router.post("/{project_id}/files", status_code=HTTPStatus.CREATED)
 async def create_file(
     uploaded_file: UploadFile,
@@ -192,7 +228,6 @@ async def create_file(
         description=None,
         uploaded_on=now,
         hash=file_hash,
-        # TODO: Using S3 to save file.
         path=str(fpath),
         type=mimetype,
         status=FileStatus.LOCAL.value,
@@ -201,7 +236,7 @@ async def create_file(
     session.add(new_file)
     session.flush()
     session.refresh(new_file)
-    job = task_queue.enqueue(upload_file_to_s3)
+    task_queue.enqueue(upload_file_to_s3, new_file)
     return FileModel.model_validate(new_file)
 
 
