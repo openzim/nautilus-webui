@@ -4,6 +4,7 @@ LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 ENV ALLOWED_ORIGINS http://localhost
 ENV POSTGRES_URI nodb
 ENV WEB_CONCURRENCY 1
+ENV TRANSIENT_STORAGE_PATH /cache
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libmagic1 \

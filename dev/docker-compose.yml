@@ -33,10 +33,13 @@ services:
   backend:
     build: ../backend
     container_name: nautilus-backend
+    volumes:
+      - backend_cache:/cache
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
       - REDIS_URI=redis://redis:6379/0
       - ALLOWED_ORIGINS=*
+      - TRANSIENT_STORAGE_PATH=/cache
     ports:
       - 8080:80
     depends_on:
@@ -44,6 +47,19 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+  worker:
+    build:
+      dockerfile: ../dev/backend-worker/Dockerfile
+      context: ../backend
+    volumes:
+      - backend_cache:/cache
+    container_name: nautilus-backend-worker
+    environment:
+      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
+      - REDIS_URI=redis://redis:6379/0
+      - S3_URL_WITH_CREDENTIALS=Placeholder
+    depends_on:
+      - backend
   frontend:
     build: ../frontend
     container_name: nautilus-frontend
@@ -82,3 +98,4 @@ services:
 volumes:
   pg_data_nautilus:
   pg_data_redis:
+  backend_cache:
