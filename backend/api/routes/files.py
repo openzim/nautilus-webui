@@ -168,13 +168,13 @@ def upload_file_to_s3(new_file: File):
     """Update local file to S3 storage and update file status"""
     s3_key = s3_file_key(new_file.project_id, new_file.hash)
 
-    if s3_storage.has_object(s3_key):
+    if s3_storage.storage.has_object(s3_key):
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
         return
 
     for i in range(constants.s3_max_tries):
         try:
-            s3_storage.upload_file(fpath=new_file.path, key=s3_key)
+            s3_storage.storage.upload_file(fpath=new_file.path, key=s3_key)
             update_file_status_and_path(new_file, FileStatus.S3, s3_key)
             return
         except Exception as exc:
@@ -189,7 +189,7 @@ def delete_file_from_s3(file: File):
     """Delete files from S3."""
     for i in range(constants.s3_max_tries):
         try:
-            s3_storage.delete_object(key=file.path)
+            s3_storage.storage.delete_object(key=file.path)
             return
         except Exception as exc:
             logger.error(f"{file.hash} failed to delete: {exc}")

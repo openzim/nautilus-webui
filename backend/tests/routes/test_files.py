@@ -5,11 +5,14 @@ from dateutil import parser
 
 from api.constants import constants
 from api.database import get_local_fpath_for
+from api.routes.files import task_queue
 
 
 def test_upload_file_correct_data(
-    logged_in_client, project_id, test_file, test_file_hash
+    logged_in_client, project_id, test_file, test_file_hash, mocker
 ):
+    task_queue_mock = mocker.patch.object(task_queue, "enqueue")
+    task_queue_mock.return_value = True
     params = {"project_id": project_id}
     file = {"uploaded_file": test_file}
     response = logged_in_client.post(
