@@ -186,6 +186,7 @@ def upload_file_to_s3(new_file: File):
 
 
 def delete_file_from_s3(file: File):
+    """Delete files from S3."""
     for i in range(constants.s3_max_tries):
         try:
             s3_storage.delete_object(key=file.path)
