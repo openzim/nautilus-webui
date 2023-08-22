@@ -8,7 +8,7 @@ from time import sleep
 from typing import BinaryIO
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
