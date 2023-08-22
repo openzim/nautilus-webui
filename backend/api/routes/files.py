@@ -8,7 +8,7 @@ from time import sleep
 from typing import BinaryIO
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
@@ -185,6 +185,17 @@ def upload_file_to_s3(new_file: File):
     update_file_status_and_path(new_file, FileStatus.FAILURE, new_file.path)
 
 
+def delete_file_from_s3(file: File):
+    for i in range(constants.s3_max_tries):
+        try:
+            s3_storage.delete_object(key=file.path)
+            return
+        except Exception as exc:
+            logger.error(f"{file.hash} failed to delete: {exc}")
+            logger.error(f"retry {i+1} in {constants.s3_max_tries} times")
+            sleep(constants.s3_retry_wait)
+
+
 @router.post("/{project_id}/files", status_code=HTTPStatus.CREATED)
 async def create_file(
     uploaded_file: UploadFile,
@@ -284,10 +295,12 @@ async def delete_file(
         .select_from(File)
         .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
-        .filter_by(status=FileStatus.LOCAL.value)
     )
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
-        file_location = file.local_fpath
-        file_location.unlink(missing_ok=True)
+        if file.status == FileStatus.LOCAL.value:
+            file_location = file.local_fpath
+            file_location.unlink(missing_ok=True)
+        if file.status == FileStatus.S3.value:
+            task_queue.enqueue(delete_file_from_s3, file)
     session.delete(file)
