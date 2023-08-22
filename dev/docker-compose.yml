@@ -57,7 +57,7 @@ services:
     environment:
       - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
       - REDIS_URI=redis://redis:6379/0
-      - S3_URL_WITH_CREDENTIALS=Placeholder
+      - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
     depends_on:
       - backend
   frontend:
