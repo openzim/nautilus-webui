@@ -49,7 +49,9 @@ def test_upload_too_large_file(logged_in_client, project_id):
     assert json_result["detail"] == "Uploaded File is too large."
 
 
-def test_upload_file_excess_project_quota(logged_in_client, project_id):
+def test_upload_file_excess_project_quota(logged_in_client, project_id, mocker):
+    task_queue_mock = mocker.patch.object(task_queue, "enqueue")
+    task_queue_mock.return_value = True
     params = {"project_id": project_id}
     file = {"uploaded_file": b"\xff" * (constants.project_quota - 1)}
     response = logged_in_client.post(
@@ -68,7 +70,9 @@ def test_upload_file_excess_project_quota(logged_in_client, project_id):
     assert json_result["detail"] == "Uploaded files exceeded project quota"
 
 
-def test_upload_same_file(logged_in_client, project_id, test_file):
+def test_upload_same_file(logged_in_client, project_id, test_file, mocker):
+    task_queue_mock = mocker.patch.object(task_queue, "enqueue")
+    task_queue_mock.return_value = True
     params = {"project_id": project_id}
     file = {"uploaded_file": test_file}
     response = logged_in_client.post(
