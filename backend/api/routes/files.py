@@ -174,8 +174,9 @@ def upload_file_to_s3(new_file: File):
 
     for i in range(constants.s3_max_tries):
         try:
-            s3_storage.storage.upload_file(fpath=new_file.path, key=s3_key)
+            s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
             update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+            new_file.local_fpath.unlink(missing_ok=True)
             return
         except Exception as exc:
             logger.error(f"{new_file.hash} failed to upload to cache: {exc}")
