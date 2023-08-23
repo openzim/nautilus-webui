@@ -158,10 +158,10 @@ def s3_file_key(project_id: UUID, path: str) -> str:
 
 def update_file_status_and_path(file: File, status: FileStatus, path: str):
     """Update file's Status and Path."""
-    session = next(gen_session())
-    stmt = update(File).filter_by(id=file.id).values(status=status, path=path)
-    session.execute(stmt)
-    session.commit()
+    with DBSession.begin() as session:
+        stmt = update(File).filter_by(id=file.id).values(status=status, path=path)
+        session.execute(stmt)
+        session.commit()
 
 
 def upload_file_to_s3(new_file: File):
