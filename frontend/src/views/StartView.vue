@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+import FooterComponent from '@/components/FooterComponent.vue'
 import CollectionsView from './CollectionsView.vue'
 import HomeView from '@/views/HomeView.vue'
 import { type Project } from '@/constants'
