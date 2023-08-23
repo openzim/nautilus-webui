@@ -4,7 +4,10 @@ from api.constants import constants, logger
 
 
 class S3Storage:
-    _s3_storage = None
+    def __init__(self) -> None:
+        self.storage = self._setup_s3_and_check_credentials(
+            constants.s3_url_with_credentials
+        )
 
     def _setup_s3_and_check_credentials(self, s3_url_with_credentials):
         logger.info("testing S3 Optimization Cache credentials")
@@ -18,14 +21,6 @@ class S3Storage:
             logger.error(f"  Key ID: {s3_storage.params.get('keyid')}")
             raise ValueError("Unable to connect to Optimization Cache. Check its URL.")
         return s3_storage
-
-    @property
-    def storage(self):
-        if not self._s3_storage:
-            self._s3_storage = self._setup_s3_and_check_credentials(
-                constants.s3_url_with_credentials
-            )
-        return self._s3_storage
 
 
 s3_storage = S3Storage()
