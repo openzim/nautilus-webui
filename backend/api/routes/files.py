@@ -213,7 +213,7 @@ def upload_file_to_s3(new_file_id: UUID):
         raise exc
 
 
-def delete_file_from_s3(file_key: str):
+def delete_key_from_s3(file_key: str):
     """Delete files from S3."""
     logger.warning(f"Try to delete {file_key} from S3")
     if not s3_storage.storage.has_object(file_key):
@@ -332,6 +332,6 @@ async def delete_file(
             file_location.unlink(missing_ok=True)
         if file.status == FileStatus.S3:
             task_queue.enqueue(
-                delete_file_from_s3, s3_file_key(file.project_id, file.hash)
+                delete_key_from_s3, s3_file_key(file.project_id, file.hash)
             )
     session.delete(file)
