@@ -2,9 +2,15 @@ FROM python:3.11-slim
 LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 ENV ALLOWED_ORIGINS http://localhost
-ENV POSTGRES_URI nodb
+ENV POSTGRES_URI ""
+ENV PRIVATE_KEY ""
+ENV S3_URL_WITH_CREDENTIALS ""
+ENV REDIS_URI ""
+ENV CHANNEL_NAME ""
 ENV WEB_CONCURRENCY 1
-ENV TRANSIENT_STORAGE_PATH /cache
+ENV TRANSIENT_STORAGE_PATH /storage
+
+VOLUME [ "/storage" ]
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libmagic1 \

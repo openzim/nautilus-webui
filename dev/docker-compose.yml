@@ -34,12 +34,15 @@ services:
     build: ../backend
     container_name: nautilus-backend
     volumes:
-      - backend_cache:/cache
+      - backend_storage:/storage
     environment:
-      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
-      - REDIS_URI=redis://redis:6379/0
+      - POSTGRES_URI=${POSTGRES_URI}
+      - REDIS_URI=${REDIS_URI}
+      - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
+      - PRIVATE_KEY=secrectkey
       - ALLOWED_ORIGINS=*
-      - TRANSIENT_STORAGE_PATH=/cache
+      - TRANSIENT_STORAGE_PATH=/storage
+      - CHANNEL_NAME=${CHANNEL_NAME}
     ports:
       - 8080:80
     depends_on:
@@ -48,16 +51,17 @@ services:
       redis:
         condition: service_healthy
   worker:
-    build:
-      dockerfile: ../dev/backend-worker/Dockerfile
-      context: ../backend
+    build: ../backend
     volumes:
-      - backend_cache:/cache
+      - backend_storage:/storage
     container_name: nautilus-backend-worker
     environment:
-      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
-      - REDIS_URI=redis://redis:6379/0
+      - POSTGRES_URI=${POSTGRES_URI}
+      - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
+      - PRIVATE_KEY=secrectkey
+      - CHANNEL_NAME=${CHANNEL_NAME}
+    command: /bin/sh -c "rq worker ${CHANNEL_NAME} --url ${REDIS_URI} --with-scheduler"
     depends_on:
       - backend
   frontend:
@@ -75,11 +79,17 @@ services:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
+    volumes:
+      - backend_storage:/storage
     container_name: nautilus-backend-tools
     command: /bin/sh -c "sleep Infinity"
     environment:
-      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus
-      - REDIS_URI=redis://redis:6379/0
+      - POSTGRES_URI=${POSTGRES_URI}
+      - REDIS_URI=${REDIS_URI}
+      - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
+      - PRIVATE_KEY=secrectkey
+      - TRANSIENT_STORAGE_PATH=/storage
+      - CHANNEL_NAME=${CHANNEL_NAME}
     depends_on:
       - database
       - redis
@@ -87,15 +97,21 @@ services:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
+    volumes:
+      - backend_storage:/storage
     container_name: nautilus-backend-tests
     command: /bin/sh -c "sleep Infinity"
     environment:
-      - POSTGRES_URI=postgresql+psycopg://nautilus:nautilus@database:5432/nautilus-test
-      - REDIS_URI=redis://redis:6379/0
+      - POSTGRES_URI=${POSTGRES_URI}
+      - REDIS_URI=${REDIS_URI}
+      - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
+      - PRIVATE_KEY=secrectkey
+      - TRANSIENT_STORAGE_PATH=/storage
+      - CHANNEL_NAME=${CHANNEL_NAME}
     depends_on:
       - database
       - redis
 volumes:
   pg_data_nautilus:
   pg_data_redis:
-  backend_cache:
+  backend_storage:
