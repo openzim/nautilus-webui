@@ -176,7 +176,7 @@ def update_file_path(file: File, path: str):
     update_file_status_and_path(file, file.status, path)
 
 
-def get_file_by_id(file_id: UUID):
+def get_file_by_id(file_id: UUID) -> File:
     """Get File instance by its id."""
     with DBSession.begin() as session:
         stmt = select(File).where(File.id == file_id)
@@ -185,6 +185,17 @@ def get_file_by_id(file_id: UUID):
             raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {file_id}")
         session.expunge(file)
         return file
+
+
+def get_project_by_id(project_id: UUID) -> Project:
+    """Get Project instance by its id."""
+    with DBSession.begin() as session:
+        stmt = select(Project).where(Project.id == project_id)
+        project = session.execute(stmt).scalar()
+        if not project:
+            raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {project_id}")
+        session.expunge(project)
+        return project
 
 
 def upload_file_to_s3(new_file_id: UUID):
@@ -204,6 +215,9 @@ def upload_file_to_s3(new_file_id: UUID):
 
     try:
         s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
+        project = get_project_by_id(new_file.project_id)
+        if project.expire_on:
+            s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
         new_file.local_fpath.unlink(missing_ok=True)
         return
@@ -259,6 +273,9 @@ async def create_file(
         raise HTTPException(
             HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
         ) from exc
+
+    if len(project.files) == 0:
+        project.expire_on = now + constants.project_expire_after
 
     new_file = File(
         filename=filename,
