@@ -4,7 +4,6 @@ from collections.abc import Iterator
 from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
-from time import sleep
 from typing import BinaryIO
 from uuid import UUID
 
@@ -214,16 +213,16 @@ def upload_file_to_s3(new_file_id: UUID):
         raise exc
 
 
-def delete_file_from_s3(file: File):
+def delete_file_from_s3(file_key: str):
     """Delete files from S3."""
-    for i in range(constants.s3_max_tries):
-        try:
-            s3_storage.storage.delete_object(key=file.path)
-            return
-        except Exception as exc:
-            logger.error(f"{file.hash} failed to delete: {exc}")
-            logger.error(f"retry {i+1} in {constants.s3_max_tries} times")
-            sleep(constants.s3_retry_wait)
+    logger.warning(f"Try to delete {file_key} from S3")
+    if not s3_storage.storage.has_object(file_key):
+        logger.warning(f"{file_key} is not exist in S3")
+        return
+    try:
+        s3_storage.storage.delete_object(file_key)
+    except Exception as exc:
+        logger.error(exc)
 
 
 @router.post("/{project_id}/files", status_code=HTTPStatus.CREATED)
@@ -332,5 +331,7 @@ async def delete_file(
             file_location = file.local_fpath
             file_location.unlink(missing_ok=True)
         if file.status == FileStatus.S3:
-            task_queue.enqueue(delete_file_from_s3, file)
+            task_queue.enqueue(
+                delete_file_from_s3, s3_file_key(file.project_id, file.hash)
+            )
     session.delete(file)
