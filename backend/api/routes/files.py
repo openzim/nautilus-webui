@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
 from api.constants import constants, logger
+from api.database import Session as DBSession
 from api.database import gen_session, get_local_fpath_for
 from api.database.models import File, Project
 from api.redis import task_queue
@@ -48,10 +49,11 @@ class FileModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class FileStatus(Enum):
+class FileStatus(str, Enum):
     LOCAL = "LOCAL"
     S3 = "S3"
-    FAILURE = "Failure"
+    FAILURE = "FAILURE"
+    UPLOADING = "UPLOADING"
 
 
 def validated_file(
@@ -156,7 +158,7 @@ def s3_file_key(project_id: UUID, path: str) -> str:
     return f"{project_id}-{path}"
 
 
-def update_file_status_and_path(file: File, status: FileStatus, path: str):
+def update_file_status_and_path(file: File, status: str, path: str):
     """Update file's Status and Path."""
     with DBSession.begin() as session:
         stmt = update(File).filter_by(id=file.id).values(status=status, path=path)
@@ -164,26 +166,51 @@ def update_file_status_and_path(file: File, status: FileStatus, path: str):
         session.commit()
 
 
-def upload_file_to_s3(new_file: File):
+def update_file_status(file: File, status: str):
+    """Update file's Status."""
+    update_file_status_and_path(file, status, file.path)
+
+
+def update_file_path(file: File, path: str):
+    """Update file's path."""
+    update_file_status_and_path(file, file.status, path)
+
+
+def get_file_by_id(file_id: UUID):
+    """Get File instance by its id."""
+    with DBSession.begin() as session:
+        stmt = select(File).where(File.id == file_id)
+        file = session.execute(stmt).scalar()
+        if not file:
+            raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {file_id}")
+        session.expunge(file)
+        return file
+
+
+def upload_file_to_s3(new_file_id: UUID):
     """Update local file to S3 storage and update file status"""
+    new_file = get_file_by_id(new_file_id)
+
+    if new_file.status == FileStatus.UPLOADING:
+        return
+    else:
+        update_file_status(new_file, FileStatus.UPLOADING)
+
     s3_key = s3_file_key(new_file.project_id, new_file.hash)
 
     if s3_storage.storage.has_object(s3_key):
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
         return
 
-    for i in range(constants.s3_max_tries):
-        try:
-            s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
-            update_file_status_and_path(new_file, FileStatus.S3, s3_key)
-            new_file.local_fpath.unlink(missing_ok=True)
-            return
-        except Exception as exc:
-            logger.error(f"{new_file.hash} failed to upload to cache: {exc}")
-            logger.error(f"retry {i+1} in {constants.s3_max_tries} times")
-            sleep(constants.s3_retry_wait)
-
-    update_file_status_and_path(new_file, FileStatus.FAILURE, new_file.path)
+    try:
+        s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
+        update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+        new_file.local_fpath.unlink(missing_ok=True)
+        return
+    except Exception as exc:
+        logger.error(f"{new_file.hash} failed to upload to s3: {exc}")
+        update_file_status(new_file, FileStatus.FAILURE)
+        raise exc
 
 
 def delete_file_from_s3(file: File):
@@ -249,7 +276,7 @@ async def create_file(
     session.add(new_file)
     session.flush()
     session.refresh(new_file)
-    task_queue.enqueue(upload_file_to_s3, new_file)
+    task_queue.enqueue(upload_file_to_s3, new_file.id, retry=constants.job_retry)
     return FileModel.model_validate(new_file)
 
 
@@ -300,9 +327,9 @@ async def delete_file(
     )
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
-        if file.status == FileStatus.LOCAL.value:
+        if file.status == FileStatus.LOCAL:
             file_location = file.local_fpath
             file_location.unlink(missing_ok=True)
-        if file.status == FileStatus.S3.value:
+        if file.status == FileStatus.S3:
             task_queue.enqueue(delete_file_from_s3, file)
     session.delete(file)

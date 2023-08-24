@@ -1,12 +1,12 @@
 import datetime
 import logging
 import os
-import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import humanfriendly
+from rq import Retry
 
 
 def determine_environment_variable(variable_name: str):
@@ -54,6 +54,7 @@ class BackendConf:
     def __post_init__(self):
         self.logger = logging.getLogger(Path(__file__).parent.name)
         self.transient_storage_path.mkdir(exist_ok=True)
+        self.job_retry = Retry(max=self.s3_max_tries, interval=int(self.s3_retry_wait))
 
 
 constants = BackendConf()

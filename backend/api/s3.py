@@ -12,8 +12,10 @@ class S3Storage:
     def _setup_s3_and_check_credentials(self, s3_url_with_credentials):
         logger.info("testing S3 Optimization Cache credentials")
         s3_storage = KiwixStorage(s3_url_with_credentials)
+        # We Don't check read and write permissions here,
+        # See: https://github.com/openzim/python-storagelib/issues/11
         if not s3_storage.check_credentials(
-            list_buckets=True, bucket=True, write=True, read=True, failsafe=True
+            list_buckets=True, bucket=True, failsafe=True
         ):
             logger.error("S3 cache connection error testing permissions.")
             logger.error(f"  Server: {s3_storage.url.netloc}")
