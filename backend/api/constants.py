@@ -14,9 +14,10 @@ def determine_environment_variable(variable_name: str):
         raise OSError(f"Please set the {variable_name} environment variable")
 
 
-determine_environment_variable("POSTGRES_URI")
-determine_environment_variable("S3_URL_WITH_CREDENTIALS")
-determine_environment_variable("PRIVATE_KEY")
+def determine_mandatory_environment_variables():
+    determine_environment_variable("POSTGRES_URI")
+    determine_environment_variable("S3_URL_WITH_CREDENTIALS")
+    determine_environment_variable("PRIVATE_KEY")
 
 
 @dataclass(kw_only=True)
