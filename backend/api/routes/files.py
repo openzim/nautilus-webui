@@ -345,8 +345,7 @@ async def delete_file(
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
         if file.status == FileStatus.LOCAL:
-            file_location = file.local_fpath
-            file_location.unlink(missing_ok=True)
+            file.local_fpath.unlink(missing_ok=True)
         if file.status == FileStatus.S3:
             task_queue.enqueue(
                 delete_key_from_s3, s3_file_key(file.project_id, file.hash)
