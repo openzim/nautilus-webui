@@ -201,6 +201,9 @@ def get_project_by_id(project_id: UUID) -> Project:
 def upload_file_to_s3(new_file_id: UUID):
     """Update local file to S3 storage and update file status"""
     new_file = get_file_by_id(new_file_id)
+    project = get_project_by_id(new_file.project_id)
+    if not project.expire_on:
+        raise ValueError(f"Project: {project.id} does not have expire date.")
 
     if new_file.status == FileStatus.UPLOADING:
         return
@@ -215,9 +218,7 @@ def upload_file_to_s3(new_file_id: UUID):
 
     try:
         s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
-        project = get_project_by_id(new_file.project_id)
-        if project.expire_on:
-            s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
+        s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
         new_file.local_fpath.unlink(missing_ok=True)
         return
