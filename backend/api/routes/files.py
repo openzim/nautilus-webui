@@ -226,16 +226,16 @@ def upload_file_to_s3(new_file_id: UUID):
         raise exc
 
 
-def delete_key_from_s3(file_key: str):
+def delete_key_from_s3(s3_key: str):
     """Delete files from S3."""
-    logger.warning(f"Try to delete {file_key} from S3")
-    if not s3_storage.storage.has_object(file_key):
-        logger.debug(f"{file_key} does not exist in S3")
+    logger.warning(f"Try to delete {s3_key} from S3")
+    if not s3_storage.storage.has_object(s3_key):
+        logger.debug(f"{s3_key} does not exist in S3")
         return
     try:
-        s3_storage.storage.delete_object(file_key)
+        s3_storage.storage.delete_object(s3_key)
     except Exception as exc:
-        logger.error(f"Failed to delete {file_key} from S3")
+        logger.error(f"Failed to delete {s3_key} from S3")
         logger.exception(exc)
 
 
