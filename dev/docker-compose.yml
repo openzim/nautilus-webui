@@ -61,7 +61,7 @@ services:
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
       - PRIVATE_KEY=secrectkey
       - CHANNEL_NAME=${CHANNEL_NAME}
-    command: /bin/sh -c "rq worker ${CHANNEL_NAME} --url ${REDIS_URI} --with-scheduler"
+    command: ["rq-worker"]
     depends_on:
       - backend
   frontend:

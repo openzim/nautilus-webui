@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Starting worker…"
+rq worker ${CHANNEL_NAME} --url ${REDIS_URI} --with-scheduler ${@}
