@@ -182,7 +182,7 @@ def get_file_by_id(file_id: UUID) -> File:
         stmt = select(File).where(File.id == file_id)
         file = session.execute(stmt).scalar()
         if not file:
-            raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {file_id}")
+            raise ValueError(f"File not found: {file_id}")
         session.expunge(file)
         return file
 
@@ -193,7 +193,7 @@ def get_project_by_id(project_id: UUID) -> Project:
         stmt = select(Project).where(Project.id == project_id)
         project = session.execute(stmt).scalar()
         if not project:
-            raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {project_id}")
+            raise ValueError(f"Project not found: {project_id}")
         session.expunge(project)
         return project
 
@@ -222,7 +222,7 @@ def upload_file_to_s3(new_file_id: UUID):
         new_file.local_fpath.unlink(missing_ok=True)
         return
     except Exception as exc:
-        logger.error(f"{new_file.hash} failed to upload to s3: {exc}")
+        logger.error(f"{s3_key} failed to upload to s3: {exc}")
         update_file_status(new_file, FileStatus.FAILURE)
         raise exc
 
@@ -231,12 +231,13 @@ def delete_key_from_s3(file_key: str):
     """Delete files from S3."""
     logger.warning(f"Try to delete {file_key} from S3")
     if not s3_storage.storage.has_object(file_key):
-        logger.warning(f"{file_key} is not exist in S3")
+        logger.debug(f"{file_key} does not exist in S3")
         return
     try:
         s3_storage.storage.delete_object(file_key)
     except Exception as exc:
-        logger.error(exc)
+        logger.error(f"Failed to delete {file_key} from S3")
+        logger.exception(exc)
 
 
 @router.post("/{project_id}/files", status_code=HTTPStatus.CREATED)
