@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.source https://github.com/openzim/nautilus-webui
 
 ENV ALLOWED_ORIGINS http://localhost
 ENV POSTGRES_URI ""
-ENV PRIVATE_KEY ""
+ENV PRIVATE_SALT ""
 ENV S3_URL_WITH_CREDENTIALS ""
 ENV REDIS_URI ""
 ENV CHANNEL_NAME ""

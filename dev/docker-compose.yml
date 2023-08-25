@@ -39,7 +39,7 @@ services:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
-      - PRIVATE_KEY=secrectkey
+      - PRIVATE_SALT=secrectkey
       - ALLOWED_ORIGINS=*
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
@@ -59,7 +59,7 @@ services:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
-      - PRIVATE_KEY=secrectkey
+      - PRIVATE_SALT=secrectkey
       - CHANNEL_NAME=${CHANNEL_NAME}
     command: ["rq-worker"]
     depends_on:
@@ -87,7 +87,7 @@ services:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
-      - PRIVATE_KEY=secrectkey
+      - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
     depends_on:
@@ -105,7 +105,7 @@ services:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
-      - PRIVATE_KEY=secrectkey
+      - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
     depends_on:

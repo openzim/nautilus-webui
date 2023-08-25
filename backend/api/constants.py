@@ -17,7 +17,7 @@ def determine_environment_variable(variable_name: str):
 def determine_mandatory_environment_variables():
     determine_environment_variable("POSTGRES_URI")
     determine_environment_variable("S3_URL_WITH_CREDENTIALS")
-    determine_environment_variable("PRIVATE_KEY")
+    determine_environment_variable("PRIVATE_SALT")
 
 
 @dataclass(kw_only=True)
@@ -31,7 +31,7 @@ class BackendConf:
     # Mandatory configurations
     postgres_uri = os.getenv("POSTGRES_URI", "nodb")
     s3_url_with_credentials = os.getenv("S3_URL_WITH_CREDENTIALS")
-    private_key = os.getenv("PRIVATE_KEY")
+    private_salt = os.getenv("PRIVATE_SALT")
 
     # Optional configuration.
     s3_max_tries = int(os.getenv("S3_MAX_TRIES", "3"))

@@ -154,7 +154,7 @@ def validate_project_quota(file_size: int, project: Project):
 
 def s3_file_key(project_id: UUID, file_hash: str) -> str:
     """Generate s3 file key."""
-    to_be_hashed_str = f"{project_id}-{file_hash}-{constants.private_key}"
+    to_be_hashed_str = f"{project_id}-{file_hash}-{constants.private_salt}"
     return hashlib.sha256(bytes(to_be_hashed_str, "utf-8")).hexdigest()
 
 
