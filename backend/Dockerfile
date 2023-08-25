@@ -22,7 +22,7 @@ COPY alembic.ini /app/alembic.ini
 COPY migrations/  /app/migrations
 
 COPY rq-worker /usr/local/bin
-RUN chmod a+Xx /usr/local/bin/rq-worker
+RUN chmod a+x /usr/local/bin/rq-worker
 
 RUN cd /app && \
     chmod +x /app/entrypoint.sh && \
