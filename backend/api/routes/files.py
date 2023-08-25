@@ -220,8 +220,6 @@ def upload_file_to_s3(new_file_id: UUID):
         s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
         s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
-        new_file.local_fpath.unlink(missing_ok=True)
-        return
     except Exception as exc:
         logger.error(f"{s3_key} failed to upload to s3: {exc}")
         update_file_status(new_file, FileStatus.FAILURE)
