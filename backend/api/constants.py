@@ -32,6 +32,9 @@ class BackendConf:
     # Optional configuration.
     s3_max_tries = int(os.getenv("S3_MAX_TRIES", "3"))
     s3_retry_wait = humanfriendly.parse_timespan(os.getenv("S3_RETRY_TIMES", "10s"))
+    s3_deletion_delay = datetime.timedelta(
+        hours=int(os.getenv("S3_DELETION_DELAY", "12"))
+    )
     transient_storage_path = Path(
         os.getenv("TRANSIENT_STORAGE_PATH", tempfile.gettempdir())
     ).resolve()

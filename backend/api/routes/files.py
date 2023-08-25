@@ -347,7 +347,9 @@ async def delete_file(
         if file.status == FileStatus.LOCAL:
             file.local_fpath.unlink(missing_ok=True)
         if file.status == FileStatus.S3:
-            task_queue.enqueue(
-                delete_key_from_s3, s3_file_key(file.project_id, file.hash)
+            task_queue.enqueue_at(
+                datetime.datetime.now(tz=datetime.UTC) + constants.s3_deletion_delay,
+                delete_key_from_s3,
+                s3_file_key(file.project_id, file.hash),
             )
     session.delete(file)
