@@ -10,8 +10,7 @@ from rq import Retry
 
 
 def determine_mandatory_environment_variables():
-    mandatory_variables = ("POSTGRES_URI", "S3_URL_WITH_CREDENTIALS", "PRIVATE_SALT")
-    for variable in mandatory_variables:
+    for variable in ("POSTGRES_URI", "S3_URL_WITH_CREDENTIALS", "PRIVATE_SALT"):
         if not os.getenv(variable):
             raise OSError(f"Please set the {variable} environment variable")
 
