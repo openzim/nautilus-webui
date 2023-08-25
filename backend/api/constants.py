@@ -9,15 +9,11 @@ import humanfriendly
 from rq import Retry
 
 
-def determine_environment_variable(variable_name: str):
-    if not os.getenv(variable_name):
-        raise OSError(f"Please set the {variable_name} environment variable")
-
-
 def determine_mandatory_environment_variables():
-    determine_environment_variable("POSTGRES_URI")
-    determine_environment_variable("S3_URL_WITH_CREDENTIALS")
-    determine_environment_variable("PRIVATE_SALT")
+    mandatory_variables = ("POSTGRES_URI", "S3_URL_WITH_CREDENTIALS", "PRIVATE_SALT")
+    for variable in mandatory_variables:
+        if not os.getenv(variable):
+            raise OSError(f"Please set the {variable} environment variable")
 
 
 @dataclass(kw_only=True)
