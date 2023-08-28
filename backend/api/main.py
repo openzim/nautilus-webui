@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from http import HTTPStatus
 
 from fastapi import FastAPI
@@ -5,12 +6,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from api import __description__, __titile__, __version__
-from api.constants import constants
+from api.constants import constants, determine_mandatory_environment_variables
 from api.routes import files, projects, users, utils
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    determine_mandatory_environment_variables()
+    yield
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title=__titile__, description=__description__, version=__version__)
+    app = FastAPI(
+        lifespan=lifespan,
+        title=__titile__,
+        description=__description__,
+        version=__version__,
+    )
 
     @app.get("/")
     async def landing() -> RedirectResponse:

@@ -14,9 +14,12 @@ from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
 from api.constants import constants, logger
+from api.database import Session as DBSession
 from api.database import gen_session, get_local_fpath_for
 from api.database.models import File, Project
+from api.redis import task_queue
 from api.routes import validated_project
+from api.s3 import s3_storage
 
 router = APIRouter()
 
@@ -45,9 +48,11 @@ class FileModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class FileStatus(Enum):
+class FileStatus(str, Enum):
     LOCAL = "LOCAL"
     S3 = "S3"
+    FAILURE = "FAILURE"
+    UPLOADING = "UPLOADING"
 
 
 def validated_file(
@@ -147,6 +152,93 @@ def validate_project_quota(file_size: int, project: Project):
         )
 
 
+def s3_file_key(project_id: UUID, file_hash: str) -> str:
+    """Generate s3 file key."""
+    to_be_hashed_str = f"{project_id}-{file_hash}-{constants.private_salt}"
+    return hashlib.sha256(bytes(to_be_hashed_str, "utf-8")).hexdigest()
+
+
+def update_file_status_and_path(file: File, status: str, path: str):
+    """Update file's Status and Path."""
+    with DBSession.begin() as session:
+        stmt = update(File).filter_by(id=file.id).values(status=status, path=path)
+        session.execute(stmt)
+        session.commit()
+
+
+def update_file_status(file: File, status: str):
+    """Update file's Status."""
+    update_file_status_and_path(file, status, file.path)
+
+
+def update_file_path(file: File, path: str):
+    """Update file's path."""
+    update_file_status_and_path(file, file.status, path)
+
+
+def get_file_by_id(file_id: UUID) -> File:
+    """Get File instance by its id."""
+    with DBSession.begin() as session:
+        stmt = select(File).where(File.id == file_id)
+        file = session.execute(stmt).scalar()
+        if not file:
+            raise ValueError(f"File not found: {file_id}")
+        session.expunge(file)
+        return file
+
+
+def get_project_by_id(project_id: UUID) -> Project:
+    """Get Project instance by its id."""
+    with DBSession.begin() as session:
+        stmt = select(Project).where(Project.id == project_id)
+        project = session.execute(stmt).scalar()
+        if not project:
+            raise ValueError(f"Project not found: {project_id}")
+        session.expunge(project)
+        return project
+
+
+def upload_file_to_s3(new_file_id: UUID):
+    """Update local file to S3 storage and update file status"""
+    new_file = get_file_by_id(new_file_id)
+    project = get_project_by_id(new_file.project_id)
+    if not project.expire_on:
+        raise ValueError(f"Project: {project.id} does not have expire date.")
+
+    if new_file.status == FileStatus.UPLOADING:
+        return
+    else:
+        update_file_status(new_file, FileStatus.UPLOADING)
+
+    s3_key = s3_file_key(new_file.project_id, new_file.hash)
+
+    if s3_storage.storage.has_object(s3_key):
+        update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+        return
+
+    try:
+        s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
+        s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
+        update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+    except Exception as exc:
+        logger.error(f"File: {new_file_id} failed to upload to s3: {exc}")
+        update_file_status(new_file, FileStatus.FAILURE)
+        raise exc
+
+
+def delete_key_from_s3(s3_file_key: str):
+    """Delete files from S3."""
+    logger.warning(f"File: {s3_file_key} starts deletion from S3")
+    if not s3_storage.storage.has_object(s3_file_key):
+        logger.debug(f"{s3_file_key} does not exist in S3")
+        return
+    try:
+        s3_storage.storage.delete_object(s3_file_key)
+    except Exception as exc:
+        logger.error(f"File: {s3_file_key} failed to be deleted from S3")
+        logger.exception(exc)
+
+
 @router.post("/{project_id}/files", status_code=HTTPStatus.CREATED)
 async def create_file(
     uploaded_file: UploadFile,
@@ -182,6 +274,9 @@ async def create_file(
             HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
         ) from exc
 
+    if len(project.files) == 0:
+        project.expire_on = now + constants.project_expire_after
+
     new_file = File(
         filename=filename,
         filesize=size,
@@ -190,7 +285,6 @@ async def create_file(
         description=None,
         uploaded_on=now,
         hash=file_hash,
-        # TODO: Using S3 to save file.
         path=str(fpath),
         type=mimetype,
         status=FileStatus.LOCAL.value,
@@ -199,6 +293,7 @@ async def create_file(
     session.add(new_file)
     session.flush()
     session.refresh(new_file)
+    task_queue.enqueue(upload_file_to_s3, new_file.id, retry=constants.job_retry)
     return FileModel.model_validate(new_file)
 
 
@@ -246,10 +341,19 @@ async def delete_file(
         .select_from(File)
         .filter_by(project_id=file.project_id)
         .filter_by(hash=file.hash)
-        .filter_by(status=FileStatus.LOCAL.value)
     )
     number_of_duplicate_files = session.scalars(stmt).one()
     if number_of_duplicate_files == 1:
-        file_location = file.local_fpath
-        file_location.unlink(missing_ok=True)
+        if file.status == FileStatus.LOCAL:
+            file.local_fpath.unlink(missing_ok=True)
+        if file.status == FileStatus.S3:
+            task_queue.enqueue(
+                delete_key_from_s3, s3_file_key(file.project_id, file.hash)
+            )
+        if file.status == FileStatus.UPLOADING:
+            task_queue.enqueue_at(
+                datetime.datetime.now(tz=datetime.UTC) + constants.s3_deletion_delay,
+                delete_key_from_s3,
+                s3_file_key(file.project_id, file.hash),
+            )
     session.delete(file)
