@@ -381,6 +381,7 @@ async function updateFilesMetadata(
     }
   }
 }
+
 async function updateSingleFileMetadata(
   clientFileId: string,
   fileId: string,
@@ -408,6 +409,7 @@ async function updateSingleFileMetadata(
   files.value.get(clientFileId)!.file.authors = newMetaData.authors
   files.value.get(clientFileId)!.file.filename = newMetaData.filename
 }
+
 function updateFileEditingStatus(newId: string | null) {
   editingFileId.value = newId
 }
