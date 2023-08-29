@@ -100,7 +100,7 @@
           type="button"
           class="btn"
           @click.prevent="isEditMode = true"
-          :disabled="props.clientVisibleFile.file.isEditable"
+          :disabled="!props.clientVisibleFile.file.isEditable"
         >
           <font-awesome-icon :icon="['fas', 'file-pen']" />
         </button>
