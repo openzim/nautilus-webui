@@ -69,7 +69,6 @@
                 :render-key="key"
                 :client-visible-file="file"
                 :is-selected="selectedFiles.has(key)"
-                :show-edit-button="isEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
               />

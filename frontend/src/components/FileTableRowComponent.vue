@@ -65,16 +65,23 @@
       </div>
     </td>
     <td class="align-middle">
-      <button
-        type="button"
-        class="btn"
-        @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)"
-      >
-        <font-awesome-icon :icon="['fas', 'trash']" />
-      </button>
-      <button type="button" class="btn" v-if="props.showEditButton">
-        <font-awesome-icon :icon="['fas', 'file-pen']" />
-      </button>
+      <div v-if="!isEditMode">
+        <button
+          type="button"
+          class="btn"
+          @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)"
+        >
+          <font-awesome-icon :icon="['fas', 'trash']" />
+        </button>
+        <button type="button" class="btn" @click.prevent="isEditMode = true">
+          <font-awesome-icon :icon="['fas', 'file-pen']" />
+        </button>
+      </div>
+      <div v-else>
+        <button type="button" class="btn" @click.prevent="saveMetadata">
+          <font-awesome-icon :icon="['fas', 'file-arrow-down']" />
+        </button>
+      </div>
     </td>
   </tr>
 </template>
@@ -90,7 +97,6 @@ const props = defineProps<{
   isSelected: boolean
   renderKey: string
   clientVisibleFile: ClientVisibleFile
-  showEditButton: boolean
 }>()
 const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
@@ -98,6 +104,8 @@ const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: File]
 }>()
+const isEditMode = ref(false)
+
 const fileUploadedDate = computed(() =>
   moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm')
 )
@@ -117,6 +125,10 @@ async function toggleSelectFile(key: string) {
 
 async function deleteFile(key: string, file: File) {
   emit('deleteFile', key, file)
+}
+
+async function saveMetadata() {
+  isEditMode.value = false
 }
 </script>
 
