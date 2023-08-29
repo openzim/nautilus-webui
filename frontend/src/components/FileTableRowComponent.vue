@@ -9,8 +9,10 @@
         :checked="props.isSelected"
       />
     </th>
-    <td class="align-middle">
-      {{ props.clientVisibleFile.file.filename }}
+    <td class="align-middle text-truncate">
+      <span class="d-inline-block text-truncate" style="max-width: 10em">
+        {{ props.clientVisibleFile.file.filename }}
+      </span>
     </td>
     <td class="align-middle">
       {{ humanifyFileSize(props.clientVisibleFile.file.filesize) }}
