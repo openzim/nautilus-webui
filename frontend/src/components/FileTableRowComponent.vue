@@ -163,15 +163,12 @@ watch(toolTipsElement, (newValue) => {
   }
 })
 
-watch(
-  props.clientVisibleFile,
-  (newValue) => {
-    metaDataFormModal.value.title = newValue.file.title
-    metaDataFormModal.value.description = newValue.file.description ?? ''
-    metaDataFormModal.value.authors = newValue.file.authors ?? []
-    metaDataFormModal.value.filename = newValue.file.filename
-  },
-)
+watch(props.clientVisibleFile, (newValue) => {
+  metaDataFormModal.value.title = newValue.file.title
+  metaDataFormModal.value.description = newValue.file.description ?? ''
+  metaDataFormModal.value.authors = newValue.file.authors ?? []
+  metaDataFormModal.value.filename = newValue.file.filename
+})
 
 async function toggleSelectFile(key: string) {
   emit('toggleSelectFile', key)

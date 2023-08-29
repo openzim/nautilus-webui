@@ -219,10 +219,23 @@ async function uploadFiles(uploadFiles: FileList) {
 
     uploadFileRequestsList.push(
       storeApp.axiosInstance
-        .post<FileClass>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
+        .post<File>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
         .then((response) => {
           if (files.value.has(newFile.id)) {
-            files.value.get(newFile.id)!.file = response.data
+            const data = response.data
+            files.value.get(newFile.id)!.file = new FileClass(
+              data.id,
+              data.project_id,
+              data.filename,
+              data.filesize,
+              data.title,
+              data.authors,
+              data.description,
+              data.uploaded_on,
+              data.hash,
+              data.type,
+              data.status
+            )
           }
         })
         .catch((error) => {
@@ -343,25 +356,29 @@ function updateCompareFunction(newFunction: CompareFunctionType) {
 
 async function updateFilesMetadata(fileId: string, newMetadata: FileMetadataForm) {
   if (isEditMode.value == false) {
-    updateSingleFileMetadata(fileId, newMetadata)
+    updateSingleFileMetadata(fileId, fileId, newMetadata)
   } else {
     if (selectedFiles.value.size == 0) {
-      for (const file of files.value.values()) {
+      for (const [id, file] of files.value.entries()) {
         if (file.file.isEditable) {
-          updateSingleFileMetadata(file.file.id, newMetadata)
+          updateSingleFileMetadata(id, file.file.id, newMetadata)
         }
       }
     } else {
       for (const id of selectedFiles.value.keys()) {
         const file = files.value.get(id)
         if (file != undefined && file.file.isEditable) {
-          updateSingleFileMetadata(file.file.id, newMetadata)
+          updateSingleFileMetadata(file.file.id, file.file.id, newMetadata)
         }
       }
     }
   }
 }
-async function updateSingleFileMetadata(fileId: string, newMetaData: FileMetadataForm) {
+async function updateSingleFileMetadata(
+  clientFileId: string,
+  fileId: string,
+  newMetaData: FileMetadataForm
+) {
   if (newMetaData.title == '') {
     storeApp.alertsWarning("Can not update file's metadata, since title is empty")
     return
@@ -379,10 +396,10 @@ async function updateSingleFileMetadata(fileId: string, newMetaData: FileMetadat
     console.log("Unable to update file's metadata.", error, fileId)
     storeApp.alertsError(`Unable to update file's metadata, file id: ${fileId}`)
   }
-  files.value.get(fileId)!.file.title = newMetaData.title
-  files.value.get(fileId)!.file.description = newMetaData.description
-  files.value.get(fileId)!.file.authors = newMetaData.authors
-  files.value.get(fileId)!.file.filename = newMetaData.filename
+  files.value.get(clientFileId)!.file.title = newMetaData.title
+  files.value.get(clientFileId)!.file.description = newMetaData.description
+  files.value.get(clientFileId)!.file.authors = newMetaData.authors
+  files.value.get(clientFileId)!.file.filename = newMetaData.filename
 }
 </script>
 
