@@ -100,10 +100,7 @@
           type="button"
           class="btn"
           @click.prevent="isEditMode = true"
-          :disabled="
-            props.clientVisibleFile.file.status == FileStatus.FAILURE ||
-            props.clientVisibleFile.file.status == FileStatus.UPLOADING
-          "
+          :disabled="props.clientVisibleFile.file.isEditable"
         >
           <font-awesome-icon :icon="['fas', 'file-pen']" />
         </button>
