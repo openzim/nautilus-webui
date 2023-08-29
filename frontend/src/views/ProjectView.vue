@@ -386,11 +386,11 @@ async function updateSingleFileMetadata(
   fileId: string,
   newMetaData: FileMetadataForm
 ) {
-  if (newMetaData.title == '') {
+  if (newMetaData.title.trim().length == 0) {
     storeApp.alertsWarning("Can not update file's metadata, since title is empty")
     return
   }
-  if (newMetaData.filename == '') {
+  if (newMetaData.filename.trim().length == 0) {
     storeApp.alertsWarning("Can not update file's metadata, since filename is empty")
     return
   }

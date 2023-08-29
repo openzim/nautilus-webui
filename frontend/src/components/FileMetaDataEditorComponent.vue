@@ -13,7 +13,7 @@
           <font-awesome-icon icon="fa-regular fa-circle-xmark" />
         </button>
       </li>
-      <input type="text" class="flex-grow-1 border-0" @keyup.enter="addTag" />
+      <input type="text" class="flex-grow-1 border-0" placeholder="Author" @keyup.enter="addTag" />
     </ul>
     <input type="text" class="form-control" placeholder="filename" v-model="formModal.filename" />
   </div>
@@ -46,7 +46,8 @@ watch(
 async function addTag(event: Event) {
   event.preventDefault()
   const target = event.target as HTMLInputElement
-  if (target.value.length != 0) {
+  const value = target.value.trim()
+  if (value.length != 0) {
     formModal.value.authors.push(target.value)
     target.value = ''
   }
