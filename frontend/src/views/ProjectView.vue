@@ -69,6 +69,8 @@
                 :render-key="key"
                 :client-visible-file="file"
                 :is-selected="selectedFiles.has(key)"
+                :editing-file-id="editingFileId"
+                @update-editing-status="updateFileEditingStatus"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
                 @update-file-metadata="updateFilesMetadata"
@@ -107,6 +109,7 @@ import { updateProjects } from '@/utils'
 
 const isActive = ref(false)
 const isEditMode = ref(false)
+const editingFileId: Ref<string | null> = ref(null)
 const isShowed = ref(true)
 const storeApp = useAppStore()
 const storeProject = useProjectStore()
@@ -400,6 +403,9 @@ async function updateSingleFileMetadata(
   files.value.get(clientFileId)!.file.description = newMetaData.description
   files.value.get(clientFileId)!.file.authors = newMetaData.authors
   files.value.get(clientFileId)!.file.filename = newMetaData.filename
+}
+function updateFileEditingStatus(newId: string | null) {
+  editingFileId.value = newId
 }
 </script>
 
