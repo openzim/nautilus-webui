@@ -71,7 +71,7 @@
                 :is-selected="selectedFiles.has(key)"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
-                @update-file-metadata="updateFileMetadata"
+                @update-file-metadata="updateFilesMetadata"
               />
             </tbody>
           </table>
@@ -93,6 +93,7 @@ import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import {
   FileStatus,
   type File,
+  FileClass,
   type ClientVisibleFile,
   humanifyFileSize,
   type CompareFunctionType,
@@ -117,7 +118,7 @@ const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
 )
-const toBeDeletedFiles: Ref<Map<string, File>> = ref(new Map())
+const toBeDeletedFiles: Ref<Map<string, FileClass>> = ref(new Map())
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 )
@@ -153,13 +154,29 @@ function updateIsActive(newValue: boolean) {
 }
 
 async function getAllFiles(projectId: string | null) {
-  var result: File[] = []
+  var result: FileClass[] = []
   if (projectId == null) {
     return result
   }
   try {
     const reponse = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
-    result = reponse.data
+    for (const file of reponse.data) {
+      result.push(
+        new FileClass(
+          file.id,
+          file.project_id,
+          file.filename,
+          file.filesize,
+          file.title,
+          file.authors,
+          file.description,
+          file.uploaded_on,
+          file.hash,
+          file.type,
+          file.status
+        )
+      )
+    }
   } catch (error: any) {
     console.log('Unable to retrieve the files info', error)
     storeApp.alertsWarning('Unable to retrieve the files info')
@@ -173,17 +190,19 @@ async function uploadFiles(uploadFiles: FileList) {
   }
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
-    const newFile: File = {
-      id: storeApp.constants.genFakeId,
-      project_id: storeProject.lastProjectId,
-      filename: uploadFile.name,
-      filesize: uploadFile.size,
-      title: uploadFile.name,
-      uploaded_on: new Date().toISOString(),
-      hash: storeApp.constants.fakeHash,
-      type: uploadFile.type,
-      status: FileStatus.UPLOADING
-    }
+    const newFile: FileClass = new FileClass(
+      storeApp.constants.genFakeId,
+      storeProject.lastProjectId,
+      uploadFile.name,
+      uploadFile.size,
+      uploadFile.name,
+      undefined,
+      undefined,
+      new Date().toISOString(),
+      storeApp.constants.fakeHash,
+      uploadFile.type,
+      FileStatus.UPLOADING
+    )
     files.value.set(newFile.id, { file: newFile, uploadedSize: 0 })
 
     const requestData = new FormData()
@@ -200,7 +219,7 @@ async function uploadFiles(uploadFiles: FileList) {
 
     uploadFileRequestsList.push(
       storeApp.axiosInstance
-        .post<File>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
+        .post<FileClass>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
         .then((response) => {
           if (files.value.has(newFile.id)) {
             files.value.get(newFile.id)!.file = response.data
@@ -241,7 +260,7 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
 }
 
 async function deleteFiles() {
-  const deletedFiles: File[] = []
+  const deletedFiles: FileClass[] = []
 
   for (const [key, file] of toBeDeletedFiles.value) {
     try {
@@ -267,7 +286,7 @@ async function deleteFiles() {
   }
 }
 
-async function deleteSingleFile(key: string, file: File) {
+async function deleteSingleFile(key: string, file: FileClass) {
   toBeDeletedFiles.value.clear()
   toBeDeletedFiles.value.set(key, file)
   storeModal.showModal(
@@ -322,7 +341,27 @@ function updateCompareFunction(newFunction: CompareFunctionType) {
   compareFunction.value = newFunction
 }
 
-async function updateFileMetadata(fileId: string, newMetaData: FileMetadataForm) {
+async function updateFilesMetadata(fileId: string, newMetadata: FileMetadataForm) {
+  if (isEditMode.value == false) {
+    updateSingleFileMetadata(fileId, newMetadata)
+  } else {
+    if (selectedFiles.value.size == 0) {
+      for (const file of files.value.values()) {
+        if (file.file.isEditable) {
+          updateSingleFileMetadata(file.file.id, newMetadata)
+        }
+      }
+    } else {
+      for (const id of selectedFiles.value.keys()) {
+        const file = files.value.get(id)
+        if (file != undefined && file.file.isEditable) {
+          updateSingleFileMetadata(file.file.id, newMetadata)
+        }
+      }
+    }
+  }
+}
+async function updateSingleFileMetadata(fileId: string, newMetaData: FileMetadataForm) {
   if (newMetaData.title == '') {
     storeApp.alertsWarning("Can not update file's metadata, since title is empty")
     return

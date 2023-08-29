@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import { partial } from 'filesize'
 
 export interface ClientVisibleFile {
-  file: File
+  file: FileClass
   uploadedSize: number
   statusCode?: string
   statusText?: string
@@ -32,6 +32,50 @@ export interface File {
   hash: string
   type: string
   status: FileStatus
+}
+export class FileClass implements File {
+  id: string
+  project_id: string
+  filename: string
+  filesize: number
+  title: string
+  authors?: string[]
+  description?: string
+  uploaded_on: string
+  hash: string
+  type: string
+  status: FileStatus
+
+  public constructor(
+    id: string,
+    project_id: string,
+    filename: string,
+    filesize: number,
+    title: string,
+    authors: string[] | undefined,
+    description: string | undefined,
+    uploaded_on: string,
+    hash: string,
+    type: string,
+    status: FileStatus
+  ) {
+    this.id = id
+    this.project_id = project_id
+    this.filename = filename
+    this.filesize = filesize
+    this.title = title
+    this.authors = authors
+    this.description = description
+    this.uploaded_on = uploaded_on
+    this.hash = hash
+    this.type = type
+    this.status = status
+  }
+
+  get isEditable(): boolean {
+    return true
+    return this.status != FileStatus.FAILURE && this.status != FileStatus.UPLOADING
+  }
 }
 
 export enum FileStatus {

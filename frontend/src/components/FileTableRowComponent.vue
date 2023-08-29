@@ -121,7 +121,7 @@
 import {
   FileStatus,
   humanifyFileSize,
-  type File,
+  FileClass,
   type ClientVisibleFile,
   type FileMetadataForm,
   type MetadataEditorFormType
@@ -141,7 +141,7 @@ const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
-  deleteFile: [key: string, file: File]
+  deleteFile: [key: string, file: FileClass]
   updateFileMetadata: [id: string, metadata: FileMetadataForm]
 }>()
 const isEditMode = ref(false)
@@ -170,7 +170,7 @@ async function toggleSelectFile(key: string) {
   emit('toggleSelectFile', key)
 }
 
-async function deleteFile(key: string, file: File) {
+async function deleteFile(key: string, file: FileClass) {
   emit('deleteFile', key, file)
 }
 
