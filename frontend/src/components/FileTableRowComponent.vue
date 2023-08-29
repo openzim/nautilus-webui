@@ -5,7 +5,7 @@
         class="form-check-input"
         type="checkbox"
         value=""
-        @change.prevent="toggleSelectFile(props.renderKey)"
+        @change.prevent="toggleSelectFile(props.renderId)"
         :checked="props.isSelected"
       />
     </th>
@@ -92,14 +92,14 @@
         <button
           type="button"
           class="btn"
-          @click.prevent="deleteFile(props.renderKey, props.clientVisibleFile.file)"
+          @click.prevent="deleteFile(props.renderId, props.clientVisibleFile.file)"
         >
           <font-awesome-icon :icon="['fas', 'trash']" />
         </button>
         <button
           type="button"
           class="btn"
-          @click.prevent="emit('updateEditingStatus', renderKey)"
+          @click.prevent="emit('updateEditingStatus', renderId)"
           :disabled="!props.clientVisibleFile.file.isEditable"
         >
           <font-awesome-icon :icon="['fas', 'file-pen']" />
@@ -134,7 +134,7 @@ import FileMetaDataEditorComponent from '@/components/FileMetaDataEditorComponen
 
 const props = defineProps<{
   isSelected: boolean
-  renderKey: string
+  renderId: string
   clientVisibleFile: ClientVisibleFile
   editingFileId: string | null
 }>()
@@ -143,7 +143,7 @@ const upHere = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: FileClass]
-  updateFileMetadata: [id: string, metadata: FileMetadataForm]
+  updateFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
   updateEditingStatus: [id: string | null]
 }>()
 
@@ -161,7 +161,7 @@ const authors = computed(() =>
   props.clientVisibleFile.file.authors?.reduce((prev, author) => prev + author + ',', '')
 )
 const inEditing = computed(
-  () => props.editingFileId != null && props.editingFileId == props.renderKey
+  () => props.editingFileId != null && props.editingFileId == props.renderId
 )
 
 watch(toolTipsElement, (newValue) => {
@@ -187,7 +187,12 @@ async function deleteFile(key: string, file: FileClass) {
 
 async function saveMetadata() {
   emit('updateEditingStatus', null)
-  emit('updateFileMetadata', props.clientVisibleFile.file.id, metaDataFormModal.value)
+  emit(
+    'updateFileMetadata',
+    props.renderId,
+    props.clientVisibleFile.file.id,
+    metaDataFormModal.value
+  )
 }
 
 async function updateMetadataForm(newValue: MetadataEditorFormType) {

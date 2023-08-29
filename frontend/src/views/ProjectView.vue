@@ -64,11 +64,11 @@
             </thead>
             <tbody>
               <FileTableRowComponent
-                v-for="[key, file] in sortedFiles"
-                :key="key"
-                :render-key="key"
+                v-for="[renderId, file] in sortedFiles"
+                :key="renderId"
+                :render-id="renderId"
                 :client-visible-file="file"
-                :is-selected="selectedFiles.has(key)"
+                :is-selected="selectedFiles.has(renderId)"
                 :editing-file-id="editingFileId"
                 @update-editing-status="updateFileEditingStatus"
                 @toggle-select-file="toggleSelectFile"
@@ -357,9 +357,13 @@ function updateCompareFunction(newFunction: CompareFunctionType) {
   compareFunction.value = newFunction
 }
 
-async function updateFilesMetadata(fileId: string, newMetadata: FileMetadataForm) {
+async function updateFilesMetadata(
+  renderId: string,
+  fileId: string,
+  newMetadata: FileMetadataForm
+) {
   if (isEditMode.value == false) {
-    updateSingleFileMetadata(fileId, fileId, newMetadata)
+    updateSingleFileMetadata(renderId, fileId, newMetadata)
   } else {
     if (selectedFiles.value.size == 0) {
       for (const [id, file] of files.value.entries()) {
