@@ -202,6 +202,10 @@ async function updateMetadataForm(newValue: MetadataEditorFormType) {
 }
 
 async function exitEditing() {
+  metaDataFormModal.value.title = props.clientVisibleFile.file.title
+  metaDataFormModal.value.description = props.clientVisibleFile.file.description ?? ''
+  metaDataFormModal.value.authors = props.clientVisibleFile.file.authors ?? []
+  metaDataFormModal.value.filename = props.clientVisibleFile.file.filename
   emit('updateEditingStatus', null)
 }
 </script>
