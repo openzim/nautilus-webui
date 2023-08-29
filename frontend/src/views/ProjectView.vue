@@ -71,6 +71,7 @@
                 :is-selected="selectedFiles.has(key)"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
+                @update-file-metadata="updateFileMetadata"
               />
             </tbody>
           </table>
@@ -94,7 +95,8 @@ import {
   type File,
   type ClientVisibleFile,
   humanifyFileSize,
-  type CompareFunctionType
+  type CompareFunctionType,
+  type FileMetadataForm
 } from '@/constants'
 import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
@@ -124,16 +126,19 @@ const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
 )
 
 watch(lastProjectId, async () => {
-  files.value.clear()
-  const apiFiles = await getAllFiles(storeProject.lastProjectId)
-  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
+  await refreshFiles()
 })
 
 if (storeInitialFileStore.initialFiles.length == 0) {
-  const apiFiles = await getAllFiles(storeProject.lastProjectId)
-  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
+  await refreshFiles()
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
+}
+
+async function refreshFiles() {
+  files.value.clear()
+  const apiFiles = await getAllFiles(storeProject.lastProjectId)
+  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 }
 
 function sortFiles(
@@ -315,6 +320,30 @@ function updateSelectFiles(newValue: Map<string, boolean>) {
 
 function updateCompareFunction(newFunction: CompareFunctionType) {
   compareFunction.value = newFunction
+}
+
+async function updateFileMetadata(fileId: string, newMetaData: FileMetadataForm) {
+  if (newMetaData.title == '') {
+    storeApp.alertsWarning("Can not update file's metadata, since title is empty")
+    return
+  }
+  if (newMetaData.filename == '') {
+    storeApp.alertsWarning("Can not update file's metadata, since filename is empty")
+    return
+  }
+  try {
+    await storeApp.axiosInstance.patch<string>(
+      `/projects/${lastProjectId.value}/files/${fileId}`,
+      newMetaData
+    )
+  } catch (error) {
+    console.log("Unable to update file's metadata.", error, fileId)
+    storeApp.alertsError(`Unable to update file's metadata, file id: ${fileId}`)
+  }
+  files.value.get(fileId)!.file.title = newMetaData.title
+  files.value.get(fileId)!.file.description = newMetaData.description
+  files.value.get(fileId)!.file.authors = newMetaData.authors
+  files.value.get(fileId)!.file.filename = newMetaData.filename
 }
 </script>
 

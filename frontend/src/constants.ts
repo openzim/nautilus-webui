@@ -87,3 +87,15 @@ export type CompareFunctionType = (
   a: [string, ClientVisibleFile],
   b: [string, ClientVisibleFile]
 ) => number
+
+export type FileMetadataForm = {
+  title: string
+  description: string
+  authors: string[]
+  filename: string
+}
+export interface MetadataEditorFormType {
+  description: string
+  authors: string[]
+  filename: string
+}

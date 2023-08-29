@@ -9,10 +9,15 @@
         :checked="props.isSelected"
       />
     </th>
-    <td class="align-middle text-truncate">
-      <span class="d-inline-block text-truncate" style="max-width: 10em">
-        {{ props.clientVisibleFile.file.filename }}
-      </span>
+    <td class="align-middle">
+      <div v-if="!isEditMode">
+        <span class="d-inline-block text-truncate file-title">
+          {{ props.clientVisibleFile.file.title }}
+        </span>
+      </div>
+      <div v-else>
+        <input v-model="metaDataFormModal.title" class="form-control file-title" />
+      </div>
     </td>
     <td class="align-middle">
       {{ humanifyFileSize(props.clientVisibleFile.file.filesize) }}
@@ -45,23 +50,41 @@
       </span>
     </td>
     <td class="align-middle">
-      <div
-        class="position-relative"
-        @mouseover.prevent="upHere = true"
-        @mouseleave.prevent="upHere = false"
-      >
-        {{ props.clientVisibleFile.file.authors != undefined ? `Authors; ` : '' }}
-        {{ props.clientVisibleFile.file.description != undefined ? `Description; ` : '' }}
-        <div v-show="upHere" class="card position-absolute bottom-0 start-0 metadata-card">
-          <div class="card-body">
-            <div class="card-title custom-title">Description:</div>
-            <p class="card-text">{{ props.clientVisibleFile.file.description }}</p>
-            <div class="card-title custom-title">Auhtors:</div>
-            <p class="card-text">
-              {{ authors }}
-            </p>
+      <div v-if="!isEditMode">
+        <div
+          class="position-relative"
+          @mouseover.prevent="upHere = true"
+          @mouseleave.prevent="upHere = false"
+        >
+          {{
+            props.clientVisibleFile.file.authors != undefined &&
+            props.clientVisibleFile.file.authors!.length != 0
+              ? `Authors; `
+              : ''
+          }}
+          {{
+            props.clientVisibleFile.file.description != undefined &&
+            props.clientVisibleFile.file.description != ''
+              ? `Description; `
+              : ''
+          }}
+          <div v-show="upHere" class="card position-absolute bottom-0 start-0 metadata-card">
+            <div class="card-body">
+              <div class="card-title custom-title">Description:</div>
+              <p class="card-text">{{ props.clientVisibleFile.file.description }}</p>
+              <div class="card-title custom-title">Auhtors:</div>
+              <p class="card-text">
+                {{ authors }}
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <FileMetaDataEditorComponent
+          :metadata="metaDataFormModal"
+          @update-form="updateMetadataForm"
+        />
       </div>
     </td>
     <td class="align-middle">
@@ -73,7 +96,15 @@
         >
           <font-awesome-icon :icon="['fas', 'trash']" />
         </button>
-        <button type="button" class="btn" @click.prevent="isEditMode = true">
+        <button
+          type="button"
+          class="btn"
+          @click.prevent="isEditMode = true"
+          :disabled="
+            props.clientVisibleFile.file.status == FileStatus.FAILURE ||
+            props.clientVisibleFile.file.status == FileStatus.UPLOADING
+          "
+        >
           <font-awesome-icon :icon="['fas', 'file-pen']" />
         </button>
       </div>
@@ -87,11 +118,19 @@
 </template>
 
 <script setup lang="ts">
-import { FileStatus, humanifyFileSize, type File, type ClientVisibleFile } from '@/constants'
+import {
+  FileStatus,
+  humanifyFileSize,
+  type File,
+  type ClientVisibleFile,
+  type FileMetadataForm,
+  type MetadataEditorFormType
+} from '@/constants'
 import { fromMime } from 'human-filetypes'
 import moment from 'moment'
 import { computed, ref, watch, type Ref } from 'vue'
 import * as bootstrap from 'bootstrap'
+import FileMetaDataEditorComponent from '@/components/FileMetaDataEditorComponent.vue'
 
 const props = defineProps<{
   isSelected: boolean
@@ -103,8 +142,16 @@ const upHere = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: File]
+  updateFileMetadata: [id: string, metadata: FileMetadataForm]
 }>()
 const isEditMode = ref(false)
+
+const metaDataFormModal: Ref<FileMetadataForm> = ref({
+  title: props.clientVisibleFile.file.title,
+  description: props.clientVisibleFile.file.description ?? '',
+  authors: props.clientVisibleFile.file.authors ?? [],
+  filename: props.clientVisibleFile.file.filename
+})
 
 const fileUploadedDate = computed(() =>
   moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm')
@@ -129,6 +176,13 @@ async function deleteFile(key: string, file: File) {
 
 async function saveMetadata() {
   isEditMode.value = false
+  emit('updateFileMetadata', props.clientVisibleFile.file.id, metaDataFormModal.value)
+}
+
+async function updateMetadataForm(newValue: MetadataEditorFormType) {
+  metaDataFormModal.value.description = newValue.description
+  metaDataFormModal.value.authors = newValue.authors
+  metaDataFormModal.value.filename = newValue.filename
 }
 </script>
 
@@ -141,5 +195,9 @@ async function saveMetadata() {
 
 .custom-title {
   color: var(--main-color);
+}
+
+.file-title {
+  max-width: 12em;
 }
 </style>
