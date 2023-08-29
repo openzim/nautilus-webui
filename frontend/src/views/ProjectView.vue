@@ -372,10 +372,10 @@ async function updateFilesMetadata(
         }
       }
     } else {
-      for (const id of selectedFiles.value.keys()) {
-        const file = files.value.get(id)
+      for (const renderId of selectedFiles.value.keys()) {
+        const file = files.value.get(renderId)
         if (file != undefined && file.file.isEditable) {
-          updateSingleFileMetadata(file.file.id, file.file.id, newMetadata)
+          updateSingleFileMetadata(renderId, file.file.id, newMetadata)
         }
       }
     }
