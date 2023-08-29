@@ -109,6 +109,9 @@
         <button type="button" class="btn" @click.prevent="saveMetadata">
           <font-awesome-icon :icon="['fas', 'file-arrow-down']" />
         </button>
+        <button type="button" class="btn" @click.prevent="exitEditing">
+          <font-awesome-icon :icon="['fas', 'trash']" />
+        </button>
       </div>
     </td>
   </tr>
@@ -191,6 +194,10 @@ async function updateMetadataForm(newValue: MetadataEditorFormType) {
   metaDataFormModal.value.description = newValue.description
   metaDataFormModal.value.authors = newValue.authors
   metaDataFormModal.value.filename = newValue.filename
+}
+
+async function exitEditing() {
+  emit('updateEditingStatus', null)
 }
 </script>
 
