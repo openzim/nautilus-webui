@@ -46,7 +46,7 @@
                 name="btnradio"
                 id="upload"
                 autocomplete="off"
-                @change="inEditMode = false"
+                @change="exitEditModeHandler"
                 :checked="!inEditMode"
               />
               <label class="btn btn-outline-primary" for="upload">Upload</label>
@@ -72,7 +72,8 @@
                 :in-edit-mode="inEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
-                @update-file-metadata="updateFilesMetadata"
+                @update-file-metadata="updateFileMetadata"
+                @update-single-file-metadata="updateSingleFileMetadata"
               />
             </tbody>
           </table>
@@ -125,6 +126,9 @@ const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
 )
 const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
+)
+const beUpdatedFile: Ref<Map<string, { fileId: string; metadata: FileMetadataForm }>> = ref(
+  new Map()
 )
 
 watch(lastProjectId, async () => {
@@ -329,34 +333,38 @@ function updateCompareFunction(newFunction: CompareFunctionType) {
   compareFunction.value = newFunction
 }
 
-async function updateFilesMetadata(
-  renderId: string,
-  fileId: string,
-  newMetadata: FileMetadataForm
-) {
-  console.log('HHHH')
-  if (inEditMode.value == false) {
-    updateSingleFileMetadata(renderId, fileId, newMetadata)
-  } else {
-    if (selectedFiles.value.size == 0) {
-      for (const [id, file] of files.value.entries()) {
-        if (file.file.isEditable) {
-          updateSingleFileMetadata(id, file.file.id, newMetadata)
-        }
-      }
-    } else {
-      for (const renderId of selectedFiles.value.keys()) {
-        const file = files.value.get(renderId)
-        if (file != undefined && file.file.isEditable) {
-          updateSingleFileMetadata(renderId, file.file.id, newMetadata)
-        }
-      }
+async function exitEditModeHandler() {
+  const changeList = []
+  for (const [key, element] of beUpdatedFile.value.entries()) {
+    if (files.value.get(key) != undefined) {
+      changeList.push(element.metadata.title)
     }
   }
+  storeModal.showModal(
+    'Are you sure you want to change those files:',
+    'Change',
+    'Discard',
+    updateBeUpdatedFilesMetadata,
+    async () => {},
+    changeList
+  )
+}
+async function updateBeUpdatedFilesMetadata() {
+  for (const [key, element] of beUpdatedFile.value.entries()) {
+    if (files.value.get(key) != undefined) {
+      await updateSingleFileMetadata(key, element.fileId, element.metadata)
+    }
+  }
+  inEditMode.value = false
+  beUpdatedFile.value.clear()
+}
+async function updateFileMetadata(renderId: string, fileId: string, newMetaData: FileMetadataForm) {
+  beUpdatedFile.value.set(renderId, { fileId: fileId, metadata: newMetaData })
+  console.log(beUpdatedFile.value)
 }
 
 async function updateSingleFileMetadata(
-  clientFileId: string,
+  renderId: string,
   fileId: string,
   newMetaData: FileMetadataForm
 ) {
@@ -377,10 +385,10 @@ async function updateSingleFileMetadata(
     console.log("Unable to update file's metadata.", error, fileId)
     storeApp.alertsError(`Unable to update file's metadata, file id: ${fileId}`)
   }
-  files.value.get(clientFileId)!.file.title = newMetaData.title
-  files.value.get(clientFileId)!.file.description = newMetaData.description
-  files.value.get(clientFileId)!.file.authors = newMetaData.authors
-  files.value.get(clientFileId)!.file.filename = newMetaData.filename
+  files.value.get(renderId)!.file.title = newMetaData.title
+  files.value.get(renderId)!.file.description = newMetaData.description
+  files.value.get(renderId)!.file.authors = newMetaData.authors
+  files.value.get(renderId)!.file.filename = newMetaData.filename
 }
 </script>
 

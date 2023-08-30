@@ -11,7 +11,11 @@
     </th>
     <td class="align-middle">
       <div v-if="inEditMode || inSingleFileEditMode">
-        <input v-model="metaDataFormModal.title" class="form-control file-title" />
+        <input
+          :value="metadataFormModal.title"
+          class="form-control file-title"
+          @input="handleTitleInput"
+        />
       </div>
       <div v-else>
         <span class="d-inline-block text-truncate file-title">
@@ -52,7 +56,7 @@
     <td class="align-middle">
       <div v-if="inEditMode || inSingleFileEditMode">
         <FileMetaDataEditorComponent
-          :metadata="metaDataFormModal"
+          :metadata="metadataFormModal"
           @update-form="updateMetadataForm"
         />
       </div>
@@ -145,9 +149,10 @@ const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: NautilusFile]
   updateFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
+  updateSingleFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
 }>()
 
-const metaDataFormModal: Ref<FileMetadataForm> = ref({
+const metadataFormModal: Ref<FileMetadataForm> = ref({
   title: props.clientVisibleFile.file.title,
   description: props.clientVisibleFile.file.description ?? '',
   authors: props.clientVisibleFile.file.authors?.slice() ?? [],
@@ -176,11 +181,32 @@ watch(
 )
 
 watch(props.clientVisibleFile, (newValue) => {
-  metaDataFormModal.value.title = newValue.file.title
-  metaDataFormModal.value.description = newValue.file.description ?? ''
-  metaDataFormModal.value.authors = newValue.file.authors?.slice() ?? []
-  metaDataFormModal.value.filename = newValue.file.filename
+  metadataFormModal.value.title = newValue.file.title
+  metadataFormModal.value.description = newValue.file.description ?? ''
+  metadataFormModal.value.authors = newValue.file.authors?.slice() ?? []
+  metadataFormModal.value.filename = newValue.file.filename
 })
+
+function handleTitleInput(event: Event) {
+  event.preventDefault()
+  const target = event.target as HTMLInputElement
+  const value = target.value.trim()
+  if (value.length != 0) {
+    metadataFormModal.value.title = value
+  }
+  updateFileMetadata()
+}
+
+function updateFileMetadata() {
+  if (props.inEditMode) {
+    emit(
+      'updateFileMetadata',
+      props.renderId,
+      props.clientVisibleFile.file.id,
+      metadataFormModal.value
+    )
+  }
+}
 
 async function toggleSelectFile(key: string) {
   emit('toggleSelectFile', key)
@@ -192,25 +218,26 @@ async function deleteFile(key: string, file: NautilusFile) {
 
 async function saveMetadata() {
   emit(
-    'updateFileMetadata',
+    'updateSingleFileMetadata',
     props.renderId,
     props.clientVisibleFile.file.id,
-    metaDataFormModal.value
+    metadataFormModal.value
   )
   inSingleFileEditMode.value = false
 }
 
 async function updateMetadataForm(newValue: MetadataEditorFormType) {
-  metaDataFormModal.value.description = newValue.description
-  metaDataFormModal.value.authors = newValue.authors
-  metaDataFormModal.value.filename = newValue.filename
+  metadataFormModal.value.description = newValue.description
+  metadataFormModal.value.authors = newValue.authors
+  metadataFormModal.value.filename = newValue.filename
+  updateFileMetadata()
 }
 
 async function exitEditing() {
-  metaDataFormModal.value.title = props.clientVisibleFile.file.title
-  metaDataFormModal.value.description = props.clientVisibleFile.file.description ?? ''
-  metaDataFormModal.value.authors = props.clientVisibleFile.file.authors?.slice() ?? []
-  metaDataFormModal.value.filename = props.clientVisibleFile.file.filename
+  metadataFormModal.value.title = props.clientVisibleFile.file.title
+  metadataFormModal.value.description = props.clientVisibleFile.file.description ?? ''
+  metadataFormModal.value.authors = props.clientVisibleFile.file.authors?.slice() ?? []
+  metadataFormModal.value.filename = props.clientVisibleFile.file.filename
   inSingleFileEditMode.value = false
 }
 </script>
