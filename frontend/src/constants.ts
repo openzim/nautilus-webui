@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import { partial } from 'filesize'
 
 export interface ClientVisibleFile {
-  file: FileClass
+  file: NautilusFile
   uploadedSize: number
   statusCode?: string
   statusText?: string
@@ -33,7 +33,7 @@ export interface File {
   type: string
   status: FileStatus
 }
-export class FileClass implements File {
+export class NautilusFile implements File {
   id: string
   project_id: string
   filename: string

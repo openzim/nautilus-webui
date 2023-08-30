@@ -95,7 +95,7 @@ import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import {
   FileStatus,
   type File,
-  FileClass,
+  NautilusFile,
   type ClientVisibleFile,
   humanifyFileSize,
   type CompareFunctionType,
@@ -121,7 +121,7 @@ const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
 )
-const toBeDeletedFiles: Ref<Map<string, FileClass>> = ref(new Map())
+const toBeDeletedFiles: Ref<Map<string, NautilusFile>> = ref(new Map())
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 )
@@ -157,7 +157,7 @@ function updateIsActive(newValue: boolean) {
 }
 
 async function getAllFiles(projectId: string | null) {
-  var result: FileClass[] = []
+  var result: NautilusFile[] = []
   if (projectId == null) {
     return result
   }
@@ -165,7 +165,7 @@ async function getAllFiles(projectId: string | null) {
     const reponse = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
     for (const file of reponse.data) {
       result.push(
-        new FileClass(
+        new NautilusFile(
           file.id,
           file.project_id,
           file.filename,
@@ -193,7 +193,7 @@ async function uploadFiles(uploadFiles: FileList) {
   }
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
-    const newFile: FileClass = new FileClass(
+    const newFile: NautilusFile = new NautilusFile(
       storeApp.constants.genFakeId,
       storeProject.lastProjectId,
       uploadFile.name,
@@ -226,7 +226,7 @@ async function uploadFiles(uploadFiles: FileList) {
         .then((response) => {
           if (files.value.has(newFile.id)) {
             const data = response.data
-            files.value.get(newFile.id)!.file = new FileClass(
+            files.value.get(newFile.id)!.file = new NautilusFile(
               data.id,
               data.project_id,
               data.filename,
@@ -276,7 +276,7 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
 }
 
 async function deleteFiles() {
-  const deletedFiles: FileClass[] = []
+  const deletedFiles: NautilusFile[] = []
 
   for (const [key, file] of toBeDeletedFiles.value) {
     try {
@@ -302,7 +302,7 @@ async function deleteFiles() {
   }
 }
 
-async function deleteSingleFile(key: string, file: FileClass) {
+async function deleteSingleFile(key: string, file: NautilusFile) {
   toBeDeletedFiles.value.clear()
   toBeDeletedFiles.value.set(key, file)
   storeModal.showModal(

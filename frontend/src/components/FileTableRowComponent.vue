@@ -121,10 +121,10 @@
 import {
   FileStatus,
   humanifyFileSize,
-  FileClass,
   type ClientVisibleFile,
   type FileMetadataForm,
-  type MetadataEditorFormType
+  type MetadataEditorFormType,
+  NautilusFile
 } from '@/constants'
 import { fromMime } from 'human-filetypes'
 import moment from 'moment'
@@ -142,7 +142,7 @@ const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
-  deleteFile: [key: string, file: FileClass]
+  deleteFile: [key: string, file: NautilusFile]
   updateFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
   updateEditingStatus: [id: string | null]
 }>()
@@ -181,7 +181,7 @@ async function toggleSelectFile(key: string) {
   emit('toggleSelectFile', key)
 }
 
-async function deleteFile(key: string, file: FileClass) {
+async function deleteFile(key: string, file: NautilusFile) {
   emit('deleteFile', key, file)
 }
 
