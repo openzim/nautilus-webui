@@ -164,21 +164,7 @@ async function getAllFiles(projectId: string | null) {
   try {
     const reponse = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
     for (const file of reponse.data) {
-      result.push(
-        new NautilusFile(
-          file.id,
-          file.project_id,
-          file.filename,
-          file.filesize,
-          file.title,
-          file.authors,
-          file.description,
-          file.uploaded_on,
-          file.hash,
-          file.type,
-          file.status
-        )
-      )
+      result.push(NautilusFile.fromFile(file))
     }
   } catch (error: any) {
     console.log('Unable to retrieve the files info', error)
@@ -225,20 +211,8 @@ async function uploadFiles(uploadFiles: FileList) {
         .post<File>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
         .then((response) => {
           if (files.value.has(newFile.id)) {
-            const data = response.data
-            files.value.get(newFile.id)!.file = new NautilusFile(
-              data.id,
-              data.project_id,
-              data.filename,
-              data.filesize,
-              data.title,
-              data.authors,
-              data.description,
-              data.uploaded_on,
-              data.hash,
-              data.type,
-              data.status
-            )
+            const uploadedFile = response.data
+            files.value.get(newFile.id)!.file = NautilusFile.fromFile(uploadedFile)
           }
         })
         .catch((error) => {

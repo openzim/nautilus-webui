@@ -72,6 +72,22 @@ export class NautilusFile implements File {
     this.status = status
   }
 
+  public static fromFile(file: File): NautilusFile {
+    return new NautilusFile(
+      file.id,
+      file.project_id,
+      file.filename,
+      file.filesize,
+      file.title,
+      file.authors,
+      file.description,
+      file.uploaded_on,
+      file.hash,
+      file.type,
+      file.status
+    )
+  }
+
   get isEditable(): boolean {
     return this.status != FileStatus.FAILURE && this.status != FileStatus.UPLOADING
   }
