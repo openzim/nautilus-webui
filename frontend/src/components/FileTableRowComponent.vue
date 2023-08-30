@@ -140,7 +140,7 @@ const inSingleFileEditMode = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: NautilusFile]
-  updateFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
+  updateFileMetadataStatus: [renderId: string, id: string, metadata: FileMetadataForm]
   updateSingleFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
 }>()
 
@@ -202,7 +202,7 @@ function handleTitleInput(event: Event) {
 function updateFileMetadata() {
   if (props.inEditMode) {
     emit(
-      'updateFileMetadata',
+      'updateFileMetadataStatus',
       props.renderId,
       props.clientVisibleFile.file.id,
       metadataFormModal.value

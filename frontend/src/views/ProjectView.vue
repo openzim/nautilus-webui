@@ -76,7 +76,7 @@
                 :in-edit-mode="inEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
-                @update-file-metadata="updateFileMetadata"
+                @update-file-metadata="updateFileMetadataStatus"
                 @update-single-file-metadata="updateSingleFileMetadata"
               />
             </tbody>
@@ -370,9 +370,12 @@ async function updateBeUpdatedFilesMetadata() {
   beUpdatedFile.value.clear()
 }
 
-async function updateFileMetadata(renderId: string, fileId: string, newMetaData: FileMetadataForm) {
+async function updateFileMetadataStatus(
+  renderId: string,
+  fileId: string,
+  newMetaData: FileMetadataForm
+) {
   beUpdatedFile.value.set(renderId, { fileId: fileId, metadata: newMetaData })
-  console.log(beUpdatedFile.value)
 }
 
 async function updateSingleFileMetadata(
