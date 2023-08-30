@@ -193,9 +193,7 @@ function handleTitleInput(event: Event) {
   event.preventDefault()
   const target = event.target as HTMLInputElement
   const value = target.value.trim()
-  if (value.length != 0) {
-    metadataFormModal.value.title = value
-  }
+  metadataFormModal.value.title = value
   updateFileMetadata()
 }
 

@@ -359,6 +359,7 @@ async function exitEditModeHandler() {
     )
   }
 }
+
 async function updateBeUpdatedFilesMetadata() {
   for (const [key, element] of beUpdatedFile.value.entries()) {
     if (files.value.get(key) != undefined) {
@@ -368,6 +369,7 @@ async function updateBeUpdatedFilesMetadata() {
   inEditMode.value = false
   beUpdatedFile.value.clear()
 }
+
 async function updateFileMetadata(renderId: string, fileId: string, newMetaData: FileMetadataForm) {
   beUpdatedFile.value.set(renderId, { fileId: fileId, metadata: newMetaData })
   console.log(beUpdatedFile.value)
