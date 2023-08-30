@@ -10,13 +10,13 @@
       />
     </th>
     <td class="align-middle">
-      <div v-if="!inEditing">
+      <div v-if="inEditMode || inSingleFileEditMode">
+        <input v-model="metaDataFormModal.title" class="form-control file-title" />
+      </div>
+      <div v-else>
         <span class="d-inline-block text-truncate file-title">
           {{ props.clientVisibleFile.file.title }}
         </span>
-      </div>
-      <div v-else>
-        <input v-model="metaDataFormModal.title" class="form-control file-title" />
       </div>
     </td>
     <td class="align-middle">
@@ -50,7 +50,13 @@
       </span>
     </td>
     <td class="align-middle">
-      <div v-if="!inEditing">
+      <div v-if="inEditMode || inSingleFileEditMode">
+        <FileMetaDataEditorComponent
+          :metadata="metaDataFormModal"
+          @update-form="updateMetadataForm"
+        />
+      </div>
+      <div v-else>
         <div
           class="position-relative"
           @mouseover.prevent="upHere = true"
@@ -80,37 +86,31 @@
           </div>
         </div>
       </div>
-      <div v-else>
-        <FileMetaDataEditorComponent
-          :metadata="metaDataFormModal"
-          @update-form="updateMetadataForm"
-        />
-      </div>
     </td>
     <td class="align-middle">
-      <div v-if="!inEditing">
-        <button
-          type="button"
-          class="btn"
-          @click.prevent="deleteFile(props.renderId, props.clientVisibleFile.file)"
-        >
-          <font-awesome-icon :icon="['fas', 'trash']" />
-        </button>
-        <button
-          type="button"
-          class="btn"
-          @click.prevent="emit('updateEditingStatus', renderId)"
-          :disabled="!props.clientVisibleFile.file.isEditable"
-        >
-          <font-awesome-icon :icon="['fas', 'file-pen']" />
-        </button>
-      </div>
-      <div v-else>
+      <button
+        v-show="!inSingleFileEditMode || inEditMode"
+        type="button"
+        class="btn"
+        @click.prevent="deleteFile(props.renderId, props.clientVisibleFile.file)"
+      >
+        <font-awesome-icon :icon="['fas', 'trash']" />
+      </button>
+      <button
+        v-show="!inEditMode && !inSingleFileEditMode"
+        type="button"
+        class="btn"
+        @click.prevent="inSingleFileEditMode = true"
+        :disabled="!props.clientVisibleFile.file.isEditable"
+      >
+        <font-awesome-icon :icon="['fas', 'file-pen']" />
+      </button>
+      <div v-show="!inEditMode && inSingleFileEditMode">
         <button type="button" class="btn" @click.prevent="saveMetadata">
           <font-awesome-icon :icon="['fas', 'file-arrow-down']" />
         </button>
         <button type="button" class="btn" @click.prevent="exitEditing">
-          <font-awesome-icon :icon="['fas', 'trash']" />
+          <font-awesome-icon :icon="['fas', 'file-excel']" />
         </button>
       </div>
     </td>
@@ -133,35 +133,33 @@ import * as bootstrap from 'bootstrap'
 import FileMetaDataEditorComponent from '@/components/FileMetaDataEditorComponent.vue'
 
 const props = defineProps<{
+  inEditMode: boolean
   isSelected: boolean
   renderId: string
   clientVisibleFile: ClientVisibleFile
-  editingFileId: string | null
 }>()
 const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
+const inSingleFileEditMode = ref(false)
 const emit = defineEmits<{
   toggleSelectFile: [key: string]
   deleteFile: [key: string, file: NautilusFile]
   updateFileMetadata: [renderId: string, id: string, metadata: FileMetadataForm]
-  updateEditingStatus: [id: string | null]
 }>()
 
 const metaDataFormModal: Ref<FileMetadataForm> = ref({
   title: props.clientVisibleFile.file.title,
   description: props.clientVisibleFile.file.description ?? '',
-  authors: props.clientVisibleFile.file.authors ?? [],
+  authors: props.clientVisibleFile.file.authors?.slice() ?? [],
   filename: props.clientVisibleFile.file.filename
 })
 
 const fileUploadedDate = computed(() =>
   moment.utc(props.clientVisibleFile.file.uploaded_on).local().format('MMM DD HH:mm')
 )
+
 const authors = computed(() =>
   props.clientVisibleFile.file.authors?.reduce((prev, author) => prev + author + ',', '')
-)
-const inEditing = computed(
-  () => props.editingFileId != null && props.editingFileId == props.renderId
 )
 
 watch(toolTipsElement, (newValue) => {
@@ -170,10 +168,17 @@ watch(toolTipsElement, (newValue) => {
   }
 })
 
+watch(
+  () => props.inEditMode,
+  () => {
+    exitEditing()
+  }
+)
+
 watch(props.clientVisibleFile, (newValue) => {
   metaDataFormModal.value.title = newValue.file.title
   metaDataFormModal.value.description = newValue.file.description ?? ''
-  metaDataFormModal.value.authors = newValue.file.authors ?? []
+  metaDataFormModal.value.authors = newValue.file.authors?.slice() ?? []
   metaDataFormModal.value.filename = newValue.file.filename
 })
 
@@ -186,13 +191,13 @@ async function deleteFile(key: string, file: NautilusFile) {
 }
 
 async function saveMetadata() {
-  emit('updateEditingStatus', null)
   emit(
     'updateFileMetadata',
     props.renderId,
     props.clientVisibleFile.file.id,
     metaDataFormModal.value
   )
+  inSingleFileEditMode.value = false
 }
 
 async function updateMetadataForm(newValue: MetadataEditorFormType) {
@@ -204,9 +209,9 @@ async function updateMetadataForm(newValue: MetadataEditorFormType) {
 async function exitEditing() {
   metaDataFormModal.value.title = props.clientVisibleFile.file.title
   metaDataFormModal.value.description = props.clientVisibleFile.file.description ?? ''
-  metaDataFormModal.value.authors = props.clientVisibleFile.file.authors ?? []
+  metaDataFormModal.value.authors = props.clientVisibleFile.file.authors?.slice() ?? []
   metaDataFormModal.value.filename = props.clientVisibleFile.file.filename
-  emit('updateEditingStatus', null)
+  inSingleFileEditMode.value = false
 }
 </script>
 

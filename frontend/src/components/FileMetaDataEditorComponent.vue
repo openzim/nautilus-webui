@@ -13,7 +13,12 @@
           <font-awesome-icon icon="fa-regular fa-circle-xmark" />
         </button>
       </li>
-      <input type="text" class="flex-grow-1 border-0" placeholder="Author" @keyup.enter="addAuthor" />
+      <input
+        type="text"
+        class="flex-grow-1 border-0"
+        placeholder="Author"
+        @keyup.enter="addAuthor"
+      />
     </ul>
     <input type="text" class="form-control" placeholder="filename" v-model="formModal.filename" />
   </div>

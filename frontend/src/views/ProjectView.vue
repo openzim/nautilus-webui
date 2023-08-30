@@ -35,8 +35,8 @@
                 name="btnradio"
                 id="edit"
                 autocomplete="off"
-                @change="isEditMode = true"
-                :checked="isEditMode"
+                @change="inEditMode = true"
+                :checked="inEditMode"
               />
               <label class="btn btn-outline-primary" for="edit">Edit</label>
 
@@ -46,8 +46,8 @@
                 name="btnradio"
                 id="upload"
                 autocomplete="off"
-                @change="isEditMode = false"
-                :checked="!isEditMode"
+                @change="inEditMode = false"
+                :checked="!inEditMode"
               />
               <label class="btn btn-outline-primary" for="upload">Upload</label>
             </div>
@@ -69,8 +69,7 @@
                 :render-id="renderId"
                 :client-visible-file="file"
                 :is-selected="selectedFiles.has(renderId)"
-                :editing-file-id="editingFileId"
-                @update-editing-status="updateFileEditingStatus"
+                :in-edit-mode="inEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
                 @update-file-metadata="updateFilesMetadata"
@@ -108,8 +107,7 @@ import { storeToRefs } from 'pinia'
 import { updateProjects } from '@/utils'
 
 const isActive = ref(false)
-const isEditMode = ref(false)
-const editingFileId: Ref<string | null> = ref(null)
+const inEditMode = ref(false)
 const isShowed = ref(true)
 const storeApp = useAppStore()
 const storeProject = useProjectStore()
@@ -336,7 +334,8 @@ async function updateFilesMetadata(
   fileId: string,
   newMetadata: FileMetadataForm
 ) {
-  if (isEditMode.value == false) {
+  console.log('HHHH')
+  if (inEditMode.value == false) {
     updateSingleFileMetadata(renderId, fileId, newMetadata)
   } else {
     if (selectedFiles.value.size == 0) {
@@ -382,10 +381,6 @@ async function updateSingleFileMetadata(
   files.value.get(clientFileId)!.file.description = newMetaData.description
   files.value.get(clientFileId)!.file.authors = newMetaData.authors
   files.value.get(clientFileId)!.file.filename = newMetaData.filename
-}
-
-function updateFileEditingStatus(newId: string | null) {
-  editingFileId.value = newId
 }
 </script>
 
