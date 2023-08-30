@@ -66,18 +66,8 @@
           @mouseover.prevent="upHere = true"
           @mouseleave.prevent="upHere = false"
         >
-          {{
-            props.clientVisibleFile.file.authors != undefined &&
-            props.clientVisibleFile.file.authors!.length != 0
-              ? `Authors; `
-              : ''
-          }}
-          {{
-            props.clientVisibleFile.file.description != undefined &&
-            props.clientVisibleFile.file.description != ''
-              ? `Description; `
-              : ''
-          }}
+          {{ isAuthorsAvailable ? `Authors; ` : '' }}
+          {{ isDescriptionAvailable ? `Description; ` : '' }}
           <div v-show="upHere" class="card position-absolute bottom-0 start-0 metadata-card">
             <div class="card-body">
               <div class="card-title custom-title">Description:</div>
@@ -167,6 +157,18 @@ const fileUploadedDate = computed(() =>
 
 const authors = computed(() =>
   props.clientVisibleFile.file.authors?.reduce((prev, author) => prev + author + ',', '')
+)
+
+const isAuthorsAvailable = computed(
+  () =>
+    props.clientVisibleFile.file.authors != undefined &&
+    props.clientVisibleFile.file.authors!.length != 0
+)
+
+const isDescriptionAvailable = computed(
+  () =>
+    props.clientVisibleFile.file.description != undefined &&
+    props.clientVisibleFile.file.description != ''
 )
 
 watch(toolTipsElement, (newValue) => {
