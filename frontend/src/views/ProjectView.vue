@@ -29,27 +29,31 @@
         <div>
           <div class="d-flex flex-row-reverse">
             <div class="btn-group btn-group-sm custom-btn-outline-primary" role="group">
-              <input
-                type="radio"
-                class="btn-check"
-                name="btnradio"
-                id="edit"
-                autocomplete="off"
-                @change="inEditMode = true"
-                :checked="inEditMode"
-              />
-              <label class="btn btn-outline-primary" for="edit">Edit</label>
+              <label class="btn btn-outline-primary" for="edit" :class="{ active: inEditMode }">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="btnradio"
+                  id="edit"
+                  autocomplete="off"
+                  @click.prevent="inEditMode = true"
+                  :checked="inEditMode"
+                />
+                Edit
+              </label>
 
-              <input
-                type="radio"
-                class="btn-check"
-                name="btnradio"
-                id="upload"
-                autocomplete="off"
-                @change="exitEditModeHandler"
-                :checked="!inEditMode"
-              />
-              <label class="btn btn-outline-primary" for="upload">Upload</label>
+              <label class="btn btn-outline-primary" for="upload" :class="{ active: !inEditMode }">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="btnradio"
+                  id="upload"
+                  autocomplete="off"
+                  @click.prevent="exitEditModeHandler"
+                  :checked="!inEditMode"
+                />
+                Upload
+              </label>
             </div>
           </div>
           <table class="table">
@@ -335,19 +339,25 @@ function updateCompareFunction(newFunction: CompareFunctionType) {
 
 async function exitEditModeHandler() {
   const changeList = []
+
   for (const [key, element] of beUpdatedFile.value.entries()) {
     if (files.value.get(key) != undefined) {
       changeList.push(element.metadata.title)
     }
   }
-  storeModal.showModal(
-    'Are you sure you want to change those files:',
-    'Change',
-    'Discard',
-    updateBeUpdatedFilesMetadata,
-    async () => {},
-    changeList
-  )
+
+  if (changeList.length == 0) {
+    inEditMode.value = false
+  } else {
+    storeModal.showModal(
+      'Are you sure you want to change those files:',
+      'Change',
+      'Discard',
+      updateBeUpdatedFilesMetadata,
+      async () => {},
+      changeList
+    )
+  }
 }
 async function updateBeUpdatedFilesMetadata() {
   for (const [key, element] of beUpdatedFile.value.entries()) {
