@@ -16,7 +16,7 @@
       <input
         type="text"
         class="flex-grow-1 border-0"
-        placeholder="Author"
+        placeholder="Enter to input author"
         @keyup.enter="addAuthor"
       />
     </ul>
