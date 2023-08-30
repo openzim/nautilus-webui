@@ -9,11 +9,11 @@
     <ul class="form-control d-flex flex-wrap">
       <li v-for="(author, index) in formModal.authors" class="px-1 m-1" :key="author">
         {{ author }}
-        <button type="button" class="p-0 btn text-secondary" @click.prevent="deleteTag(index)">
+        <button type="button" class="p-0 btn text-secondary" @click.prevent="deleteAuthor(index)">
           <font-awesome-icon icon="fa-regular fa-circle-xmark" />
         </button>
       </li>
-      <input type="text" class="flex-grow-1 border-0" placeholder="Author" @keyup.enter="addTag" />
+      <input type="text" class="flex-grow-1 border-0" placeholder="Author" @keyup.enter="addAuthor" />
     </ul>
     <input type="text" class="form-control" placeholder="filename" v-model="formModal.filename" />
   </div>
@@ -43,7 +43,7 @@ watch(
   { deep: true }
 )
 
-async function addTag(event: Event) {
+async function addAuthor(event: Event) {
   event.preventDefault()
   const target = event.target as HTMLInputElement
   const value = target.value.trim()
@@ -53,7 +53,7 @@ async function addTag(event: Event) {
   }
 }
 
-async function deleteTag(index: number) {
+async function deleteAuthor(index: number) {
   formModal.value.authors = formModal.value.authors.filter((_, i) => i !== index)
 }
 </script>
