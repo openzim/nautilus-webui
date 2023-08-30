@@ -97,6 +97,7 @@
         type="button"
         class="btn"
         @click.prevent="deleteFile(props.renderId, props.clientVisibleFile.file)"
+        title="Delete File"
       >
         <font-awesome-icon :icon="['fas', 'trash']" />
       </button>
@@ -106,14 +107,15 @@
         class="btn"
         @click.prevent="inSingleFileEditMode = true"
         :disabled="!props.clientVisibleFile.file.isEditable"
+        title="Edit metadata"
       >
         <font-awesome-icon :icon="['fas', 'file-pen']" />
       </button>
       <div v-show="!inEditMode && inSingleFileEditMode">
-        <button type="button" class="btn" @click.prevent="saveMetadata">
+        <button type="button" class="btn" @click.prevent="saveMetadata" title="Save change">
           <font-awesome-icon :icon="['fas', 'file-arrow-down']" />
         </button>
-        <button type="button" class="btn" @click.prevent="exitEditing">
+        <button type="button" class="btn" @click.prevent="exitEditing" title="Discard change">
           <font-awesome-icon :icon="['fas', 'file-excel']" />
         </button>
       </div>
