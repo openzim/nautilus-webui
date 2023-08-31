@@ -16,7 +16,7 @@
       <input
         type="text"
         class="flex-grow-1 border-0"
-        placeholder="Enter to input author"
+        :placeholder="formModal.authors.length == 0 ? 'One author per line, validate with ⏎' : ''"
         @keyup.enter="addAuthor"
       />
     </ul>
