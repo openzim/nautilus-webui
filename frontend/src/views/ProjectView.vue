@@ -354,7 +354,9 @@ async function exitEditModeHandler() {
       'Change',
       'Discard',
       updateBeUpdatedFilesMetadata,
-      async () => {},
+      async () => {
+        inEditMode.value = false
+      },
       changeList
     )
   }
