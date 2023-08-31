@@ -76,7 +76,7 @@
                 :in-edit-mode="inEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
-                @update-file-metadata="updateFileMetadataStatus"
+                @update-file-metadata-status="updateFileMetadataStatus"
                 @update-single-file-metadata="updateSingleFileMetadata"
               />
             </tbody>
