@@ -338,6 +338,9 @@ function updateCompareFunction(newFunction: CompareFunctionType) {
 }
 
 async function exitEditModeHandler() {
+  if (!inEditMode.value) {
+    return
+  }
   const changeList = []
 
   for (const [key, element] of beUpdatedFile.value.entries()) {
