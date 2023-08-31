@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import { partial } from 'filesize'
 
 export interface ClientVisibleFile {
-  file: File
+  file: NautilusFile
   uploadedSize: number
   statusCode?: string
   statusText?: string
@@ -32,6 +32,65 @@ export interface File {
   hash: string
   type: string
   status: FileStatus
+}
+export class NautilusFile implements File {
+  id: string
+  project_id: string
+  filename: string
+  filesize: number
+  title: string
+  authors?: string[]
+  description?: string
+  uploaded_on: string
+  hash: string
+  type: string
+  status: FileStatus
+
+  public constructor(
+    id: string,
+    project_id: string,
+    filename: string,
+    filesize: number,
+    title: string,
+    authors: string[] | undefined,
+    description: string | undefined,
+    uploaded_on: string,
+    hash: string,
+    type: string,
+    status: FileStatus
+  ) {
+    this.id = id
+    this.project_id = project_id
+    this.filename = filename
+    this.filesize = filesize
+    this.title = title
+    this.authors = authors
+    this.description = description
+    this.uploaded_on = uploaded_on
+    this.hash = hash
+    this.type = type
+    this.status = status
+  }
+
+  public static fromFile(file: File): NautilusFile {
+    return new NautilusFile(
+      file.id,
+      file.project_id,
+      file.filename,
+      file.filesize,
+      file.title,
+      file.authors,
+      file.description,
+      file.uploaded_on,
+      file.hash,
+      file.type,
+      file.status
+    )
+  }
+
+  get isEditable(): boolean {
+    return this.status != FileStatus.FAILURE && this.status != FileStatus.UPLOADING
+  }
 }
 
 export enum FileStatus {
@@ -87,3 +146,15 @@ export type CompareFunctionType = (
   a: [string, ClientVisibleFile],
   b: [string, ClientVisibleFile]
 ) => number
+
+export type FileMetadataForm = {
+  title: string
+  description: string
+  authors: string[]
+  filename: string
+}
+export interface MetadataEditorFormType {
+  description: string
+  authors: string[]
+  filename: string
+}

@@ -4,7 +4,7 @@
       <div class="col col-2 sticky-top sidebar">
         <SideBarComponent />
       </div>
-      <div class="col content d-flex flex-column justify-content-between">
+      <div class="col content d-flex flex-column justify-content-between overflow-hidden">
         <div>
           <ProjectView v-if="hasValidProjectId" />
         </div>

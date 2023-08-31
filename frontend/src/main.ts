@@ -16,11 +16,27 @@ import {
   faAngleDown,
   faCheck,
   faSort,
-  faFile
+  faFile,
+  faFileArrowDown,
+  faFileExcel
 } from '@fortawesome/free-solid-svg-icons'
+import { faCircleXmark as farCircleXmark } from '@fortawesome/free-regular-svg-icons'
 
 /* add icons to the library */
-library.add(faPlus, faMinus, faXmark, faTrash, faFilePen, faAngleDown, faCheck, faSort, faFile)
+library.add(
+  faPlus,
+  faMinus,
+  faXmark,
+  faTrash,
+  faFilePen,
+  faAngleDown,
+  faCheck,
+  faSort,
+  faFile,
+  faFileArrowDown,
+  farCircleXmark,
+  faFileExcel
+)
 
 import App from './App.vue'
 import router from './router'

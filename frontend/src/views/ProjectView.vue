@@ -29,27 +29,31 @@
         <div>
           <div class="d-flex flex-row-reverse">
             <div class="btn-group btn-group-sm custom-btn-outline-primary" role="group">
-              <input
-                type="radio"
-                class="btn-check"
-                name="btnradio"
-                id="edit"
-                autocomplete="off"
-                @change="isEditMode = true"
-                :checked="isEditMode"
-              />
-              <label class="btn btn-outline-primary" for="edit">Edit</label>
+              <label class="btn btn-outline-primary" for="edit" :class="{ active: inEditMode }">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="btnradio"
+                  id="edit"
+                  autocomplete="off"
+                  @click.prevent="inEditMode = true"
+                  :checked="inEditMode"
+                />
+                Edit
+              </label>
 
-              <input
-                type="radio"
-                class="btn-check"
-                name="btnradio"
-                id="upload"
-                autocomplete="off"
-                @change="isEditMode = false"
-                :checked="!isEditMode"
-              />
-              <label class="btn btn-outline-primary" for="upload">Upload</label>
+              <label class="btn btn-outline-primary" for="upload" :class="{ active: !inEditMode }">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="btnradio"
+                  id="upload"
+                  autocomplete="off"
+                  @click.prevent="exitEditModeHandler"
+                  :checked="!inEditMode"
+                />
+                Upload
+              </label>
             </div>
           </div>
           <table class="table">
@@ -64,14 +68,16 @@
             </thead>
             <tbody>
               <FileTableRowComponent
-                v-for="[key, file] in sortedFiles"
-                :key="key"
-                :render-key="key"
+                v-for="[renderId, file] in sortedFiles"
+                :key="renderId"
+                :render-id="renderId"
                 :client-visible-file="file"
-                :is-selected="selectedFiles.has(key)"
-                :show-edit-button="isEditMode"
+                :is-selected="selectedFiles.has(renderId)"
+                :in-edit-mode="inEditMode"
                 @toggle-select-file="toggleSelectFile"
                 @delete-file="deleteSingleFile"
+                @update-file-metadata-status="updateFileMetadataStatus"
+                @update-single-file-metadata="updateSingleFileMetadata"
               />
             </tbody>
           </table>
@@ -93,9 +99,11 @@ import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import {
   FileStatus,
   type File,
+  NautilusFile,
   type ClientVisibleFile,
   humanifyFileSize,
-  type CompareFunctionType
+  type CompareFunctionType,
+  type FileMetadataForm
 } from '@/constants'
 import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
@@ -104,7 +112,7 @@ import { storeToRefs } from 'pinia'
 import { updateProjects } from '@/utils'
 
 const isActive = ref(false)
-const isEditMode = ref(false)
+const inEditMode = ref(false)
 const isShowed = ref(true)
 const storeApp = useAppStore()
 const storeProject = useProjectStore()
@@ -116,25 +124,31 @@ const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
 const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
 )
-const toBeDeletedFiles: Ref<Map<string, File>> = ref(new Map())
+const toBeDeletedFiles: Ref<Map<string, NautilusFile>> = ref(new Map())
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
 )
 const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
 )
+const beUpdatedFile: Ref<Map<string, { fileId: string; metadata: FileMetadataForm }>> = ref(
+  new Map()
+)
 
 watch(lastProjectId, async () => {
-  files.value.clear()
-  const apiFiles = await getAllFiles(storeProject.lastProjectId)
-  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
+  await refreshFiles()
 })
 
 if (storeInitialFileStore.initialFiles.length == 0) {
-  const apiFiles = await getAllFiles(storeProject.lastProjectId)
-  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
+  await refreshFiles()
 } else {
   await uploadFiles(storeInitialFileStore.initialFiles)
+}
+
+async function refreshFiles() {
+  files.value.clear()
+  const apiFiles = await getAllFiles(storeProject.lastProjectId)
+  apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 }
 
 function sortFiles(
@@ -149,13 +163,15 @@ function updateIsActive(newValue: boolean) {
 }
 
 async function getAllFiles(projectId: string | null) {
-  var result: File[] = []
+  var result: NautilusFile[] = []
   if (projectId == null) {
     return result
   }
   try {
     const reponse = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
-    result = reponse.data
+    for (const file of reponse.data) {
+      result.push(NautilusFile.fromFile(file))
+    }
   } catch (error: any) {
     console.log('Unable to retrieve the files info', error)
     storeApp.alertsWarning('Unable to retrieve the files info')
@@ -169,17 +185,19 @@ async function uploadFiles(uploadFiles: FileList) {
   }
   const uploadFileRequestsList = []
   for (const uploadFile of uploadFiles) {
-    const newFile: File = {
-      id: storeApp.constants.genFakeId,
-      project_id: storeProject.lastProjectId,
-      filename: uploadFile.name,
-      filesize: uploadFile.size,
-      title: uploadFile.name,
-      uploaded_on: new Date().toISOString(),
-      hash: storeApp.constants.fakeHash,
-      type: uploadFile.type,
-      status: FileStatus.UPLOADING
-    }
+    const newFile: NautilusFile = new NautilusFile(
+      storeApp.constants.genFakeId,
+      storeProject.lastProjectId,
+      uploadFile.name,
+      uploadFile.size,
+      uploadFile.name,
+      undefined,
+      undefined,
+      new Date().toISOString(),
+      storeApp.constants.fakeHash,
+      uploadFile.type,
+      FileStatus.UPLOADING
+    )
     files.value.set(newFile.id, { file: newFile, uploadedSize: 0 })
 
     const requestData = new FormData()
@@ -199,7 +217,8 @@ async function uploadFiles(uploadFiles: FileList) {
         .post<File>(`/projects/${storeProject.lastProjectId}/files`, requestData, config)
         .then((response) => {
           if (files.value.has(newFile.id)) {
-            files.value.get(newFile.id)!.file = response.data
+            const uploadedFile = response.data
+            files.value.get(newFile.id)!.file = NautilusFile.fromFile(uploadedFile)
           }
         })
         .catch((error) => {
@@ -237,7 +256,7 @@ async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
 }
 
 async function deleteFiles() {
-  const deletedFiles: File[] = []
+  const deletedFiles: NautilusFile[] = []
 
   for (const [key, file] of toBeDeletedFiles.value) {
     try {
@@ -263,7 +282,7 @@ async function deleteFiles() {
   }
 }
 
-async function deleteSingleFile(key: string, file: File) {
+async function deleteSingleFile(key: string, file: NautilusFile) {
   toBeDeletedFiles.value.clear()
   toBeDeletedFiles.value.set(key, file)
   storeModal.showModal(
@@ -316,6 +335,80 @@ function updateSelectFiles(newValue: Map<string, boolean>) {
 
 function updateCompareFunction(newFunction: CompareFunctionType) {
   compareFunction.value = newFunction
+}
+
+async function exitEditModeHandler() {
+  if (!inEditMode.value) {
+    return
+  }
+  const changeList = []
+
+  for (const [key, element] of beUpdatedFile.value.entries()) {
+    if (files.value.get(key) != undefined) {
+      changeList.push(element.metadata.title)
+    }
+  }
+
+  if (changeList.length == 0) {
+    inEditMode.value = false
+  } else {
+    storeModal.showModal(
+      'Are you sure you want to change those files:',
+      'Change',
+      'Discard',
+      updateBeUpdatedFilesMetadata,
+      async () => {
+        inEditMode.value = false
+      },
+      changeList
+    )
+  }
+}
+
+async function updateBeUpdatedFilesMetadata() {
+  for (const [key, element] of beUpdatedFile.value.entries()) {
+    if (files.value.get(key) != undefined) {
+      await updateSingleFileMetadata(key, element.fileId, element.metadata)
+    }
+  }
+  inEditMode.value = false
+  beUpdatedFile.value.clear()
+}
+
+async function updateFileMetadataStatus(
+  renderId: string,
+  fileId: string,
+  newMetaData: FileMetadataForm
+) {
+  beUpdatedFile.value.set(renderId, { fileId: fileId, metadata: newMetaData })
+}
+
+async function updateSingleFileMetadata(
+  renderId: string,
+  fileId: string,
+  newMetaData: FileMetadataForm
+) {
+  if (newMetaData.title.trim().length == 0) {
+    storeApp.alertsWarning("Can not update file's metadata, since title is empty")
+    return
+  }
+  if (newMetaData.filename.trim().length == 0) {
+    storeApp.alertsWarning("Can not update file's metadata, since filename is empty")
+    return
+  }
+  try {
+    await storeApp.axiosInstance.patch<string>(
+      `/projects/${lastProjectId.value}/files/${fileId}`,
+      newMetaData
+    )
+  } catch (error) {
+    console.log("Unable to update file's metadata.", error, fileId)
+    storeApp.alertsError(`Unable to update file's metadata, file id: ${fileId}`)
+  }
+  files.value.get(renderId)!.file.title = newMetaData.title
+  files.value.get(renderId)!.file.description = newMetaData.description
+  files.value.get(renderId)!.file.authors = newMetaData.authors
+  files.value.get(renderId)!.file.filename = newMetaData.filename
 }
 </script>
 
