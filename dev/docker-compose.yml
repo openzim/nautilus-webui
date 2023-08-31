@@ -40,7 +40,7 @@ services:
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
       - PRIVATE_SALT=secrectkey
-      - ALLOWED_ORIGINS=http://localhost:8081
+      - ALLOWED_ORIGINS=http://localhost:8081|http://localhost:8082
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
     ports:
