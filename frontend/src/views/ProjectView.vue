@@ -232,12 +232,12 @@ async function uploadFiles(uploadFiles: FileList) {
           }
         })
     )
-
-    // After files are uploaded, check the project expiration date.
-    axios.all(uploadFileRequestsList).finally(() => {
-      updateProjects()
-    })
   }
+
+  // After files are uploaded, check the project expiration date.
+  axios.all(uploadFileRequestsList).finally(() => {
+    updateProjects()
+  })
 }
 
 async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
