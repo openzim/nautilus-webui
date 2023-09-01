@@ -156,7 +156,7 @@ async function refreshFileStatus() {
     if (clientFile.file.status != FileStatus.S3 && clientFile.file.status != FileStatus.FAILURE) {
       const newFile = await getSpecificFile(clientFile.file.project_id, clientFile.file.id)
       if (!newFile) {
-        return
+        break
       }
       clientFile.file = NautilusFile.fromFile(newFile)
       if (files.value.has(renderId)) {
@@ -164,7 +164,9 @@ async function refreshFileStatus() {
       }
     }
   }
-  setTimeout(async () => {await refreshFileStatus()}, 200);
+  setTimeout(async () => {
+    await refreshFileStatus()
+  }, 200)
 }
 
 function sortFiles(
@@ -441,7 +443,6 @@ async function updateSingleFileMetadata(
 }
 
 refreshFileStatus()
-
 </script>
 
 <style scoped>
