@@ -73,6 +73,7 @@ services:
       - NAUTILUS_WEB_API=http://localhost:8080/v1
       - NAUTILUS_FILE_QUOTA=100000000
       - NAUTILUS_PROJECT_QUOTA=100000000
+      - NAUTILUS_REFRESH_TIME=1000
     depends_on:
       - backend
   backend-tools:
