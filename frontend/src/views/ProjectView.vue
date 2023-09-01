@@ -107,7 +107,7 @@ import {
 } from '@/constants'
 import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
-import { ref, type Ref, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, type Ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { updateProjects } from '@/utils'
 
@@ -166,7 +166,7 @@ async function refreshFileStatus() {
   }
   setTimeout(async () => {
     await refreshFileStatus()
-  }, 200)
+  }, storeApp.constants.env.NAUTILUS_REFRESH_TIME)
 }
 
 function sortFiles(
