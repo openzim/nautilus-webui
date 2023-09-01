@@ -89,7 +89,7 @@ export class NautilusFile implements File {
   }
 
   get isEditable(): boolean {
-    return this.status != FileStatus.FAILURE && this.status != FileStatus.UPLOADING
+    return this.status == FileStatus.S3
   }
 }
 
