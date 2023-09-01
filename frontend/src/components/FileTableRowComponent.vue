@@ -10,7 +10,7 @@
       />
     </th>
     <td class="align-middle">
-      <div v-if="inEditMode || inSingleFileEditMode">
+      <div v-if="showEditComponents">
         <input
           :value="metadataFormModal.title"
           class="form-control file-title"
@@ -49,7 +49,7 @@
       </div>
     </td>
     <td class="align-middle">
-      <div v-if="inEditMode || inSingleFileEditMode">
+      <div v-if="showEditComponents">
         <FileMetaDataEditorComponent
           :metadata="metadataFormModal"
           @update-form="updateMetadataForm"
@@ -164,6 +164,10 @@ const isDescriptionAvailable = computed(
   () =>
     props.clientVisibleFile.file.description != undefined &&
     props.clientVisibleFile.file.description != ''
+)
+
+const showEditComponents = computed(
+  () => (props.inEditMode || inSingleFileEditMode.value) && props.clientVisibleFile.file.isEditable
 )
 
 watch(toolTipsElement, (newValue) => {
