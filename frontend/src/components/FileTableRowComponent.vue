@@ -33,14 +33,9 @@
       {{ fileUploadedDate }}
     </td>
     <td class="align-middle ps-4">
-      <!-- TODO: Once S3 uploading part is finished, we need to change this part to show better progress. -->
-      <div
-        v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING"
-        class="spinner-border text-secondary"
-        role="status"
-      >
-        <span class="visually-hidden">Loading...</span>
-      </div>
+      <span v-if="props.clientVisibleFile.file.status == FileStatus.S3">
+        <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />
+      </span>
       <span
         v-else-if="props.clientVisibleFile.file.status == FileStatus.FAILURE"
         data-bs-toggle="tooltip"
@@ -49,9 +44,9 @@
       >
         <font-awesome-icon class="text-danger fs-5" :icon="['fas', 'xmark']" />
       </span>
-      <span v-else>
-        <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />
-      </span>
+      <div v-else class="spinner-border text-secondary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </td>
     <td class="align-middle">
       <div v-if="inEditMode || inSingleFileEditMode">
