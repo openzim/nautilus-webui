@@ -52,7 +52,7 @@ class FileStatus(str, Enum):
     LOCAL = "LOCAL"
     S3 = "S3"
     FAILURE = "FAILURE"
-    UPLOADING = "UPLOADING"
+    PROCESSING = "PROCESSING"
 
 
 def validated_file(
@@ -205,10 +205,10 @@ def upload_file_to_s3(new_file_id: UUID):
     if not project.expire_on:
         raise ValueError(f"Project: {project.id} does not have expire date.")
 
-    if new_file.status == FileStatus.UPLOADING:
+    if new_file.status == FileStatus.PROCESSING:
         return
     else:
-        update_file_status(new_file, FileStatus.UPLOADING)
+        update_file_status(new_file, FileStatus.PROCESSING)
 
     s3_key = s3_file_key(new_file.project_id, new_file.hash)
 
@@ -350,7 +350,7 @@ async def delete_file(
             task_queue.enqueue(
                 delete_key_from_s3, s3_file_key(file.project_id, file.hash)
             )
-        if file.status == FileStatus.UPLOADING:
+        if file.status == FileStatus.PROCESSING:
             task_queue.enqueue_at(
                 datetime.datetime.now(tz=datetime.UTC) + constants.s3_deletion_delay,
                 delete_key_from_s3,

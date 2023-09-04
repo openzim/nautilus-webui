@@ -95,9 +95,10 @@ export class NautilusFile implements File {
 
 export enum FileStatus {
   UPLOADING = 'UPLOADING',
+  PROCESSING = 'PROCESSING',
   LOCAL = 'LOCAL',
   S3 = 'S3',
-  FAILURE = 'failure'
+  FAILURE = 'FAILURE'
 }
 
 export interface Environ {

@@ -33,20 +33,31 @@
       {{ fileUploadedDate }}
     </td>
     <td class="align-middle ps-4">
-      <span v-if="props.clientVisibleFile.file.status == FileStatus.S3">
+      <ToolTipsComponent
+        v-if="props.clientVisibleFile.file.status == FileStatus.S3"
+        title="File is uploaded"
+      >
         <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />
-      </span>
-      <span
+      </ToolTipsComponent>
+      <ToolTipsComponent
         v-else-if="props.clientVisibleFile.file.status == FileStatus.FAILURE"
-        data-bs-toggle="tooltip"
-        :data-bs-title="props.clientVisibleFile.statusText"
-        ref="toolTipsElement"
+        :title="props.clientVisibleFile.statusText"
       >
         <font-awesome-icon class="text-danger fs-5" :icon="['fas', 'xmark']" />
-      </span>
-      <div v-else class="spinner-border text-secondary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
+      </ToolTipsComponent>
+      <ToolTipsComponent
+        v-else-if="props.clientVisibleFile.file.status == FileStatus.PROCESSING"
+        title="File is processing"
+      >
+        <div class="spinner-border text-warning" role="status">
+          <span class="visually-hidden">Processing...</span>
+        </div>
+      </ToolTipsComponent>
+      <ToolTipsComponent v-else title="File is uploading">
+        <div class="spinner-border text-secondary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </ToolTipsComponent>
     </td>
     <td class="align-middle">
       <div v-if="showEditComponents">
@@ -120,8 +131,8 @@ import {
 import { fromMime } from 'human-filetypes'
 import moment from 'moment'
 import { computed, ref, watch, type Ref } from 'vue'
-import * as bootstrap from 'bootstrap'
 import FileMetaDataEditorComponent from '@/components/FileMetaDataEditorComponent.vue'
+import ToolTipsComponent from './ToolTipsComponent.vue'
 
 const props = defineProps<{
   inEditMode: boolean
@@ -129,7 +140,6 @@ const props = defineProps<{
   renderId: string
   clientVisibleFile: ClientVisibleFile
 }>()
-const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
 const inSingleFileEditMode = ref(false)
 const emit = defineEmits<{
@@ -169,12 +179,6 @@ const isDescriptionAvailable = computed(
 const showEditComponents = computed(
   () => (props.inEditMode || inSingleFileEditMode.value) && props.clientVisibleFile.file.isEditable
 )
-
-watch(toolTipsElement, (newValue) => {
-  if (newValue != null) {
-    new bootstrap.Tooltip(newValue)
-  }
-})
 
 watch(
   () => props.inEditMode,
