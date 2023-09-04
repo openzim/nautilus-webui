@@ -104,7 +104,7 @@ export interface Environ {
   NAUTILUS_WEB_API: string
   NAUTILUS_FILE_QUOTA: number
   NAUTILUS_PROJECT_QUOTA: number
-  NAUTILUS_REFRESH_TIME: number
+  NAUTILUS_FILE_REFRESH_EVERY_MS: number
 }
 
 export interface AlertMessage {
@@ -137,7 +137,7 @@ export const EmptyConstants = new Constants({
   NAUTILUS_WEB_API: 'noapi',
   NAUTILUS_FILE_QUOTA: 100000000,
   NAUTILUS_PROJECT_QUOTA: 100000000,
-  NAUTILUS_REFRESH_TIME: 1000
+  NAUTILUS_FILE_REFRESH_EVERY_MS: 1000
 })
 
 // We use jedec, rather than the default iec to make the file size display more readable.

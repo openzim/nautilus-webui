@@ -166,7 +166,7 @@ async function refreshFileStatus() {
   }
   setTimeout(async () => {
     await refreshFileStatus()
-  }, storeApp.constants.env.NAUTILUS_REFRESH_TIME)
+  }, storeApp.constants.env.NAUTILUS_FILE_REFRESH_EVERY_MS)
 }
 
 function sortFiles(
