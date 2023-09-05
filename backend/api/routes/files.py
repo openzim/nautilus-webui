@@ -277,24 +277,36 @@ async def create_file(
     if len(project.files) == 0:
         project.expire_on = now + constants.project_expire_after
 
-    new_file = File(
-        filename=filename,
-        filesize=size,
-        title=filename,
-        authors=None,
-        description=None,
-        uploaded_on=now,
-        hash=file_hash,
-        path=str(fpath),
-        type=mimetype,
-        status=FileStatus.LOCAL.value,
-    )
-    project.files.append(new_file)
-    session.add(new_file)
-    session.flush()
-    session.refresh(new_file)
-    task_queue.enqueue(upload_file_to_s3, new_file.id, retry=constants.job_retry)
-    return FileModel.model_validate(new_file)
+    # adding file in an independant session that gets commited before enquing
+    # so its visible by other processes (rq-worker)
+    with DBSession.begin() as indep_session:
+        # get project again but from this session
+        project_ = indep_session.execute(
+            select(Project).filter_by(id=str(project.id))
+        ).scalar()
+        new_file = File(
+            filename=filename,
+            filesize=size,
+            title=filename,
+            authors=None,
+            description=None,
+            uploaded_on=now,
+            hash=file_hash,
+            path=str(fpath),
+            type=mimetype,
+            status=FileStatus.LOCAL.value,
+        )
+        project_.files.append(new_file)
+        indep_session.add(new_file)
+        indep_session.flush()
+        indep_session.refresh(new_file)
+        file_id = str(new_file.id)
+    # request file upload by rq-worker
+    task_queue.enqueue(upload_file_to_s3, file_id, retry=constants.job_retry)
+
+    # fetch File from DB in this session to return it
+    file = session.execute(select(File).filter_by(id=file_id)).scalar()
+    return FileModel.model_validate(file)
 
 
 @router.get("/{project_id}/files", response_model=list[FileModel])
