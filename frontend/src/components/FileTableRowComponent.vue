@@ -54,9 +54,7 @@
         </div>
       </ToolTipsComponent>
       <ToolTipsComponent v-else title="File is uploading">
-        <div class="spinner-border text-secondary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+        {{ fileUploadingPercentage }} %
       </ToolTipsComponent>
     </td>
     <td class="align-middle">
@@ -178,6 +176,10 @@ const isDescriptionAvailable = computed(
 
 const showEditComponents = computed(
   () => (props.inEditMode || inSingleFileEditMode.value) && props.clientVisibleFile.file.isEditable
+)
+
+const fileUploadingPercentage = computed(() =>
+  ((props.clientVisibleFile.uploadedSize / props.clientVisibleFile.file.filesize) * 100).toFixed(0)
 )
 
 watch(
