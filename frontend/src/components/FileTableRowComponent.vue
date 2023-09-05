@@ -10,7 +10,7 @@
       />
     </th>
     <td class="align-middle">
-      <div v-if="inEditMode || inSingleFileEditMode">
+      <div v-if="showEditComponents">
         <input
           :value="metadataFormModal.title"
           class="form-control file-title"
@@ -33,28 +33,32 @@
       {{ fileUploadedDate }}
     </td>
     <td class="align-middle ps-4">
-      <!-- TODO: Once S3 uploading part is finished, we need to change this part to show better progress. -->
-      <div
-        v-if="props.clientVisibleFile.file.status == FileStatus.UPLOADING"
-        class="spinner-border text-secondary"
-        role="status"
+      <ToolTipsComponent
+        v-if="props.clientVisibleFile.file.status == FileStatus.S3"
+        title="File is uploaded"
       >
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <span
+        <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />
+      </ToolTipsComponent>
+      <ToolTipsComponent
         v-else-if="props.clientVisibleFile.file.status == FileStatus.FAILURE"
-        data-bs-toggle="tooltip"
-        :data-bs-title="props.clientVisibleFile.statusText"
-        ref="toolTipsElement"
+        :title="props.clientVisibleFile.statusText"
       >
         <font-awesome-icon class="text-danger fs-5" :icon="['fas', 'xmark']" />
-      </span>
-      <span v-else>
-        <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />
-      </span>
+      </ToolTipsComponent>
+      <ToolTipsComponent
+        v-else-if="props.clientVisibleFile.file.status == FileStatus.PROCESSING"
+        title="File is processing"
+      >
+        <div class="spinner-border text-warning" role="status">
+          <span class="visually-hidden">Processing...</span>
+        </div>
+      </ToolTipsComponent>
+      <ToolTipsComponent v-else title="File is uploading">
+        {{ fileUploadingPercentage }} %
+      </ToolTipsComponent>
     </td>
     <td class="align-middle">
-      <div v-if="inEditMode || inSingleFileEditMode">
+      <div v-if="showEditComponents">
         <FileMetaDataEditorComponent
           :metadata="metadataFormModal"
           @update-form="updateMetadataForm"
@@ -125,8 +129,8 @@ import {
 import { fromMime } from 'human-filetypes'
 import moment from 'moment'
 import { computed, ref, watch, type Ref } from 'vue'
-import * as bootstrap from 'bootstrap'
 import FileMetaDataEditorComponent from '@/components/FileMetaDataEditorComponent.vue'
+import ToolTipsComponent from './ToolTipsComponent.vue'
 
 const props = defineProps<{
   inEditMode: boolean
@@ -134,7 +138,6 @@ const props = defineProps<{
   renderId: string
   clientVisibleFile: ClientVisibleFile
 }>()
-const toolTipsElement: Ref<Element | null> = ref(null)
 const upHere = ref(false)
 const inSingleFileEditMode = ref(false)
 const emit = defineEmits<{
@@ -171,11 +174,13 @@ const isDescriptionAvailable = computed(
     props.clientVisibleFile.file.description != ''
 )
 
-watch(toolTipsElement, (newValue) => {
-  if (newValue != null) {
-    new bootstrap.Tooltip(newValue)
-  }
-})
+const showEditComponents = computed(
+  () => (props.inEditMode || inSingleFileEditMode.value) && props.clientVisibleFile.file.isEditable
+)
+
+const fileUploadingPercentage = computed(() =>
+  ((props.clientVisibleFile.uploadedSize / props.clientVisibleFile.file.filesize) * 100).toFixed(0)
+)
 
 watch(
   () => props.inEditMode,

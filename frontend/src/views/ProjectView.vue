@@ -151,6 +151,24 @@ async function refreshFiles() {
   apiFiles.forEach((item) => files.value.set(item.id, { file: item, uploadedSize: item.filesize }))
 }
 
+async function refreshFileStatus() {
+  for (const [renderId, clientFile] of files.value.entries()) {
+    if (clientFile.file.status != FileStatus.S3 && clientFile.file.status != FileStatus.FAILURE) {
+      const newFile = await getSpecificFile(clientFile.file.project_id, clientFile.file.id)
+      if (!newFile) {
+        break
+      }
+      clientFile.file = NautilusFile.fromFile(newFile)
+      if (files.value.has(renderId)) {
+        files.value.set(renderId, clientFile)
+      }
+    }
+  }
+  setTimeout(async () => {
+    await refreshFileStatus()
+  }, storeApp.constants.env.NAUTILUS_FILE_REFRESH_EVERY_MS)
+}
+
 function sortFiles(
   files: Map<string, ClientVisibleFile>,
   compareFunction: CompareFunctionType
@@ -168,13 +186,26 @@ async function getAllFiles(projectId: string | null) {
     return result
   }
   try {
-    const reponse = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
-    for (const file of reponse.data) {
+    const response = await storeApp.axiosInstance.get<File[]>(`/projects/${projectId}/files`)
+    for (const file of response.data) {
       result.push(NautilusFile.fromFile(file))
     }
   } catch (error: any) {
     console.log('Unable to retrieve the files info', error)
     storeApp.alertsWarning('Unable to retrieve the files info')
+  }
+  return result
+}
+
+async function getSpecificFile(projectId: string, fileId: string) {
+  let result = null
+  try {
+    const response = await storeApp.axiosInstance.get<File>(
+      `/projects/${projectId}/files/${fileId}`
+    )
+    result = response.data
+  } catch (error: any) {
+    console.log('Unable to retrieve the files info', error)
   }
   return result
 }
@@ -232,12 +263,12 @@ async function uploadFiles(uploadFiles: FileList) {
           }
         })
     )
-
-    // After files are uploaded, check the project expiration date.
-    axios.all(uploadFileRequestsList).finally(() => {
-      updateProjects()
-    })
   }
+
+  // After files are uploaded, check the project expiration date.
+  axios.all(uploadFileRequestsList).finally(() => {
+    updateProjects()
+  })
 }
 
 async function dropFilesHandler(fileList: FileList, uploadFileSize: number) {
@@ -410,6 +441,8 @@ async function updateSingleFileMetadata(
   files.value.get(renderId)!.file.authors = newMetaData.authors
   files.value.get(renderId)!.file.filename = newMetaData.filename
 }
+
+refreshFileStatus()
 </script>
 
 <style scoped>
