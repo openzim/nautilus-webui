@@ -281,9 +281,11 @@ async def create_file(
     # so its visible by other processes (rq-worker)
     with DBSession.begin() as indep_session:
         # get project again but from this session
-        project_ = indep_session.execute(
+        project_: Project | None = indep_session.execute(
             select(Project).filter_by(id=str(project.id))
         ).scalar()
+        if not project_:
+            raise OSError("Failed to re-fetch Project")
         new_file = File(
             filename=filename,
             filesize=size,
