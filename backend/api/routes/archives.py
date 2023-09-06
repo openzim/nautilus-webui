@@ -50,3 +50,9 @@ async def get_all_archives(
 ) -> list[ArchiveModel]:
     """Get all archives of a project"""
     return TypeAdapter(list[ArchiveModel]).validate_python(project.archives)
+
+
+@router.get("/{project_id}/archives/{archive_id}", response_model=ArchiveModel)
+async def get_archive(archive: Archive = Depends(validated_project)) -> ArchiveModel:
+    """Get a specific archives of a project"""
+    return ArchiveModel.model_validate(archive)
