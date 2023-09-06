@@ -4,6 +4,7 @@ import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+from uuid import UUID
 
 import humanfriendly
 from rq import Retry
@@ -51,6 +52,7 @@ class BackendConf:
     authentication_cookie_name: str = "user_id"
     api_version_prefix = "/v1"
     project_expire_after = datetime.timedelta(days=7)
+    empty_uuid = UUID("263acb5d-d6ca-4e12-92a4-94d4f59fa18b")
 
     def __post_init__(self):
         self.logger = logging.getLogger(Path(__file__).parent.name)

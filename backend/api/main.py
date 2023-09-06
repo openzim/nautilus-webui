@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 
 from api import __description__, __titile__, __version__
 from api.constants import constants, determine_mandatory_environment_variables
-from api.routes import files, projects, users, utils
+from api.routes import archives, files, projects, users, utils
 
 
 @asynccontextmanager

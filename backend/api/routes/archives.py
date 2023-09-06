@@ -1,4 +1,5 @@
-from datetime import datetime
+import datetime
+from enum import Enum
 from http import HTTPStatus
 from typing import Any
 from uuid import UUID
@@ -7,12 +8,40 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from api.constants import constants
 
 from api.database import gen_session
 from api.database.models import Archive, Project
 from api.routes import validated_project
 
 router = APIRouter()
+
+
+class ArchiveStatus(str, Enum):
+    CREATED = "CREATED"
+    REQUEST = "REQUEST"
+    FINISHED = "FINISHED"
+    FAILURE = "FAILURE"
+
+
+class ArchiveConfig(BaseModel):
+    title: str | None
+    description: str | None
+    name: str | None
+    publisher: str | None
+    creator: str | None
+    languages: list[str] | None
+    tags: list[str] | None
+
+
+class ArchiveRequest(BaseModel):
+    filename: str | None
+    email: str | None
+    config: ArchiveConfig
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ArchiveModel(BaseModel):
     id: UUID
 
@@ -20,8 +49,8 @@ class ArchiveModel(BaseModel):
 
     filename: str
     filesize: int
-    created_on: datetime
-    requested_on: datetime
+    created_on: datetime.datetime
+    requested_on: datetime.datetime
     download_url: str
     collection_json_path: str
     status: str
@@ -56,3 +85,36 @@ async def get_all_archives(
 async def get_archive(archive: Archive = Depends(validated_project)) -> ArchiveModel:
     """Get a specific archives of a project"""
     return ArchiveModel.model_validate(archive)
+
+
+@router.post(
+    "/{project_id}/archives/",
+    response_model=ArchiveModel,
+    status_code=HTTPStatus.CREATED,
+)
+async def create_archive(
+    archive_request: ArchiveRequest,
+    project: Project = Depends(validated_project),
+    session: Session = Depends(gen_session),
+) -> ArchiveModel:
+    """Create a pre-request archive"""
+    now = datetime.datetime.now(tz=datetime.UTC)
+    new_archive = Archive(
+        filename=archive_request.filename
+        if archive_request.filename
+        else f"{project.name}.zim",
+        filesize=project.used_space,
+        created_on=now,
+        requested_on=datetime.datetime.min,
+        download_url="",
+        collection_json_path="",
+        status=ArchiveStatus.CREATED,
+        zimfarm_task_id=constants.empty_uuid,
+        email=archive_request.email,
+        config=archive_request.config.model_dump(),
+    )
+    project.archives.append(new_archive)
+    session.add(new_archive)
+    session.flush()
+    session.refresh(new_archive)
+    return ArchiveModel.model_validate(new_archive)
