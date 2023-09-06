@@ -6,10 +6,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, TypeAdapter
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
-from api.constants import constants
 
+from api.constants import constants
 from api.database import gen_session
 from api.database.models import Archive, Project
 from api.routes import validated_project
@@ -82,7 +82,7 @@ async def get_all_archives(
 
 
 @router.get("/{project_id}/archives/{archive_id}", response_model=ArchiveModel)
-async def get_archive(archive: Archive = Depends(validated_project)) -> ArchiveModel:
+async def get_archive(archive: Archive = Depends(validated_archive)) -> ArchiveModel:
     """Get a specific archives of a project"""
     return ArchiveModel.model_validate(archive)
 
@@ -118,3 +118,28 @@ async def create_archive(
     session.flush()
     session.refresh(new_archive)
     return ArchiveModel.model_validate(new_archive)
+
+
+@router.patch(
+    "/{project_id}/archives/{archive_id}",
+    status_code=HTTPStatus.NO_CONTENT,
+)
+async def update_archive(
+    archive_request: ArchiveRequest,
+    archive: Archive = Depends(validated_archive),
+    project: Project = Depends(validated_project),
+    session: Session = Depends(gen_session),
+):
+    """Create a pre-request archive"""
+    stmt = (
+        update(Archive)
+        .filter_by(id=archive.id)
+        .values(
+            filename=archive_request.filename
+            if archive_request.filename
+            else f"{project.name}.zim",
+            email=archive_request.email,
+            config=archive_request.config.model_dump(),
+        )
+    )
+    session.execute(stmt)
