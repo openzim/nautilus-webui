@@ -7,9 +7,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.database import Session
-from api.database.models import File, Project, User
+from api.database.models import Archive, File, Project, User
 from api.entrypoint import app
+from api.routes.archives import ArchiveStatus
 from api.routes.files import save_file
+from api.constants import constants
 
 
 @pytest.fixture()
@@ -50,6 +52,16 @@ def missing_user_cookie(missing_user_id):
 @pytest.fixture
 def test_project_name():
     return "test_project_name"
+
+
+@pytest.fixture
+def test_archive_name():
+    return "test_archive_name.zim"
+
+
+@pytest.fixture
+def missing_archive_id():
+    return "55a345a6-20d2-40a7-b85a-7ec37e55b986"
 
 
 @pytest.fixture()
@@ -131,3 +143,33 @@ def project_id(test_project_name, user_id):
         user = session.get(User, created_id)
         if user:
             session.delete(user)
+
+
+@pytest.fixture()
+def archive_id(test_archive_name, project_id):
+    now = datetime.datetime.now(datetime.UTC)
+    new_archive = Archive(
+        filename=test_archive_name,
+        filesize=0,
+        created_on=now,
+        requested_on=datetime.datetime.min,
+        download_url="",
+        collection_json_path="",
+        status=ArchiveStatus.CREATED,
+        zimfarm_task_id=constants.empty_uuid,
+        email=None,
+        config={},
+    )
+    with Session.begin() as session:
+        project = session.get(Project, project_id)
+        if project:
+            project.archives.append(new_archive)
+        session.add(new_archive)
+        session.flush()
+        session.refresh(new_archive)
+        created_id = new_archive.id
+    yield created_id
+    with Session.begin() as session:
+        archives = session.get(Archive, created_id)
+        if archives:
+            session.delete(archives)

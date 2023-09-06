@@ -88,7 +88,7 @@ async def get_archive(archive: Archive = Depends(validated_archive)) -> ArchiveM
 
 
 @router.post(
-    "/{project_id}/archives/",
+    "/{project_id}/archives",
     response_model=ArchiveModel,
     status_code=HTTPStatus.CREATED,
 )
