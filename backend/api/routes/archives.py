@@ -50,9 +50,7 @@ class ArchiveModel(BaseModel):
     filename: str
     filesize: int
     created_on: datetime.datetime
-    requested_on: datetime.datetime
     download_url: str
-    collection_json_path: str
     status: str
     email: str | None
     config: dict[str, Any]
