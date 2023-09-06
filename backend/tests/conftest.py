@@ -6,12 +6,12 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from api.constants import constants
 from api.database import Session
 from api.database.models import Archive, File, Project, User
 from api.entrypoint import app
 from api.routes.archives import ArchiveStatus
 from api.routes.files import save_file
-from api.constants import constants
 
 
 @pytest.fixture()
