@@ -63,7 +63,7 @@ def validated_archive(
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ) -> Archive:
-    """Depends()-able file from request, ensuring it exists"""
+    """Depends()-able archive from request, ensuring it exists"""
     stmt = select(Archive).filter_by(id=archive_id).filter_by(project_id=project.id)
     archive = session.execute(stmt).scalar()
     if not archive:
@@ -128,7 +128,7 @@ async def update_archive(
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ):
-    """Create a pre-request archive"""
+    """Update a metadata of a archive"""
     stmt = (
         update(Archive)
         .filter_by(id=archive.id)
