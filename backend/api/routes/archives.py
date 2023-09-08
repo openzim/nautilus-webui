@@ -32,10 +32,10 @@ class ArchiveConfig(BaseModel):
     creator: str | None
     languages: list[str] | None
     tags: list[str] | None
+    filename: str
 
 
 class ArchiveRequest(BaseModel):
-    filename: str | None
     email: str | None
     config: ArchiveConfig
 
@@ -47,10 +47,9 @@ class ArchiveModel(BaseModel):
 
     project_id: UUID
 
-    filename: str
-    filesize: int
+    filesize: int | None
     created_on: datetime.datetime
-    download_url: str
+    download_url: str | None
     status: str
     email: str | None
     config: dict[str, Any]
@@ -85,39 +84,6 @@ async def get_archive(archive: Archive = Depends(validated_archive)) -> ArchiveM
     return ArchiveModel.model_validate(archive)
 
 
-@router.post(
-    "/{project_id}/archives",
-    response_model=ArchiveModel,
-    status_code=HTTPStatus.CREATED,
-)
-async def create_archive(
-    archive_request: ArchiveRequest,
-    project: Project = Depends(validated_project),
-    session: Session = Depends(gen_session),
-) -> ArchiveModel:
-    """Create a pre-request archive"""
-    now = datetime.datetime.now(tz=datetime.UTC)
-    new_archive = Archive(
-        filename=archive_request.filename
-        if archive_request.filename
-        else f"{project.name}.zim",
-        filesize=project.used_space,
-        created_on=now,
-        requested_on=datetime.datetime.min,
-        download_url="",
-        collection_json_path="",
-        status=ArchiveStatus.CREATED,
-        zimfarm_task_id=constants.empty_uuid,
-        email=archive_request.email,
-        config=archive_request.config.model_dump(),
-    )
-    project.archives.append(new_archive)
-    session.add(new_archive)
-    session.flush()
-    session.refresh(new_archive)
-    return ArchiveModel.model_validate(new_archive)
-
-
 @router.patch(
     "/{project_id}/archives/{archive_id}",
     status_code=HTTPStatus.NO_CONTENT,
@@ -125,7 +91,6 @@ async def create_archive(
 async def update_archive(
     archive_request: ArchiveRequest,
     archive: Archive = Depends(validated_archive),
-    project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ):
     """Update a metadata of a archive"""
@@ -133,9 +98,6 @@ async def update_archive(
         update(Archive)
         .filter_by(id=archive.id)
         .values(
-            filename=archive_request.filename
-            if archive_request.filename
-            else f"{project.name}.zim",
             email=archive_request.email,
             config=archive_request.config.model_dump(),
         )
