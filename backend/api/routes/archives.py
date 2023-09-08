@@ -18,10 +18,15 @@ router = APIRouter()
 
 
 class ArchiveStatus(str, Enum):
-    CREATED = "CREATED"
-    REQUEST = "REQUEST"
-    FINISHED = "FINISHED"
-    FAILURE = "FAILURE"
+    # It's in database but not requested and can be modified
+    PENDING = "PENDING"
+    # it has been ZF-requested; can not be modified by user,
+    # awaiting callback from ZimFarm
+    REQUESTED = "REQUESTED"
+    # ZimFarm task succeeded, it now has a download_url and filesize
+    READY = "READY"
+    # ZimFarm task failed, cant be downloaded
+    FAILED = "FAILED"
 
 
 class ArchiveConfig(BaseModel):
