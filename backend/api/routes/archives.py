@@ -9,7 +9,6 @@ from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from api.constants import constants
 from api.database import gen_session
 from api.database.models import Archive, Project
 from api.routes import validated_project
