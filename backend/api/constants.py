@@ -43,6 +43,9 @@ class BackendConf:
     cookie_expiration_days = int(os.getenv("COOKIE_EXPIRATION_DAYS", "30"))
     project_quota = humanfriendly.parse_size(os.getenv("PROJECT_QUOTA", "100MB"))
     chunk_size = humanfriendly.parse_size(os.getenv("CHUNK_SIZE", "2MiB"))
+    illustration_quota = humanfriendly.parse_size(
+        os.getenv("ILLUSTRATION_QUOTA", "2MiB")
+    )
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
         "http://localhost",

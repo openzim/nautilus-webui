@@ -1,17 +1,27 @@
+import base64
 import datetime
 from enum import Enum
 from http import HTTPStatus
+from io import BytesIO
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from zimscraperlib import filesystem
+import zimscraperlib.image
 
+from api.constants import constants, logger
 from api.database import gen_session
 from api.database.models import Archive, Project
-from api.routes import validated_project
+from api.routes import (
+    calculate_file_size,
+    generate_file_hash,
+    save_file,
+    validated_project,
+)
 
 router = APIRouter()
 
@@ -107,3 +117,75 @@ async def update_archive(
         )
     )
     session.execute(stmt)
+
+
+def validate_illustration_image(upload_file: UploadFile):
+    """
+    Validates the illustration image to ensure it meets the requirements.
+
+    Args:
+        upload_file (UploadFile): The uploaded illustration image.
+
+    Raises:
+        HTTPException: If the illustration is invalid,
+                       the illustration is empty,
+                       illustration is not a png image.
+    """
+    filename = upload_file.filename
+    size = calculate_file_size(upload_file.file)
+
+    if not filename:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
+        )  # pragma: no cover
+
+    if size == 0:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty file.")
+
+    if size > constants.illustration_quota:
+        raise HTTPException(
+            status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            detail="Illustration is too large.",
+        )
+
+    mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
+
+    if "image/" not in mimetype:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Illustration is not a valid png image.",
+        )
+
+    upload_file.file.seek(0)
+
+
+@router.post(
+    "/{project_id}/archives/{archive_id}/illustration",
+    status_code=HTTPStatus.CREATED,
+)
+async def upload_illustration(
+    uploaded_illustration: UploadFile,
+    archive: Archive = Depends(validated_archive),
+    project: Project = Depends(validated_project),
+    session: Session = Depends(gen_session),
+):
+    """Upload an illustration of a archive."""
+    validate_illustration_image(uploaded_illustration)
+
+    file_hash = generate_file_hash(uploaded_illustration.file)
+
+    try:
+        fpath = save_file(uploaded_illustration.file, file_hash, project.id)
+    except Exception as exc:
+        logger.error(exc)
+        raise HTTPException(
+            HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
+        ) from exc
+    converted_image_path = fpath.with_suffix(".png")
+    zimscraperlib.image.convert_image(fpath, converted_image_path)
+    zimscraperlib.image.resize_image(converted_image_path, width=48, height=48)
+    with open(converted_image_path, "rb") as image_file:
+        new_config = archive.config
+        new_config["illustration"] = base64.b64encode(image_file.read()).decode("utf-8")
+        stmt = update(Archive).filter_by(id=archive.id).values(config=new_config)
+        session.execute(stmt)
