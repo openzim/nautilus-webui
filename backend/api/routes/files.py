@@ -2,8 +2,6 @@ import datetime
 import hashlib
 from enum import Enum
 from http import HTTPStatus
-from pathlib import Path
-from typing import BinaryIO
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
@@ -14,13 +12,12 @@ from zimscraperlib import filesystem
 
 from api.constants import constants, logger
 from api.database import Session as DBSession
-from api.database import gen_session, get_local_fpath_for
+from api.database import gen_session
 from api.database.models import File, Project
 from api.redis import task_queue
 from api.routes import (
     calculate_file_size,
     generate_file_hash,
-    read_file_in_chunks,
     save_file,
     validated_project,
 )

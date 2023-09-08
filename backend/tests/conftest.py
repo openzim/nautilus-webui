@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from api.constants import constants
 from api.database import Session
 from api.database.models import Archive, File, Project, User
 from api.entrypoint import app
@@ -111,6 +110,22 @@ def test_file():
 
 
 @pytest.fixture
+def test_png_image():
+    return (
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00"
+        b"\x01\x08\x04\x00\x00\x00\xb5\x1c\x0c\x02\x00\x00\x00\x0bIDATx\xdacd`\x00\x00\x00\x06\x00\x020\x81\xd0/\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+
+
+@pytest.fixture
+def test_jpeg_image():
+    return (
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00"
+        b"\x01\x08\x04\x00\x00\x00\xb5\x1c\x0c\x02\x00\x00\x00\x0bIDATx\xdacd`\x00\x00\x00\x06\x00\x020\x81\xd0/\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+
+
+@pytest.fixture
 def test_file_hash():
     return "9e56d33da489a4ba0fe1f02ed4b0b5984854845dfd666a92e112262b8e7ea0dc"
 
@@ -149,16 +164,15 @@ def project_id(test_project_name, user_id):
 def archive_id(test_archive_name, project_id):
     now = datetime.datetime.now(datetime.UTC)
     new_archive = Archive(
-        filename=test_archive_name,
-        filesize=0,
         created_on=now,
-        requested_on=datetime.datetime.min,
-        download_url="",
-        collection_json_path="",
-        status=ArchiveStatus.CREATED,
-        zimfarm_task_id=constants.empty_uuid,
+        status=ArchiveStatus.PENDING,
+        config={"filename": test_archive_name},
+        filesize=None,
+        requested_on=None,
+        download_url=None,
+        collection_json_path=None,
+        zimfarm_task_id=None,
         email=None,
-        config={},
     )
     with Session.begin() as session:
         project = session.get(Project, project_id)

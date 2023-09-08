@@ -1,7 +1,8 @@
 import hashlib
+from collections.abc import Iterator
 from http import HTTPStatus
 from pathlib import Path
-from typing import Annotated, BinaryIO, Iterator
+from typing import Annotated, BinaryIO
 from uuid import UUID
 
 from fastapi import Cookie, Depends, HTTPException, Response

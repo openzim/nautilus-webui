@@ -2,16 +2,15 @@ import base64
 import datetime
 from enum import Enum
 from http import HTTPStatus
-from io import BytesIO
 from typing import Any
 from uuid import UUID
 
+import zimscraperlib.image
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
-import zimscraperlib.image
 
 from api.constants import constants, logger
 from api.database import gen_session
