@@ -94,3 +94,8 @@ def generate_file_hash(file: BinaryIO) -> str:
     for chunk in read_file_in_chunks(file):
         hasher.update(chunk)
     return hasher.hexdigest()
+
+
+def normalize_filename(filename):
+    # TODO: Normalize Filename
+    return filename

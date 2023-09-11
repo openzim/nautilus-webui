@@ -18,6 +18,7 @@ from api.database.models import Archive, Project
 from api.routes import (
     calculate_file_size,
     generate_file_hash,
+    normalize_filename,
     save_file,
     validated_project,
 )
@@ -107,6 +108,8 @@ async def update_archive(
     session: Session = Depends(gen_session),
 ):
     """Update a metadata of a archive"""
+    config = archive_request.config.model_dump()
+    config["filename"] = normalize_filename(config.get("filename"))
     stmt = (
         update(Archive)
         .filter_by(id=archive.id)
