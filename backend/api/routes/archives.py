@@ -1,5 +1,6 @@
 import base64
 import datetime
+import io
 from enum import Enum
 from http import HTTPStatus
 from typing import Any
@@ -12,14 +13,13 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from zimscraperlib import filesystem
 
-from api.constants import constants, logger
+from api.constants import constants
 from api.database import gen_session
 from api.database.models import Archive, Project
 from api.routes import (
     calculate_file_size,
-    generate_file_hash,
     normalize_filename,
-    save_file,
+    read_file_in_chunks,
     validated_project,
 )
 
@@ -175,20 +175,27 @@ async def upload_illustration(
     """Upload an illustration of a archive."""
     validate_illustration_image(uploaded_illustration)
 
-    file_hash = generate_file_hash(uploaded_illustration.file)
+    src = io.BytesIO()
+    for chunk in read_file_in_chunks(uploaded_illustration.file):
+        src.write(chunk)
+    dst = io.BytesIO()
+    try:
+        zimscraperlib.image.convert_image(src, dst, fmt="PNG")
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Illustration cannot be converted to PNG",
+        ) from exc
 
     try:
-        fpath = save_file(uploaded_illustration.file, file_hash, project.id)
+        zimscraperlib.image.resize_image(dst, width=48, height=48, method="cover")
     except Exception as exc:
-        logger.error(exc)
         raise HTTPException(
-            HTTPStatus.INTERNAL_SERVER_ERROR, "Server unable to save file."
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Illustration cannot be resized",
         ) from exc
-    converted_image_path = fpath.with_suffix(".png")
-    zimscraperlib.image.convert_image(fpath, converted_image_path)
-    zimscraperlib.image.resize_image(converted_image_path, width=48, height=48)
-    with open(converted_image_path, "rb") as image_file:
+    else:
         new_config = archive.config
-        new_config["illustration"] = base64.b64encode(image_file.read()).decode("utf-8")
+        new_config["illustration"] = base64.b64encode(dst.getvalue()).decode("utf-8")
         stmt = update(Archive).filter_by(id=archive.id).values(config=new_config)
         session.execute(stmt)
