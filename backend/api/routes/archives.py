@@ -156,7 +156,7 @@ def validate_illustration_image(upload_file: UploadFile):
     if "image/" not in mimetype:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail="Illustration is not a valid png image.",
+            detail="Illustration is not a valid image.",
         )
 
     upload_file.file.seek(0)
