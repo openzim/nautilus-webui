@@ -169,7 +169,6 @@ def validate_illustration_image(upload_file: UploadFile):
 async def upload_illustration(
     uploaded_illustration: UploadFile,
     archive: Archive = Depends(validated_archive),
-    project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ):
     """Upload an illustration of a archive."""
