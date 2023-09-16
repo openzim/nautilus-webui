@@ -134,12 +134,13 @@ def validate_illustration_image(upload_file: UploadFile):
                        illustration is not a png image.
     """
     filename = upload_file.filename
-    size = calculate_file_size(upload_file.file)
 
     if not filename:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
         )  # pragma: no cover
+
+    size = calculate_file_size(upload_file.file)
 
     if size == 0:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty file.")
