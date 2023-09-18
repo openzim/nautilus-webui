@@ -179,7 +179,9 @@ async def upload_illustration(
         src.write(chunk)
     dst = io.BytesIO()
     try:
-        zimscraperlib.image.convert_image(src, dst, fmt="PNG")
+        zimscraperlib.image.convert_image(
+            src, dst, fmt="PNG"  # pyright: ignore [reportGeneralTypeIssues]
+        )
     except Exception as exc:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
