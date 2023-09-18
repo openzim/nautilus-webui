@@ -7,8 +7,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.database import Session
-from api.database.models import File, Project, User
+from api.database.models import Archive, File, Project, User
 from api.entrypoint import app
+from api.routes.archives import ArchiveStatus
 from api.routes.files import save_file
 
 
@@ -50,6 +51,16 @@ def missing_user_cookie(missing_user_id):
 @pytest.fixture
 def test_project_name():
     return "test_project_name"
+
+
+@pytest.fixture
+def test_archive_name():
+    return "test_archive_name.zim"
+
+
+@pytest.fixture
+def missing_archive_id():
+    return "55a345a6-20d2-40a7-b85a-7ec37e55b986"
 
 
 @pytest.fixture()
@@ -99,6 +110,14 @@ def test_file():
 
 
 @pytest.fixture
+def test_png_image():
+    return (
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00"
+        b"\x01\x08\x04\x00\x00\x00\xb5\x1c\x0c\x02\x00\x00\x00\x0bIDATx\xdacd`\x00\x00\x00\x06\x00\x020\x81\xd0/\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+
+
+@pytest.fixture
 def test_file_hash():
     return "9e56d33da489a4ba0fe1f02ed4b0b5984854845dfd666a92e112262b8e7ea0dc"
 
@@ -131,3 +150,32 @@ def project_id(test_project_name, user_id):
         user = session.get(User, created_id)
         if user:
             session.delete(user)
+
+
+@pytest.fixture()
+def archive_id(test_archive_name, project_id):
+    now = datetime.datetime.now(datetime.UTC)
+    new_archive = Archive(
+        created_on=now,
+        status=ArchiveStatus.PENDING,
+        config={"filename": test_archive_name},
+        filesize=None,
+        requested_on=None,
+        download_url=None,
+        collection_json_path=None,
+        zimfarm_task_id=None,
+        email=None,
+    )
+    with Session.begin() as session:
+        project = session.get(Project, project_id)
+        if project:
+            project.archives.append(new_archive)
+        session.add(new_archive)
+        session.flush()
+        session.refresh(new_archive)
+        created_id = new_archive.id
+    yield created_id
+    with Session.begin() as session:
+        archives = session.get(Archive, created_id)
+        if archives:
+            session.delete(archives)

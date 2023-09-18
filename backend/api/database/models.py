@@ -134,13 +134,12 @@ class Archive(Base):
     )
     project_id: Mapped[UUID] = mapped_column(ForeignKey("project.id"), init=False)
 
-    filename: Mapped[str]
-    filesize: Mapped[int]
+    filesize: Mapped[int | None]
     created_on: Mapped[datetime]
-    requested_on: Mapped[datetime]
-    download_url: Mapped[str]
-    collection_json_path: Mapped[str]
+    requested_on: Mapped[datetime | None]
+    download_url: Mapped[str | None]
+    collection_json_path: Mapped[str | None]
     status: Mapped[str]
-    zimfarm_task_id: Mapped[UUID]
+    zimfarm_task_id: Mapped[UUID | None]
     email: Mapped[str | None]
     config: Mapped[dict[str, Any]]

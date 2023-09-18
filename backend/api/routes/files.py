@@ -1,10 +1,7 @@
 import datetime
 import hashlib
-from collections.abc import Iterator
 from enum import Enum
 from http import HTTPStatus
-from pathlib import Path
-from typing import BinaryIO
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
@@ -15,10 +12,15 @@ from zimscraperlib import filesystem
 
 from api.constants import constants, logger
 from api.database import Session as DBSession
-from api.database import gen_session, get_local_fpath_for
+from api.database import gen_session
 from api.database.models import File, Project
 from api.redis import task_queue
-from api.routes import validated_project
+from api.routes import (
+    calculate_file_size,
+    generate_file_hash,
+    save_file,
+    validated_project,
+)
 from api.s3 import s3_storage
 
 router = APIRouter()
@@ -66,44 +68,6 @@ def validated_file(
     if not file:
         raise HTTPException(HTTPStatus.NOT_FOUND, f"File not found: {file_id}")
     return file
-
-
-def read_file_in_chunks(
-    reader: BinaryIO, chunk_size=constants.chunk_size
-) -> Iterator[bytes]:
-    """Read Big file chunk by chunk. Default chunk size is 2k"""
-    while True:
-        chunk = reader.read(chunk_size)
-        if not chunk:
-            break
-        yield chunk
-    reader.seek(0)
-
-
-def generate_file_hash(file: BinaryIO) -> str:
-    """Generate sha256 hash of a file, optimized for large files"""
-    hasher = hashlib.sha256()
-    for chunk in read_file_in_chunks(file):
-        hasher.update(chunk)
-    return hasher.hexdigest()
-
-
-def save_file(file: BinaryIO, file_hash: str, project_id: UUID) -> Path:
-    """Saves a binary file to a specific location and returns its path."""
-    fpath = get_local_fpath_for(file_hash, project_id)
-    if not fpath.is_file():
-        with open(fpath, "wb") as file_object:
-            for chunk in read_file_in_chunks(file):
-                file_object.write(chunk)
-    return fpath
-
-
-def calculate_file_size(file: BinaryIO) -> int:
-    """Calculate the size of a file chunk by chunk"""
-    size = 0
-    for chunk in read_file_in_chunks(file):
-        size += len(chunk)
-    return size
 
 
 def validate_uploaded_file(upload_file: UploadFile):

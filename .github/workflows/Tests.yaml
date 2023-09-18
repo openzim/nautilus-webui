@@ -5,11 +5,11 @@ on:
     paths:
       - "backend/**"
   push:
-    branches: [main]
+    branches: [ main ]
 env:
   POSTGRES_URI: "postgresql+psycopg://nautilus:nautilus@localhost:5432/nautilus"
   S3_URL_WITH_CREDENTIALS: "PLACEHOLDER"
-  PRIVATE_KEY: "PRIVATE_KEY"
+  PRIVATE_SALT: "PRIVATE_SALT"
 
 jobs:
   run-tests:
