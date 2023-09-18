@@ -109,7 +109,7 @@ async def update_archive(
 ):
     """Update a metadata of a archive"""
     config = archive_request.config.model_dump()
-    config["filename"] = normalize_filename(config.get("filename"))
+    config["filename"] = normalize_filename(config["filename"])
     stmt = (
         update(Archive)
         .filter_by(id=archive.id)

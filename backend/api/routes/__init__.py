@@ -96,6 +96,22 @@ def generate_file_hash(file: BinaryIO) -> str:
     return hasher.hexdigest()
 
 
-def normalize_filename(filename):
-    # TODO: Normalize Filename
-    return filename
+def normalize_filename(filename: str) -> str:
+    """filesystem (ext4,apfs,hfs+,ntfs,exfat) and S3 compliant filename"""
+
+    normalized = str(filename)
+
+    # we replace / with __ as it would have a meaning
+    replacements = (("/", "__"),)
+    for pattern, repl in replacements:
+        normalized = filename.replace(pattern, repl)
+
+    # other prohibited chars are removed (mostly for Windows context)
+    removals = ["\\", ":", "*", "?", '"', "<", ">", "|"] + [
+        chr(idx) for idx in range(1, 32)
+    ]
+    for char in removals:
+        normalized.replace(char, "")
+
+    # ext4/exfat has a 255B filename limit (s3 is 1KiB)
+    return normalized.encode("utf-8")[:255].decode("utf-8")
