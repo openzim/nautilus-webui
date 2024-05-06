@@ -3,7 +3,7 @@ import os
 from io import BytesIO
 from pathlib import Path
 
-import pytest
+import pytest  # pyright: ignore [reportMissingImports]
 from fastapi.testclient import TestClient
 
 from api.database import Session
