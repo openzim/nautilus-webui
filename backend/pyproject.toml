@@ -44,6 +44,7 @@ check = [
 test = [
   "pytest==8.2.0",
   "coverage==7.5.1",
+  "pytest-mock==3.14.0",
 ]
 dev = [
   "pre-commit==3.7.0",
@@ -69,7 +70,7 @@ features = ["dev"]
 features = ["scripts", "test"]
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.10", "3.11"]
+python = ["3.11"]
 
 [tool.hatch.envs.test.scripts]
 run = "inv test --args '{args}'"
