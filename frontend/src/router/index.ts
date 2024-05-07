@@ -1,11 +1,8 @@
-import PrivacyAndCookieStatement from '@/views/PrivacyAndCookieStatement.vue'
 import StartView from '@/views/StartView.vue'
-import TermsOfService from '@/views/TermsOfService.vue'
 import CollectionsView from '@/views/CollectionsView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
-import ContactPage from '@/components/ContactPage.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import StaticStartView from '@/views/StaticStartView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -17,22 +14,26 @@ const router = createRouter({
     {
       path: '/privacy-and-cookie-statement',
       name: 'PrivacyCookieStatement',
-      component: PrivacyAndCookieStatement
-    },
-    {
-      path: '/terms-of-service',
-      name: 'TermsOfService',
-      component: TermsOfService
+      component: StaticStartView,
+      props: {page: 'privacy', showTitle: true}
     },
     {
       path: '/faq',
       name: 'faq',
-      component: FrequentlyAskedQuestions
+      component: StaticStartView,
+      props: {page: 'faq', showTitle: true}
+    },
+    {
+      path: '/terms-of-service',
+      name: 'TermsOfService',
+      component: StaticStartView,
+      props: {page: 'tos', showTitle: true}
     },
     {
       path: '/contact',
       name: 'contact',
-      component: ContactPage
+      component: StaticStartView,
+      props: {page: 'contact', showTitle: true}
     },
     {
       path: '/',

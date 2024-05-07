@@ -1,6 +1,7 @@
 <template>
   <div class="container help">
     <div class="row justify-content-md-center">
+      <h1 v-if="showTitle">Frequently Asked Questions</h1>
       <ul class="list-group list-group-flush">
         <li class="list-group-item" v-for="(item, index) in faqs" :key="item.title">
           <div class="d-grid">
@@ -40,6 +41,7 @@
 import { ref } from 'vue'
 import { humanifyFileSize } from '@/constants'
 import { useAppStore } from '@/stores/stores'
+defineProps({showTitle: Boolean})
 const storeApp = useAppStore()
 const faqs = ref([
   {

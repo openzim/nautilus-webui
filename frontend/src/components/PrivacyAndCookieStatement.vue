@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 v-if="showTitle">Contact Us</h1>
+    <h1 v-if="showTitle">Nautilus Privacy & Cookie Statement</h1>
     <p>
       Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad
       nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia.
@@ -15,5 +15,5 @@
 </template>
 
 <script setup lang="ts">
-  defineProps({showTitle: Boolean})
+defineProps({showTitle: Boolean})
 </script>

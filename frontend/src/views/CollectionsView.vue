@@ -20,6 +20,8 @@ import FooterComponent from '@/components/FooterComponent.vue'
 import ProjectView from './ProjectView.vue'
 import { useProjectStore } from '@/stores/stores'
 import { computed } from 'vue'
+
+defineProps({page: String})
 const storeProject = useProjectStore()
 const hasValidProjectId = computed(() => storeProject.lastProjectId != null)
 </script>
@@ -32,6 +34,8 @@ const hasValidProjectId = computed(() => storeProject.lastProjectId != null)
 .sidebar {
   background-color: var(--main-color);
   height: 100vh;
+  width: 25%;
+  max-width: 20em;
 }
 
 .content {
