@@ -38,6 +38,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { humanifyFileSize } from '@/constants'
+import { useAppStore } from '@/stores/stores'
+const storeApp = useAppStore()
 const faqs = ref([
   {
     title: 'What is a Zim file',
@@ -64,7 +67,7 @@ const faqs = ref([
     content: `<p>
       Due to the nature of the tool, we cannot allow it to create files of arbitrary size. 
       This could be detrimental to our infrastructure. 
-      We currently enforce a limit: 200MiB files.
+      We currently enforce a limit: ${humanifyFileSize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA)} files.
       </p>`,
     toggle: false
   },
