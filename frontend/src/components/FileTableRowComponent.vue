@@ -76,7 +76,7 @@
             <div class="card-body">
               <div class="card-title custom-title">Description:</div>
               <p class="card-text">{{ props.clientVisibleFile.file.description }}</p>
-              <div class="card-title custom-title">Auhtors:</div>
+              <div class="card-title custom-title">Authors:</div>
               <p class="card-text">
                 {{ authors }}
               </p>
