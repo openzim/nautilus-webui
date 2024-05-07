@@ -68,10 +68,27 @@ services:
     ports:
       - 8081:80
     environment:
-      - NAUTILUS_WEB_API=http://localhost:8080/v1
-      - NAUTILUS_FILE_QUOTA=100000000
-      - NAUTILUS_PROJECT_QUOTA=100000000
-      - NAUTILUS_REFRESH_TIME=1000
+      - NAUTILUS_WEB_API=${NAUTILUS_WEB_API}
+      - NAUTILUS_FILE_QUOTA=${NAUTILUS_FILE_QUOTA}
+      - NAUTILUS_PROJECT_QUOTA=${NAUTILUS_PROJECT_QUOTA}
+      - NAUTILUS_REFRESH_TIME=${NAUTILUS_REFRESH_TIME}
+    depends_on:
+      - backend
+  frontend-tools:
+    build:
+      dockerfile: ../dev/frontend-tools/Dockerfile
+      context: ../frontend
+    container_name: nautilus-frontend-tools
+    volumes:
+      - ../frontend/public:/src/public
+      - ../frontend/src:/src/src
+    ports:
+      - 8082:80
+    environment:
+      - NAUTILUS_WEB_API=${NAUTILUS_WEB_API}
+      - NAUTILUS_FILE_QUOTA=${NAUTILUS_FILE_QUOTA}
+      - NAUTILUS_PROJECT_QUOTA=${NAUTILUS_PROJECT_QUOTA}
+      - NAUTILUS_REFRESH_TIME=${NAUTILUS_REFRESH_TIME}
     depends_on:
       - backend
   backend-tools:
