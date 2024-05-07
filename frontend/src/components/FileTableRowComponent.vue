@@ -179,11 +179,8 @@ const showEditComponents = computed(
 )
 
 const fileUploadingPercentage = computed(() => {
-  let pc = (
-    (props.clientVisibleFile.uploadedSize / props.clientVisibleFile.file.filesize) *
-    100
-  ).toFixed(0)
-  return pc > 100 ? 100 : pc
+  let pc = (props.clientVisibleFile.uploadedSize / props.clientVisibleFile.file.filesize) * 100
+  return pc > 100 ? 100 : pc.toFixed(0)
 })
 
 watch(

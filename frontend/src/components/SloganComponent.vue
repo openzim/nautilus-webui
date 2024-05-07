@@ -27,7 +27,12 @@
 </template>
 
 <style scoped>
-a, a:active, a:visited { color: var(--main-color); text-decoration: none; }
+a,
+a:active,
+a:visited {
+  color: var(--main-color);
+  text-decoration: none;
+}
 .spot {
   color: var(--main-color);
 }

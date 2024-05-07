@@ -28,9 +28,14 @@ import PrivacyAndCookieStatement from '@/components/PrivacyAndCookieStatement.vu
 import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
 import ContactPage from '@/components/ContactPage.vue'
 
-defineProps({page: String, showTitle: Boolean})
+defineProps({ page: String, showTitle: Boolean })
 </script>
 
 <style type="text/css">
-a, a:active, a:visited { color: var(--main-color); text-decoration: none; }
+a,
+a:active,
+a:visited {
+  color: var(--main-color);
+  text-decoration: none;
+}
 </style>

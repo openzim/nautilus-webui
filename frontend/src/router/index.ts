@@ -15,25 +15,25 @@ const router = createRouter({
       path: '/privacy-and-cookie-statement',
       name: 'PrivacyCookieStatement',
       component: StaticStartView,
-      props: {page: 'privacy', showTitle: true}
+      props: { page: 'privacy', showTitle: true }
     },
     {
       path: '/faq',
       name: 'faq',
       component: StaticStartView,
-      props: {page: 'faq', showTitle: true}
+      props: { page: 'faq', showTitle: true }
     },
     {
       path: '/terms-of-service',
       name: 'TermsOfService',
       component: StaticStartView,
-      props: {page: 'tos', showTitle: true}
+      props: { page: 'tos', showTitle: true }
     },
     {
       path: '/contact',
       name: 'contact',
       component: StaticStartView,
-      props: {page: 'contact', showTitle: true}
+      props: { page: 'contact', showTitle: true }
     },
     {
       path: '/',

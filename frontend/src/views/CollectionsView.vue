@@ -21,7 +21,7 @@ import ProjectView from './ProjectView.vue'
 import { useProjectStore } from '@/stores/stores'
 import { computed } from 'vue'
 
-defineProps({page: String})
+defineProps({ page: String })
 const storeProject = useProjectStore()
 const hasValidProjectId = computed(() => storeProject.lastProjectId != null)
 </script>

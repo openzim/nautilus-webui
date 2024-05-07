@@ -41,7 +41,7 @@
 import { ref } from 'vue'
 import { humanifyFileSize } from '@/constants'
 import { useAppStore } from '@/stores/stores'
-defineProps({showTitle: Boolean})
+defineProps({ showTitle: Boolean })
 const storeApp = useAppStore()
 const faqs = ref([
   {
@@ -69,7 +69,9 @@ const faqs = ref([
     content: `<p>
       Due to the nature of the tool, we cannot allow it to create files of arbitrary size. 
       This could be detrimental to our infrastructure. 
-      We currently enforce a limit: ${humanifyFileSize(storeApp.constants.env.NAUTILUS_PROJECT_QUOTA)} files.
+      We currently enforce a limit: ${humanifyFileSize(
+        storeApp.constants.env.NAUTILUS_PROJECT_QUOTA
+      )} files.
       </p>`,
     toggle: false
   },
