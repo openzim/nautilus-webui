@@ -178,9 +178,13 @@ const showEditComponents = computed(
   () => (props.inEditMode || inSingleFileEditMode.value) && props.clientVisibleFile.file.isEditable
 )
 
-const fileUploadingPercentage = computed(() =>
-  ((props.clientVisibleFile.uploadedSize / props.clientVisibleFile.file.filesize) * 100).toFixed(0)
-)
+const fileUploadingPercentage = computed(() => {
+  let pc = (
+    (props.clientVisibleFile.uploadedSize / props.clientVisibleFile.file.filesize) *
+    100
+  ).toFixed(0)
+  return pc > 100 ? 100 : pc
+})
 
 watch(
   () => props.inEditMode,
