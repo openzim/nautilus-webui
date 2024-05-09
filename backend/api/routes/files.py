@@ -14,7 +14,6 @@ from api.constants import constants, logger
 from api.database import Session as DBSession
 from api.database import gen_session
 from api.database.models import File, Project
-from api.redis import task_queue
 from api.routes import (
     calculate_file_size,
     generate_file_hash,
@@ -22,6 +21,7 @@ from api.routes import (
     validated_project,
 )
 from api.s3 import s3_storage
+from api.store import task_queue
 
 router = APIRouter()
 
