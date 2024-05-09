@@ -19,6 +19,8 @@ ENV ALLOWED_ORIGINS http://localhost
 ENV WEB_CONCURRENCY 1
 # comma-separated list of IPs/networks trusted to set proper X-Forwarded-For headers
 ENV FORWARDED_ALLOW_IPS "127.0.0.1"
+# set any value to run database migrations on entrypoint
+ENV RUN_DB_MIGRATIONS ""
 
 VOLUME [ "/storage" ]
 

@@ -41,6 +41,7 @@ services:
       - ALLOWED_ORIGINS=http://localhost:8081|http://localhost:8082
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
+      - RUN_DB_MIGRATIONS=y
     ports:
       - 8080:80
     depends_on:
@@ -112,8 +113,10 @@ services:
       - CHANNEL_NAME=${CHANNEL_NAME}
       - ALLOWED_ORIGINS=http://localhost:8081|http://localhost:8082
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
   backend-tools:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -130,8 +133,10 @@ services:
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
   backend-tests:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
@@ -148,8 +153,10 @@ services:
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 volumes:
   pg_data_nautilus:
   pg_data_redis:
