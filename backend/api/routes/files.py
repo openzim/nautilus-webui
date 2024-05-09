@@ -176,11 +176,10 @@ def upload_file_to_s3(new_file_id: UUID):
 
     s3_key = s3_file_key(new_file.project_id, new_file.hash)
 
-    if s3_storage.storage.has_object(s3_key):
-        update_file_status_and_path(new_file, FileStatus.S3, s3_key)
-        return
-
     try:
+        if s3_storage.storage.has_object(s3_key):
+            update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+            return
         s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
         s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
