@@ -178,9 +178,13 @@ def upload_file_to_s3(new_file_id: UUID):
 
     try:
         if s3_storage.storage.has_object(s3_key):
+            logger.debug(f"Object `{s3_key}` for File {new_file_id} already in S3")
             update_file_status_and_path(new_file, FileStatus.S3, s3_key)
             return
+        logger.debug(f"Uploading {new_file_id}: `{new_file.local_fpath}` to `{s3_key}`")
         s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
+        logger.debug(f"Uploaded {new_file_id}. Removing `{new_file.local_fpath}`…")
+        new_file.local_fpath.unlink(missing_ok=True)
         s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
         update_file_status_and_path(new_file, FileStatus.S3, s3_key)
     except Exception as exc:
