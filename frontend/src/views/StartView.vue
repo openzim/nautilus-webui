@@ -6,7 +6,7 @@
         <HomeView v-else />
       </Suspense>
     </div>
-    <FooterComponent />
+    <FooterComponent v-if="!isValidProjectId" />
   </div>
 </template>
 

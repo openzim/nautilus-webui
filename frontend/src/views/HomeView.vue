@@ -16,12 +16,10 @@
         <FrequentlyAskedQuestions />
       </div>
     </div>
-    <FooterComponent />
   </div>
 </template>
 
 <script setup lang="ts">
-import FooterComponent from '@/components/FooterComponent.vue'
 import SloganComponent from '@/components/SloganComponent.vue'
 import FrequentlyAskedQuestions from '@/components/FrequentlyAskedQuestions.vue'
 import DragToStartProjectComponent from '@/components/DragToStartProjectComponent.vue'
