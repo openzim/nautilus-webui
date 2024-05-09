@@ -85,7 +85,7 @@
             class="drag-field d-flex justify-content-center align-items-center"
             v-if="files.size <= 10"
           >
-            <h4 style="color: var(--main-color); opacity: 0.6">Drag Files to here</h4>
+            <h4 style="color: var(--main-color); opacity: 0.6">Drag Files here</h4>
           </div>
         </div>
       </UploadFilesComponent>
