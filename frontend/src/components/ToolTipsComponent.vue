@@ -22,7 +22,6 @@ onMounted(() => {
   tootip.value = new Tooltip(element.value!)
 })
 onBeforeUnmount(() => {
-  console.log('HHH')
   tootip.value?.dispose()
 })
 </script>
