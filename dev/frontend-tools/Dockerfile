@@ -13,7 +13,7 @@ JS_PATH=/src/public/environ.json\n\
 cp -v \"\${JS_PATH}\" \"\${JS_PATH}.orig\"\n\
 echo \"dump NAUTILUS_* environ variables to \$JS_PATH\"\n\
 \n\
-python3 -c 'import os; import json; print(json.dumps({k: v for k, v in os.environ.items() if k.startswith(\"NAUTILUS_\")}, indent=4))' > \$JS_PATH\n\
+python3 -c 'import os; import json; print(json.dumps({k: v for k, v in os.environ.items() if k.startswith(\"NAUTILUS_\")}, indent=2))' > \$JS_PATH\n\
 \n\
 cat \$JS_PATH\n\
 echo \"-----\"\n\
