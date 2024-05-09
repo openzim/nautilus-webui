@@ -1,3 +1,5 @@
+*.orig
+
 # excluding dev env file so developers can edit compose env file
 dev/.env
 
