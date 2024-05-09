@@ -1,5 +1,6 @@
 import { useAppStore, useProjectStore } from './stores/stores'
 import type { Project } from '@/constants'
+import router from '@/router'
 
 /** Checks if a given project ID is valid */
 export async function validProjectID(id: string | null) {
@@ -57,5 +58,6 @@ export async function updateProjects() {
   } catch (error: unknown) {
     console.log('Unable to retrieve projects info', error)
     storeApp.alertsError('Unable to retrieve projects info')
+    router.replace({ path: '/' })
   }
 }
