@@ -1,5 +1,4 @@
 import datetime
-import hashlib
 from enum import Enum
 from http import HTTPStatus
 from uuid import UUID
@@ -14,13 +13,10 @@ from api.constants import constants, logger
 from api.database import Session as DBSession
 from api.database import gen_session
 from api.database.models import File, Project
-from api.routes import (
-    calculate_file_size,
-    generate_file_hash,
-    save_file,
-    validated_project,
-)
-from api.s3 import s3_storage
+from api.database.utils import get_file_by_id, get_project_by_id
+from api.files import calculate_file_size, generate_file_hash, save_file
+from api.routes import validated_project
+from api.s3 import s3_file_key, s3_storage
 from api.store import task_queue
 
 router = APIRouter()
@@ -116,12 +112,6 @@ def validate_project_quota(file_size: int, project: Project):
         )
 
 
-def s3_file_key(project_id: UUID, file_hash: str) -> str:
-    """Generate s3 file key."""
-    to_be_hashed_str = f"{project_id}-{file_hash}-{constants.private_salt}"
-    return hashlib.sha256(bytes(to_be_hashed_str, "utf-8")).hexdigest()
-
-
 def update_file_status_and_path(file: File, status: str, path: str):
     """Update file's Status and Path."""
     with DBSession.begin() as session:
@@ -138,28 +128,6 @@ def update_file_status(file: File, status: str):
 def update_file_path(file: File, path: str):
     """Update file's path."""
     update_file_status_and_path(file, file.status, path)
-
-
-def get_file_by_id(file_id: UUID) -> File:
-    """Get File instance by its id."""
-    with DBSession.begin() as session:
-        stmt = select(File).where(File.id == file_id)
-        file = session.execute(stmt).scalar()
-        if not file:
-            raise ValueError(f"File not found: {file_id}")
-        session.expunge(file)
-        return file
-
-
-def get_project_by_id(project_id: UUID) -> Project:
-    """Get Project instance by its id."""
-    with DBSession.begin() as session:
-        stmt = select(Project).where(Project.id == project_id)
-        project = session.execute(stmt).scalar()
-        if not project:
-            raise ValueError(f"Project not found: {project_id}")
-        session.expunge(project)
-        return project
 
 
 def upload_file_to_s3(new_file_id: UUID):

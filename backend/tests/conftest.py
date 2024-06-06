@@ -9,8 +9,8 @@ from fastapi.testclient import TestClient
 from api.database import Session
 from api.database.models import Archive, File, Project, User
 from api.entrypoint import app
+from api.files import save_file
 from api.routes.archives import ArchiveStatus
-from api.routes.files import save_file
 
 
 @pytest.fixture()
@@ -161,6 +161,7 @@ def archive_id(test_archive_name, project_id):
         config={"filename": test_archive_name},
         filesize=None,
         requested_on=None,
+        completed_on=None,
         download_url=None,
         collection_json_path=None,
         zimfarm_task_id=None,

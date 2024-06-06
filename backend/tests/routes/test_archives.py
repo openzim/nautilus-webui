@@ -69,7 +69,7 @@ def test_update_archive_correct_data(logged_in_client, project_id, archive_id):
             "name": "test_name",
             "publisher": "test_publisher",
             "creator": "test_creator",
-            "languages": ["en"],
+            "languages": "en",
             "tags": ["test_tags"],
         },
     }
@@ -91,7 +91,7 @@ def test_update_archive_correct_data(logged_in_client, project_id, archive_id):
     assert json_result.get("config").get("name") == "test_name"
     assert json_result.get("config").get("publisher") == "test_publisher"
     assert json_result.get("config").get("creator") == "test_creator"
-    assert json_result.get("config").get("languages")[0] == "en"
+    assert json_result.get("config").get("languages") == "en"
     assert json_result.get("config").get("tags")[0] == "test_tags"
 
 
@@ -105,7 +105,7 @@ def test_update_archive_wrong_id(logged_in_client, project_id, missing_archive_i
             "name": "test_name",
             "publisher": "test_publisher",
             "creator": "test_creator",
-            "languages": ["en"],
+            "languages": "en",
             "tags": ["test_tags"],
         },
     }

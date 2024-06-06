@@ -27,6 +27,7 @@ dependencies = [
   "zimscraperlib==3.3.2",
   "humanfriendly==10.0",
   "rq==1.16.2",
+  "werkzeug==3.0.3",
 ]
 dynamic = ["authors", "license", "version", "urls"]
 
@@ -39,7 +40,7 @@ lint = [
   "ruff==0.4.3",
 ]
 check = [
-  "pyright==1.1.362",
+  "pyright==1.1.366",
 ]
 test = [
   "pytest==8.2.0",
@@ -47,6 +48,7 @@ test = [
   "pytest-mock==3.14.0",
 ]
 dev = [
+  "ipython==8.25.0",
   "pre-commit==3.7.0",
   "nautilus-api[scripts]",
   "nautilus-api[lint]",
@@ -198,6 +200,7 @@ ban-relative-imports = "all"
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+"**/migrations/**/*" = ["F401", "ISC001"]
 
 [tool.pytest.ini_options]
 minversion = "7.3"

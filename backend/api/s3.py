@@ -1,3 +1,6 @@
+import hashlib
+from uuid import UUID
+
 from kiwixstorage import KiwixStorage
 
 from api.constants import constants, logger
@@ -32,3 +35,12 @@ class S3Storage:
 
 
 s3_storage = S3Storage()
+
+
+def s3_file_key(project_id: UUID, file_hash: str) -> str:
+    """S3 key for a Project's File"""
+    digest = hashlib.sha256(
+        bytes(f"{project_id}-{file_hash}-{constants.private_salt}", "utf-8")
+    ).hexdigest()
+    # using project_id/ pattern to ease browsing bucket for objects
+    return f"{project_id}/{digest}"

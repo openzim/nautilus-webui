@@ -49,6 +49,7 @@ async def create_project(
         config={},
         filesize=None,
         requested_on=None,
+        completed_on=None,
         download_url=None,
         collection_json_path=None,
         zimfarm_task_id=None,

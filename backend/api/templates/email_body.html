@@ -1,0 +1,22 @@
+<html>
+<body>
+{% if task.status == "requested" %}
+<h2>Zim requested!</h2>
+<p>Your Zim request of a Nautilus ZIM for “{{ task.config.flags.title }}” has been recorded.</p>
+<p>We'll send you another email once your Zim file is ready to download.</p>
+{% endif %}
+
+{% if task.status == "succeeded" %}
+<h2>Zim is ready!</h2>
+<p>Your Zim request of a Nautilus ZIM for “{{ task.config.flags.title }}” has completed.</p>
+<p>Here it is:</p>
+{% if task.files %}<ul>
+{% for file in task.files.values() %}<li><a href="{{ download_url }}{{ task.config.warehouse_path }}/{{ file.name }}">{{ file.name }}</a> ({{ file.size|format_size }})</li>{% endfor %}
+</ul>{% endif %}
+{% endif %}
+
+{% if task.status in ("failed", "canceled") %}<h2>Your ZIM request of a Nautilus ZIM for “{{ task.config.flags.title }}” has failed!</h2>
+<p>We are really sorry.</p>
+<p>Please double check your inputs and <a href="{{ base_url }}">try again</a>. If it fails again, please contact-us</p>{% endif %}
+</body>
+</html>

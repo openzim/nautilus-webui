@@ -137,6 +137,7 @@ class Archive(Base):
     filesize: Mapped[int | None]
     created_on: Mapped[datetime]
     requested_on: Mapped[datetime | None]
+    completed_on: Mapped[datetime | None]
     download_url: Mapped[str | None]
     collection_json_path: Mapped[str | None]
     status: Mapped[str]
