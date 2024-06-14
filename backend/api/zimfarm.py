@@ -214,7 +214,7 @@ def test_connection():
 
 def request_task(
     archive_id: UUID, request_def: RequestSchema, email: str | None
-) -> str:
+) -> UUID:
     ident = uuid4().hex
 
     flags = {
@@ -319,4 +319,4 @@ def request_task(
         logger.error(
             f"Unable to remove schedule {schedule_name} via HTTP {status}: {resp}"
         )
-    return str(task_id)
+    return UUID(task_id)
