@@ -264,7 +264,7 @@ async def request_archive(
             detail="Project is not ready (Archive config missing mandatory metadata)",
         )
 
-    # TODO: this should guard the creation of Archive instead
+    # this should guard the creation of Archive instead !!
     if not project.expire_on:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
