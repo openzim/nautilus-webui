@@ -8,7 +8,7 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from api.database import gen_session
-from api.database.models import Archive, Project, User
+from api.database.models import Archive, ArchiveConfig, Project, User
 from api.routes import validated_project, validated_user
 from api.routes.archives import ArchiveStatus
 
@@ -46,7 +46,7 @@ async def create_project(
     new_archive = Archive(
         created_on=now,
         status=ArchiveStatus.PENDING,
-        config={},
+        config=ArchiveConfig.init_with(filename="-"),
         filesize=None,
         requested_on=None,
         completed_on=None,

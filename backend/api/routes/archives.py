@@ -17,7 +17,7 @@ from zimscraperlib import filesystem
 
 from api.constants import constants, logger
 from api.database import gen_session
-from api.database.models import Archive, Project
+from api.database.models import Archive, ArchiveConfig, Project
 from api.email import get_context, jinja_env, send_email_via_mailgun
 from api.files import (
     calculate_file_size,
@@ -44,17 +44,6 @@ class ArchiveStatus(str, Enum):
     FAILED = "FAILED"
 
 
-class ArchiveConfig(BaseModel):
-    title: str | None
-    description: str | None
-    name: str | None
-    publisher: str | None
-    creator: str | None
-    languages: str | None
-    tags: list[str] | None
-    filename: str
-
-
 class ArchiveRequest(BaseModel):
     email: str | None
     config: ArchiveConfig
@@ -72,7 +61,7 @@ class ArchiveModel(BaseModel):
     download_url: str | None
     status: str
     email: str | None
-    config: dict[str, Any]
+    config: ArchiveConfig
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -114,14 +103,15 @@ async def update_archive(
     session: Session = Depends(gen_session),
 ):
     """Update a metadata of a archive"""
-    config = archive_request.config.model_dump()
-    config["filename"] = normalize_filename(config["filename"])
+    archive_request.config.filename = normalize_filename(
+        archive_request.config.filename
+    )
     stmt = (
         update(Archive)
         .filter_by(id=archive.id)
         .values(
             email=archive_request.email,
-            config=archive_request.config.model_dump(),
+            config=archive_request.config,
         )
     )
     session.execute(stmt)
@@ -202,9 +192,8 @@ async def upload_illustration(
             detail="Illustration cannot be resized",
         ) from exc
     else:
-        new_config = archive.config
-        new_config["illustration"] = base64.b64encode(dst.getvalue()).decode("utf-8")
-        stmt = update(Archive).filter_by(id=archive.id).values(config=new_config)
+        archive.config.illustration = base64.b64encode(dst.getvalue()).decode("utf-8")
+        stmt = update(Archive).filter_by(id=archive.id).values(config=archive.config)
         session.execute(stmt)
 
 
@@ -269,6 +258,19 @@ async def request_archive(
             detail="Non-pending archive cannot be requested",
         )
 
+    if not archive.config.is_ready():
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Project is not ready (Archive config missing mandatory metadata)",
+        )
+
+    # TODO: this should guard the creation of Archive instead
+    if not project.expire_on:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Project is not ready (no archive or no files)",
+        )
+
     # gen collection and stream
     collection, collection_file, collection_hash = gen_collection_for(project=project)
     collection_key = get_collection_key(
@@ -285,14 +287,14 @@ async def request_archive(
     # Everything's on S3, prepare and submit a ZF request
     request_def = RequestSchema(
         collection_url=f"{constants.download_url}/{collection_key}",
-        name=archive.config["name"],
-        title=archive.config["title"],
-        description=archive.config["description"],
-        long_description=archive.config["long_description"],
-        language=archive.config["language"],
-        creator=archive.config["creator"],
-        publisher=archive.config["publisher"],
-        tags=archive.config["tags"],
+        name=archive.config.name,
+        title=archive.config.title,
+        description=archive.config.description,
+        long_description=None,
+        language=archive.config.languages,
+        creator=archive.config.creator,
+        publisher=archive.config.publisher,
+        tags=archive.config.tags,
         main_logo_url=None,
         illustration_url=f"{constants.download_url}/{collection_key}",
     )
@@ -382,7 +384,7 @@ async def record_task_feedback(
     if not target:
         return {"status": "success"}
 
-    context = get_context(task=payload.dict(), archive=archive)
+    context = get_context(task=payload.model_dump(), archive=archive)
     subject = jinja_env.get_template("email_subject.txt").render(**context)
     body = jinja_env.get_template("email_body.html").render(**context)
     send_email_via_mailgun(target, subject, body)
