@@ -28,6 +28,14 @@ def test_create_project_wrong_authorization(client, missing_user_cookie):
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
+def test_get_all_projects_no_data(logged_in_client):
+    response = logged_in_client.get(f"{constants.api_version_prefix}/projects")
+    json_result = response.json()
+    assert response.status_code == HTTPStatus.OK
+    assert json_result is not None
+    assert len(json_result) == 0
+
+
 def test_get_all_projects_correct_data(logged_in_client, project_id):
     response = logged_in_client.get(f"{constants.api_version_prefix}/projects")
     json_result = response.json()

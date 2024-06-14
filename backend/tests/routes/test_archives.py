@@ -1,6 +1,9 @@
 import uuid
 from http import HTTPStatus
 
+import pytest
+from httpx import AsyncClient
+
 from api.constants import constants
 
 
@@ -71,6 +74,7 @@ def test_update_archive_correct_data(logged_in_client, project_id, archive_id):
             "creator": "test_creator",
             "languages": "en",
             "tags": ["test_tags"],
+            "illustration": "",
         },
     }
     response = logged_in_client.patch(
@@ -214,3 +218,30 @@ def test_upload_illustration_without_wrong_authorization(
         files=file,
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.anyio
+async def test_request_archive_not_ready(alogged_in_client, project_id, archive_id):
+    response = await alogged_in_client.post(
+        f"{constants.api_version_prefix}/projects/"
+        f"{project_id}/archives/{archive_id}/request"
+    )
+    assert response.status_code == HTTPStatus.CONFLICT
+
+
+@pytest.mark.anyio
+async def test_request_archive_ready(
+    alogged_in_client: AsyncClient,
+    archive_id,
+    project_id,
+    expiring_project_id,
+    expiring_archive_id,
+    successful_s3_upload_file,
+    successful_zimfarm_request_task,
+):
+
+    response = await alogged_in_client.post(
+        f"{constants.api_version_prefix}/projects/"
+        f"{expiring_project_id}/archives/{expiring_archive_id}/request"
+    )
+    assert response.status_code == HTTPStatus.CREATED

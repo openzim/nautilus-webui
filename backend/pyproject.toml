@@ -40,12 +40,14 @@ lint = [
   "ruff==0.4.3",
 ]
 check = [
-  "pyright==1.1.366",
+  "pyright==1.1.367",
+  "pytest == 8.2.0",  # import pytest in tests
 ]
 test = [
   "pytest==8.2.0",
   "coverage==7.5.1",
   "pytest-mock==3.14.0",
+  "trio == 0.25.1"
 ]
 dev = [
   "ipython==8.25.0",
@@ -198,8 +200,8 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
+# Tests can use magic values, assertions, relative imports, print, and unused args (mock)
+"tests/**/*" = ["PLR2004", "S101", "TID252","T201", "ARG001", "ARG002"]
 "**/migrations/**/*" = ["F401", "ISC001"]
 
 [tool.pytest.ini_options]
