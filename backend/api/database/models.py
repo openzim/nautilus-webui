@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeVar
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, String, text
+from pydantic import BaseModel
+from sqlalchemy import DateTime, ForeignKey, String, text, types
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -12,8 +13,73 @@ from sqlalchemy.orm import (
     relationship,
 )
 from sqlalchemy.sql.schema import MetaData
+from zimscraperlib.zim.metadata import (
+    validate_description,
+    validate_language,
+    validate_required_values,
+    validate_tags,
+    validate_title,
+)
 
 from api.database import get_local_fpath_for
+
+T = TypeVar("T", bound="ArchiveConfig")
+
+
+class ArchiveConfig(BaseModel):
+    title: str
+    description: str
+    name: str
+    publisher: str
+    creator: str
+    languages: str
+    tags: list[str]
+    illustration: str
+    filename: str
+
+    @classmethod
+    def init_with(cls: type[T], filename: str, **kwargs) -> T:
+        default = {"tags": []}
+        data: dict = {key: default.get(key, "") for key in cls.model_fields.keys()}
+        data.update({"filename": filename})
+        if kwargs:
+            data.update(kwargs)
+        return cls.model_validate(data)
+
+    def is_ready(self) -> bool:
+        try:
+            for key in self.model_fields.keys():
+                validate_required_values(key.title(), getattr(self, key, ""))
+            validate_title("Title", self.title)
+            validate_description("Description", self.description)
+            validate_language("Language", self.languages)
+            validate_tags("Tags", self.tags)
+
+        except ValueError:
+            return False
+        return True
+
+
+class ArchiveConfigType(types.TypeDecorator):
+    cache_ok = True
+    impl = JSONB
+
+    def process_bind_param(self, value, dialect):  # noqa: ARG002
+        if isinstance(value, ArchiveConfig):
+            return value.model_dump()
+        if isinstance(value, dict):
+            return value
+        return dict(value) if value else {}
+
+    def process_result_value(self, value, dialect) -> ArchiveConfig:  # noqa: ARG002
+        if isinstance(value, ArchiveConfig):
+            return value
+        return ArchiveConfig.model_validate(dict(value) if value else {})
+
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(
+            op, value
+        )  # pyright: ignore [reportCallIssue]
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
@@ -22,6 +88,7 @@ class Base(MappedAsDataclass, DeclarativeBase):
     # type has to be used or when we want to ensure a specific setting (like the
     # timezone below)
     type_annotation_map: ClassVar = {
+        ArchiveConfig: ArchiveConfigType,
         dict[str, Any]: JSONB,  # transform Python Dict[str, Any] into PostgreSQL JSONB
         list[dict[str, Any]]: JSONB,
         datetime: DateTime(
@@ -137,9 +204,10 @@ class Archive(Base):
     filesize: Mapped[int | None]
     created_on: Mapped[datetime]
     requested_on: Mapped[datetime | None]
+    completed_on: Mapped[datetime | None]
     download_url: Mapped[str | None]
     collection_json_path: Mapped[str | None]
     status: Mapped[str]
     zimfarm_task_id: Mapped[UUID | None]
     email: Mapped[str | None]
-    config: Mapped[dict[str, Any]]
+    config: Mapped[ArchiveConfig]

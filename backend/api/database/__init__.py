@@ -1,7 +1,8 @@
 from collections.abc import Generator
 from uuid import UUID
 
-from bson.json_util import DEFAULT_JSON_OPTIONS, dumps, loads
+import pydantic_core
+from bson.json_util import DEFAULT_JSON_OPTIONS, loads
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import sessionmaker
@@ -25,7 +26,7 @@ Session = sessionmaker(
     bind=create_engine(
         constants.postgres_uri,
         echo=False,
-        json_serializer=dumps,  # use bson serializer to handle datetime naively
+        json_serializer=pydantic_core.to_json,
         json_deserializer=my_loads,  # use custom bson deserializer for same reason
     )
 )

@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version-file: "backend/pyproject.toml"
@@ -51,11 +51,9 @@ jobs:
         run: inv coverage --args "-vvv"
 
       - name: Upload coverage to Codecov
-        if: matrix.python == '3.11'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          root_dir: backend
-          working-directory: backend
+          directory: backend
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
