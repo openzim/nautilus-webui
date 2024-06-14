@@ -55,7 +55,7 @@ class ArchiveConfig(BaseModel):
             validate_language("Language", self.languages)
             validate_tags("Tags", self.tags)
 
-        except ValueError as exc:
+        except ValueError:
             return False
         return True
 
