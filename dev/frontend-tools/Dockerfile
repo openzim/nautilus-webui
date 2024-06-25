@@ -3,13 +3,14 @@ FROM node:20.13.0
 ENV NODE_ENV=dev
 ENV NAUTILUS_WEB_API http://localhost:8080/v1
 
-COPY . /src
-WORKDIR /src
+WORKDIR /work
+COPY . /work/
+
 
 RUN yarn \
     && printf "#!/bin/sh\n\
 \n\
-JS_PATH=/src/public/environ.json\n\
+JS_PATH=/work/public/environ.json\n\
 cp -v \"\${JS_PATH}\" \"\${JS_PATH}.orig\"\n\
 echo \"dump NAUTILUS_* environ variables to \$JS_PATH\"\n\
 \n\
