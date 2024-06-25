@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Any, ClassVar, TypeVar
 from uuid import UUID
 
@@ -60,6 +61,18 @@ class ArchiveConfig(BaseModel):
         return True
 
 
+class ArchiveStatus(str, Enum):
+    # It's in database but not requested and can be modified
+    PENDING = "PENDING"
+    # it has been ZF-requested; can not be modified by user,
+    # awaiting callback from ZimFarm
+    REQUESTED = "REQUESTED"
+    # ZimFarm task succeeded, it now has a download_url and filesize
+    READY = "READY"
+    # ZimFarm task failed, cant be downloaded
+    FAILED = "FAILED"
+
+
 class ArchiveConfigType(types.TypeDecorator):
     cache_ok = True
     impl = JSONB
@@ -89,6 +102,7 @@ class Base(MappedAsDataclass, DeclarativeBase):
     # timezone below)
     type_annotation_map: ClassVar = {
         ArchiveConfig: ArchiveConfigType,
+        ArchiveStatus: String,
         dict[str, Any]: JSONB,  # transform Python Dict[str, Any] into PostgreSQL JSONB
         list[dict[str, Any]]: JSONB,
         datetime: DateTime(
@@ -207,7 +221,7 @@ class Archive(Base):
     completed_on: Mapped[datetime | None]
     download_url: Mapped[str | None]
     collection_json_path: Mapped[str | None]
-    status: Mapped[str]
+    status: Mapped[ArchiveStatus]
     zimfarm_task_id: Mapped[UUID | None]
     email: Mapped[str | None]
     config: Mapped[ArchiveConfig]

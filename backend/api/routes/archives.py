@@ -2,7 +2,6 @@ import base64
 import datetime
 import io
 import json
-from enum import Enum
 from http import HTTPStatus
 from typing import Any, BinaryIO
 from uuid import UUID
@@ -17,7 +16,7 @@ from zimscraperlib import filesystem
 
 from api.constants import constants, logger
 from api.database import gen_session
-from api.database.models import Archive, ArchiveConfig, Project
+from api.database.models import Archive, ArchiveConfig, ArchiveStatus, Project
 from api.email import get_context, jinja_env, send_email_via_mailgun
 from api.files import (
     calculate_file_size,
@@ -30,18 +29,6 @@ from api.s3 import s3_file_key, s3_storage
 from api.zimfarm import RequestSchema, WebhookPayload, request_task
 
 router = APIRouter()
-
-
-class ArchiveStatus(str, Enum):
-    # It's in database but not requested and can be modified
-    PENDING = "PENDING"
-    # it has been ZF-requested; can not be modified by user,
-    # awaiting callback from ZimFarm
-    REQUESTED = "REQUESTED"
-    # ZimFarm task succeeded, it now has a download_url and filesize
-    READY = "READY"
-    # ZimFarm task failed, cant be downloaded
-    FAILED = "FAILED"
 
 
 class ArchiveRequest(BaseModel):

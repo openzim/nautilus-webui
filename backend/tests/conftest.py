@@ -14,10 +14,16 @@ from httpx import AsyncClient
 from starlette.testclient import TestClient
 
 from api.database import Session
-from api.database.models import Archive, ArchiveConfig, File, Project, User
+from api.database.models import (
+    Archive,
+    ArchiveConfig,
+    ArchiveStatus,
+    File,
+    Project,
+    User,
+)
 from api.entrypoint import app
 from api.files import save_file
-from api.routes.archives import ArchiveStatus
 from api.s3 import s3_storage
 
 pytestmark = pytest.mark.asyncio(scope="package")

@@ -8,9 +8,8 @@ from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from api.database import gen_session
-from api.database.models import Archive, ArchiveConfig, Project, User
+from api.database.models import Archive, ArchiveConfig, ArchiveStatus, Project, User
 from api.routes import validated_project, validated_user
-from api.routes.archives import ArchiveStatus
 
 router = APIRouter(prefix="/projects")
 
