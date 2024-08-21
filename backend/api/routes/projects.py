@@ -45,7 +45,7 @@ async def create_project(
     new_archive = Archive(
         created_on=now,
         status=ArchiveStatus.PENDING,
-        config=ArchiveConfig.init_with(filename="-"),
+        config=ArchiveConfig.init_with(filename="nautilus.zim"),
         filesize=None,
         requested_on=None,
         completed_on=None,
