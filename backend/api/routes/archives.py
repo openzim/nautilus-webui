@@ -291,11 +291,16 @@ async def request_archive(
         archive_id=archive.id, request_def=request_def, email=archive.email
     )
 
+    # temporarily recording Archive filesize as the sum of its content
+    # actual ZIM size will be updated upon completion
+    archive_files_size = sum([file.filesize for file in project.files])
+
     # request new statis in DB (requested with the ZF ID)
     stmt = (
         update(Archive)
         .filter_by(id=archive.id)
         .values(
+            filesize=archive_files_size,
             requested_on=datetime.datetime.now(tz=datetime.UTC),
             collection_json_path=collection_key,
             status=ArchiveStatus.REQUESTED,
