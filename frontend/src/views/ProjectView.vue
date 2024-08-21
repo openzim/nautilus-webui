@@ -1,4 +1,7 @@
 <template>
+
+  <ArchivesList />
+
   <div
     class="card m-5"
     :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }"
@@ -90,6 +93,8 @@
         </div>
       </UploadFilesComponent>
     </div>
+  </div>
+  <div class="m-5">
     <ZIMMetadataComponent @update-archive-metadata="updateArchiveMetadata" />
   </div>
 </template>
@@ -98,7 +103,9 @@ import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import ZIMMetadataComponent from '@/components/ZIMMetadataComponent.vue'
+import ArchivesList from '@/components/ArchivesList.vue'
 import {
+  ArchiveStatus,
   FileStatus,
   type File,
   NautilusFile,
@@ -109,7 +116,7 @@ import {
 } from '@/constants'
 import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
-import { ref, type Ref, computed, watch } from 'vue'
+import { ref, type Ref, computed, reactive, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { refreshArchives, updateProjects } from '@/utils'
 

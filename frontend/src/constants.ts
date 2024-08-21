@@ -22,6 +22,8 @@ export interface Archive {
   email?: string
   filesize?: int
   created_on: string
+  requested_on?: string
+  completed_on?: string
   download_url?: string
   config: ArchiveConfig
 }
@@ -195,4 +197,13 @@ export type ArchiveMetadataFormType = {
   language: string
   filename: string
   tags: string[]
+}
+
+
+export enum ArchiveStatus {
+  PENDING = 'PENDING',
+  REQUESTED = 'REQUESTED',
+  READY = 'READY',
+  FAILED = 'FAILED',
+
 }
