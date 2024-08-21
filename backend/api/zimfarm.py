@@ -130,7 +130,7 @@ def authenticate(*, force: bool = False):
         )
     except Exception:
         TokenData.ACCESS_TOKEN = TokenData.REFRESH_TOKEN = ""
-        TokenData.ACCESS_TOKEN_EXPIRY = datetime.datetime = datetime.datetime(
+        TokenData.ACCESS_TOKEN_EXPIRY = datetime.datetime(
             2000, 1, 1, tzinfo=datetime.UTC
         )
     else:
@@ -221,14 +221,14 @@ def request_task(
         "collection": request_def.collection_url,
         "name": request_def.name,
         "output": "/output",
-        "zim_file": f"nautilus_{archive_id}_{ident}.zim",
+        "zim-file": f"nautilus_{archive_id}_{ident}.zim",
         "language": request_def.language,
         "title": request_def.title,
         "description": request_def.description,
         "creator": request_def.creator,
         "publisher": request_def.publisher,
-        "tags": request_def.tags,
-        "main_logo": request_def.main_logo_url,
+        "tags": ";".join(request_def.tags),
+        # "main_logo": request_def.main_logo_url,
         "favicon": request_def.illustration_url,
     }
 
