@@ -45,6 +45,8 @@ class ArchiveModel(BaseModel):
 
     filesize: int | None
     created_on: datetime.datetime
+    requested_on: datetime.datetime | None
+    completed_on: datetime.datetime | None
     download_url: str | None
     status: str
     email: str | None
