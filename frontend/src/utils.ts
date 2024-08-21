@@ -1,5 +1,5 @@
 import { useAppStore, useProjectStore } from './stores/stores'
-import type { Project } from '@/constants'
+import type { Archive, Project } from '@/constants'
 import router from '@/router'
 
 /** Checks if a given project ID is valid */
@@ -59,5 +59,19 @@ export async function updateProjects() {
     console.log('Unable to retrieve projects info', error)
     storeApp.alertsError('Unable to retrieve projects info')
     router.replace({ path: '/' })
+  }
+}
+
+export async function refreshArchives() {
+  console.log('refreshArchives!!!!!!!!!!!')
+  const storeProject = useProjectStore()
+  const storeApp = useAppStore()
+  try {
+    const response = await storeApp.axiosInstance.get<Archive[]>(`/projects/${storeProject.lastProjectId}/archives`)
+    console.debug(response.data)
+    storeProject.setLastProjectArchives(response.data)
+  } catch (error: unknown) {
+    console.log('Unable to retrieve archives info', error)
+    storeApp.alertsError('Unable to retrieve archives info')
   }
 }
