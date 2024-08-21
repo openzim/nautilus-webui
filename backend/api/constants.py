@@ -82,7 +82,7 @@ class BackendConf:
     zimfarm_task_disk: int = 0
     zimfarm_callback_base_url = os.getenv("ZIMFARM_CALLBACK_BASE_URL", "")
     zimfarm_callback_token = os.getenv("ZIMFARM_CALLBACK_TOKEN", uuid.uuid4().hex)
-    zimfarm_task_worker: str = os.getenv("ZIMFARM_TASK_WORKDER") or "-"
+    zimfarm_task_worker: str = os.getenv("ZIMFARM_TASK_WORKER") or "-"
     zimfarm_request_timeout_sec: int = 10
 
     # Mailgun (3rd party API to send emails)
