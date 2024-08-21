@@ -9,6 +9,8 @@ from pathlib import Path
 import humanfriendly
 from rq import Retry
 
+logging.basicConfig()
+
 
 def determine_mandatory_environment_variables():
     for variable in ("POSTGRES_URI", "S3_URL_WITH_CREDENTIALS", "PRIVATE_SALT"):
@@ -67,6 +69,7 @@ class BackendConf:
         "ALLOWED_ORIGINS",
         "http://localhost",
     ).split("|")
+    debug: bool = bool(os.getenv("DEBUG") or "")
 
     # Zimfarm (3rd party API creating ZIMs and calling back with feedback)
     zimfarm_api_url: str = (
@@ -95,6 +98,7 @@ class BackendConf:
 
     def __post_init__(self):
         self.logger = logging.getLogger(Path(__file__).parent.name)
+        self.logger.setLevel(logging.DEBUG if self.debug else logging.INFO)
         self.transient_storage_path.mkdir(exist_ok=True)
         self.job_retry = Retry(max=self.s3_max_tries, interval=int(self.s3_retry_wait))
 

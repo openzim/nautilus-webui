@@ -15,6 +15,29 @@ export interface Project {
   expire_on?: string
 }
 
+export interface Archive {
+  id: string
+  project_id: string
+  status: string
+  email?: string
+  filesize?: int
+  created_on: string
+  download_url?: string
+  config: ArchiveConfig
+}
+
+export interface ArchiveConfig {
+  title: string
+  description: string
+  name: string
+  publisher: string
+  creator: string
+  languages: string
+  tags: string[]
+  illustration: string
+  filename: string
+}
+
 export interface User {
   id: string
   created_on: string
@@ -160,4 +183,16 @@ export interface MetadataEditorFormType {
   description: string
   authors: string[]
   filename: string
+}
+
+
+export type ArchiveMetadataFormType = {
+  title: string
+  description: string
+  name: string
+  creator: string
+  publisher: string
+  language: string
+  filename: string
+  tags: string[]
 }

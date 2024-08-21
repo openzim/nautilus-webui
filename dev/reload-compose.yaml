@@ -44,6 +44,7 @@ services:
       - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
+      - DEBUG=1
     entrypoint: ''
     command: ["rq-worker"]
     depends_on:
@@ -63,6 +64,7 @@ services:
       - NAUTILUS_FILE_QUOTA=${NAUTILUS_FILE_QUOTA}
       - NAUTILUS_PROJECT_QUOTA=${NAUTILUS_PROJECT_QUOTA}
       - NAUTILUS_FILE_REFRESH_EVERY_MS=${NAUTILUS_FILE_REFRESH_EVERY_MS}
+      - DEBUG=1
     depends_on:
       - backend
   backend:
@@ -85,6 +87,10 @@ services:
       - CHANNEL_NAME=${CHANNEL_NAME}
       - ALLOWED_ORIGINS=http://localhost:8081|http://localhost:8082
       - RUN_DB_MIGRATIONS=y
+      - ZIMFARM_API_USERNAME=${ZIMFARM_API_USERNAME}
+      - ZIMFARM_API_PASSWORD=${ZIMFARM_API_PASSWORD}
+      - ZIMFARM_TASK_WORKER=${ZIMFARM_TASK_WORKER}
+      - DEBUG=1
     depends_on:
       database:
         condition: service_healthy
