@@ -61,9 +61,10 @@ class BackendConf:
 
     # Deployment
     public_url: str = os.getenv("PUBLIC_URL") or "http://localhost"
+    # /!\ this must match the region/bucket on s3 credentials
     download_url: str = (
         os.getenv("DOWNLOAD_URL")
-        or "https://s3.us-west-1.wasabisys.com/org-kiwix-zimit/zim"
+        or "https://s3.eu-west-2.wasabisys.com/org-kiwix-nautilus"
     )
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
