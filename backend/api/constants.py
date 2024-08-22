@@ -84,7 +84,9 @@ class BackendConf:
     zimfarm_task_cpu: int = int(os.getenv("ZIMFARM_TASK_CPU") or "3")
     zimfarm_task_memory: int = 0
     zimfarm_task_disk: int = 0
-    zimfarm_callback_base_url = os.getenv("ZIMFARM_CALLBACK_BASE_URL", "")
+    zimfarm_callback_base_url = (
+        os.getenv("ZIMFARM_CALLBACK_BASE_URL") or "https://api.nautilus.openzim.org/v1"
+    )
     zimfarm_callback_token = os.getenv("ZIMFARM_CALLBACK_TOKEN", uuid.uuid4().hex)
     zimfarm_task_worker: str = os.getenv("ZIMFARM_TASK_WORKER") or "-"
     zimfarm_request_timeout_sec: int = 10
@@ -123,9 +125,6 @@ class BackendConf:
         self.zimfarm_task_disk = humanfriendly.parse_size(
             os.getenv("ZIMFARM_TASK_DISK") or "200MiB"
         )
-
-        if not self.zimfarm_callback_base_url:
-            self.zimfarm_callback_base_url = f"{self.zimfarm_api_url}/requests/hook"
 
 
 constants = BackendConf()
