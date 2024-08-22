@@ -32,7 +32,7 @@ class RequestSchema:
     creator: str
     publisher: str
     tags: list[str]
-    main_logo_url: str | None
+    main_logo_url: str
     illustration_url: str
 
 
@@ -213,7 +213,7 @@ def test_connection():
 
 
 def request_task(
-    archive_id: UUID, request_def: RequestSchema, email: str | None
+    project_id: UUID, archive_id: UUID, request_def: RequestSchema, email: str | None
 ) -> UUID:
     ident = uuid4().hex
 
@@ -228,9 +228,10 @@ def request_task(
         "creator": request_def.creator,
         "publisher": request_def.publisher,
         "tags": ";".join(request_def.tags),
-        # "main_logo": request_def.main_logo_url,
         "favicon": request_def.illustration_url,
     }
+    if request_def.main_logo_url:
+        flags.update({"main-logo": request_def.main_logo_url})
 
     config = {
         "task_name": "nautilus",
@@ -266,6 +267,7 @@ def request_task(
     if email:
         url = (
             f"{constants.zimfarm_callback_base_url}"
+            f"/{project_id}/archives/{archive_id}/hook"
             f"?token={constants.zimfarm_callback_token}&target={email}"
         )
         payload.update(

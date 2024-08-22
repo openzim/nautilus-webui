@@ -37,6 +37,7 @@ class ArchiveConfig(BaseModel):
     tags: list[str]
     illustration: str
     filename: str
+    main_logo: str | None = None
 
     @classmethod
     def init_with(cls: type[T], filename: str, **kwargs) -> T:
@@ -50,7 +51,8 @@ class ArchiveConfig(BaseModel):
     def is_ready(self) -> bool:
         try:
             for key in self.model_fields.keys():
-                validate_required_values(key.title(), getattr(self, key, ""))
+                if key != "main_logo":
+                    validate_required_values(key.title(), getattr(self, key, ""))
             validate_title("Title", self.title)
             validate_description("Description", self.description)
             validate_language("Language", self.languages)

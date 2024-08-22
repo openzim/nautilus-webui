@@ -1,5 +1,5 @@
 <template>
-  <div class="meta-container rounded-2 border border-1">
+  <div class="meta-container rounded-2 border border-1 p-3">
     <div class="d-flex flex-row-reverse">
       <div class="btn-group btn-group-sm custom-btn-outline-primary" role="group">
         <label class="btn btn-outline-primary" for="toggle-metadata-edit" :class="{ active: inMetadataEditMode }">
@@ -31,11 +31,13 @@
     </div>
     <form :onsubmit="eatEvent">
     <div class="row" v-if="inMetadataEditMode">
-      <p><input class="form-control" type="text" name="zim-title" @change="updatedField" v-model="archiveMetadataFormModal.title" placeholder="ZIM Title metadata" /></p>
-      <p><input class="form-control" type="text" name="zim-description" @change="updatedField" v-model="archiveMetadataFormModal.description" placeholder="ZIM Description metadata" /></p>
-      <p><input class="form-control" type="text" name="zim-name" @change="updatedField" v-model="archiveMetadataFormModal.name" placeholder="ZIM Name metadata" /></p>
-      <p><input class="form-control" type="text" name="zim-creator" @change="updatedField" v-model="archiveMetadataFormModal.creator" placeholder="ZIM Creator metadata" /></p>
-      <p><input class="form-control" type="text" name="zim-lang" @change="updatedField" v-model="archiveMetadataFormModal.languages" placeholder="ZIM Language metadata" /></p>
+      <p><input class="form-control" type="text" name="zimtitle" required v-model="archiveMetadataFormModal.title" placeholder="ZIM Title metadata" /></p>
+      <p><input class="form-control" type="text" name="zimdescription" required v-model="archiveMetadataFormModal.description" placeholder="ZIM Description metadata" /></p>
+      <p><input class="form-control" type="text" name="zimname" required v-model="archiveMetadataFormModal.name" placeholder="ZIM Name metadata" /></p>
+      <p>Illustration (48x48px PNG): <ImageUpload :value="archiveMetadataFormModal.illustration" enforced_format="png" :enforced_dimensions="{width: 48, height: 49}" style="width: 48px; height: 48px;" @change="onIllustrationUpdate" /></p>
+      <p>Main logo (horizontal PNG): <ImageUpload :value="archiveMetadataFormModal.main_logo" enforced_format="png" style="height: 4rem; max-width: 24rem;" @change="onMainlogoUpdate" /></p>
+      <p><input class="form-control" type="text" name="zimcreator" required v-model="archiveMetadataFormModal.creator" placeholder="ZIM Creator metadata" /></p>
+      <p><input class="form-control" type="text" name="zimlang" required v-model="archiveMetadataFormModal.languages" placeholder="ZIM Language metadata" /></p>
       <p><smart-tagz
             autosuggest
             editable
@@ -46,27 +48,21 @@
             :allowDuplicates="false"
         />
       </p>
-      <p><input class="form-control" type="file" @change="updatedIllustration" placeholder="ZIM Illustration (48x48px PNG)" /></p>
-      <p><input class="form-control" type="text" name="zim-filename" @change="updatedField" v-model="archiveMetadataFormModal.filename" placeholder="ZIM Filename" /></p>
+      <p><input class="form-control" type="text" required name="zimfilename" v-model="archiveMetadataFormModal.filename" placeholder="ZIM Filename" /></p>
     </div>
     <div class="row" v-else>
-      <div class="col">
-        <img :src="'data:image/png;base64,' + archiveMetadataFormModal.illustration" class="rounded-2 border-0" />
-      </div>
-      <div class="col">
-        <div class="row">Title: {{ archiveMetadataFormModal.title }}</div>
-        <div class="row">Description: {{ archiveMetadataFormModal.description }}</div>
-        <div class="row">Name: {{ archiveMetadataFormModal.name }}</div>
-        <div class="row">Creator: {{ archiveMetadataFormModal.creator }}</div>
-        <div class="row">Language: {{ archiveMetadataFormModal.languages }}</div>
-        <div class="row">Tags: {{ archiveMetadataFormModal.tags }}</div>
-        <div class="row">
-          <div class="col">Filename: {{ archiveMetadataFormModal.filename }}</div>
-          <div class="col">Name: {{ archiveMetadataFormModal.name }}</div>
-        </div>
-      </div>
+      <div>Title: {{ archiveMetadataFormModal.title }}</div>
+      <div>Description: {{ archiveMetadataFormModal.description }}</div>
+      <div>Name: {{ archiveMetadataFormModal.name }}</div>
+      <div>Creator: {{ archiveMetadataFormModal.creator }}</div>
+      <div>Language: {{ archiveMetadataFormModal.languages }}</div>
+      <div>Tags: <span v-for="(tag) in archiveMetadataFormModal.tags" class="badge rounded-pill text-bg-secondary me-1">{{ tag }}</span></div>
+      <div>Filename: {{ archiveMetadataFormModal.filename }}</div>
+      <div>Name: {{ archiveMetadataFormModal.name }}</div>
+      <div>Logo: <img :src="'data:image/png;base64,' + archiveMetadataFormModal.main_logo" class="border-0 main-logo"/></div>
+      <div>Illustration: <img :src="'data:image/png;base64,' + archiveMetadataFormModal.illustration" class="rounded-2 border-0 illustration" /></div>
     </div>
-    <p><input class="form-control" type="email" @change="updatedField" v-model="email" placeholder="What's your email?" name="email" /></p>
+    <p><input class="form-control" type="email" v-model="archiveMetadataFormModal.email" placeholder="What's your email?" name="email" /></p>
     <p><button class="btn btn-primary" :disabled="inMetadataEditMode" @click.prevent="requestZIM">ZIM it!</button></p>
     </form>
   </div>
@@ -75,12 +71,13 @@
 
 import { computed, ref, watch, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { type ArchiveMetadataFormType  } from '@/constants'
+import { type ArchiveMetadataFormType, DEFAULT_ILLUSTRATION, DEFAULT_MAIN_LOGO  } from '@/constants'
 import { useAppStore, useModalStore, useProjectStore } from '@/stores/stores'
 import { refreshArchives, updateProjects } from '@/utils'
 import { getLastPreviousArchive } from '@/commons'
 import { SmartTagz } from "smart-tagz";
 import "smart-tagz/dist/smart-tagz.css";
+import ImageUpload from '@/components/ImageUpload.vue'
 
 const storeApp = useAppStore()
 const storeProject = useProjectStore()
@@ -94,78 +91,6 @@ let tags = []
 
 function eatEvent(e) {
   e.preventDefault()
-}
-
-function updatedField() {
-  console.debug('## UPDATED ##')
-  // emit('updateArchiveMetadata', archiveMetadataFormModal.value)
-}
-
-
-const imageDimensions = dataUrl => 
-  new Promise((resolve, reject) => {
-      const img = new Image()
-
-      // the following handler will fire after a successful loading of the image
-      img.onload = () => {
-        const { naturalWidth: width, naturalHeight: height } = img
-        resolve({ width, height })
-      }
-
-      // and this handler will fire if there was an error with the image (like if it's not really an image or a corrupted one)
-      img.onerror = () => {
-        reject('failed to load image')
-      }
-
-      img.src = dataUrl
-})
-
-function updatedIllustration(ev) {
-  console.debug('updatedIllustration')
-  const file = ev.target.files[0];
-  const reader = new FileReader();
-  if (!file) {
-    console.error('updatedIllustration failed without file')
-    return
-  }
-  console.debug('file', file)
-
-  reader.onload = async (e) => {
-    console.log('onload')
-    let [prefix, bytes] = reader.result.split(',', 2)
-    let mimetype = prefix.replace(RegExp('^data:(.+);base64$'), '$1')
-    if (mimetype != 'image/png') {
-      console.error('Illustration is not a PNG Image', mimetype)
-      storeApp.alertsError(`Illustration must be a 48x48px PNG Image (not ${mimetype})`)
-      return
-    }
-
-    // load on DOM to get dimensions
-    const dimensions = {width: 0, height: 0}
-    await imageDimensions(reader.result)
-      .then(function(dim) {
-        dimensions.width = dim.width, dimensions.height = dim.height
-      })
-      .catch(function(err) {
-          console.error('Illustration could not be loaded as image', error)
-          storeApp.alertsError('Illustration must be a 48x48px PNG Image (failed to load)')
-      })
-
-    if (!dimensions.width || !dimensions.height){
-      console.log('failed to load', dimensions)
-      return
-    }
-
-    if (dimensions.width != 48 || dimensions.height != 48) {
-      console.error('Illustration dimensions are incorrect', dimensions)
-      storeApp.alertsError(`Illustration must be a 48x48px PNG Image (not ${dimensions.width}x${dimensions.height}px)`)
-      return
-    }
-
-    archiveMetadataFormModal.value.illustration = bytes
-    console.info('updated illus data:', reader.result)
-  }
-  reader.readAsDataURL(file);
 }
 
 function formModalFromArchive() {
@@ -182,7 +107,9 @@ function formModalFromArchive() {
       languages: lastPreviousArchive.config.languages,
       tags: lastPreviousArchive.config.tags ,
       illustration: lastPreviousArchive.config.illustration,
+      main_logo: lastPreviousArchive.config.main_logo,
       filename: lastPreviousArchive.config.filename,
+      email: lastPreviousArchive.email,
     }
   }
 
@@ -192,13 +119,15 @@ function formModalFromArchive() {
   return {
     title: storeProject.lastProjectPendingArchive.config.title || '',
     description: storeProject.lastProjectPendingArchive.config.description || '',
-    name: storeProject.lastProjectPendingArchive.config.name || '${storeProject.lastProject.name}',
+    name: storeProject.lastProjectPendingArchive.config.name || `${storeProject.lastProject.name}`,
     publisher: storeProject.lastProjectPendingArchive.config.publisher || 'nautilus by openZIM',
     creator: storeProject.lastProjectPendingArchive.config.creator || '',
     languages: storeProject.lastProjectPendingArchive.config.languages || 'eng',
     tags: storeProject.lastProjectPendingArchive.config.tags  || [],
-    illustration: storeProject.lastProjectPendingArchive.config.illustration || 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAwAQMAAABtzGvEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAANQTFRFR3BMgvrS0gAAAAF0Uk5TAEDm2GYAAAANSURBVBjTY2AYBdQEAAFQAAGn4toWAAAAAElFTkSuQmCC',
+    illustration: storeProject.lastProjectPendingArchive.config.illustration || DEFAULT_ILLUSTRATION,
+    main_logo: storeProject.lastProjectPendingArchive.config.main_logo || DEFAULT_MAIN_LOGO,
     filename: storeProject.lastProjectPendingArchive.config.filename || `${storeProject.lastProject.name}.zim`,
+    email: storeProject.lastProjectPendingArchive.config.email || '',
   }
 }
 
@@ -227,7 +156,7 @@ const emit = defineEmits<{
 async function actuallyUpdateMetadata() {
   // online stuff
   const archivePatchData = {
-    email: archiveMetadataFormModal.value.email,
+    email: archiveMetadataFormModal.value.email || '',
     config: {
       title: archiveMetadataFormModal.value.title,
       description: archiveMetadataFormModal.value.description,
@@ -237,6 +166,7 @@ async function actuallyUpdateMetadata() {
       languages: archiveMetadataFormModal.value.languages,
       tags: archiveMetadataFormModal.value.tags,
       illustration: archiveMetadataFormModal.value.illustration,
+      main_logo: archiveMetadataFormModal.value.main_logo,
       filename: archiveMetadataFormModal.value.filename,
     }
   }
@@ -254,8 +184,9 @@ async function actuallyUpdateMetadata() {
 
 async function requestZIM() {
   console.log('lets GO!')
+  const archivePostData = {email: archiveMetadataFormModal.value.email || ''}
   try {
-    const response = await storeApp.axiosInstance.post<string>(`/projects/${storeProject.lastProjectId}/archives/${storeProject.lastProjectPendingArchive.id}/request`)
+    const response = await storeApp.axiosInstance.post<string>(`/projects/${storeProject.lastProjectId}/archives/${storeProject.lastProjectPendingArchive.id}/request`, archivePostData)
     console.debug(response.data)
     refreshArchives()
   } catch (error: unknown) {
@@ -279,6 +210,9 @@ async function exitMetadataEditModeHandler() {
   )
 }
 
+function onIllustrationUpdate(data: string) { archiveMetadataFormModal.value.illustration = data }
+function onMainlogoUpdate(data: string) { archiveMetadataFormModal.value.main_logo = data }
+
 </script>
 <style scoped>
   .meta-container {
@@ -286,9 +220,12 @@ async function exitMetadataEditModeHandler() {
     background-color: #fdfdfd;
   }
 
-  img {
-    width: 6em;
-    height: 6em;
-    background-color: #d9d9d9;
+  img.illustration {
+    width: 48px;
+    height: 48px;
+  }
+
+  img.main-logo {
+    height: 4rem;
   }
 </style>

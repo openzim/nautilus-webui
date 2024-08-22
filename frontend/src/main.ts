@@ -16,6 +16,7 @@ import {
   faAngleDown,
   faCheck,
   faSort,
+  faUpload,
   faFile,
   faFileArrowDown,
   faFileExcel
@@ -32,6 +33,7 @@ library.add(
   faAngleDown,
   faCheck,
   faSort,
+  faUpload,
   faFile,
   faFileArrowDown,
   farCircleXmark,

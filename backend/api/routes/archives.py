@@ -31,11 +31,14 @@ from api.zimfarm import RequestSchema, WebhookPayload, request_task
 router = APIRouter()
 
 
-class ArchiveRequest(BaseModel):
+class ArchiveConfigRequest(BaseModel):
     email: str | None
     config: ArchiveConfig
-
     model_config = ConfigDict(from_attributes=True)
+
+
+class ArchiveRequest(BaseModel):
+    email: str | None
 
 
 class ArchiveModel(BaseModel):
@@ -87,7 +90,7 @@ async def get_archive(archive: Archive = Depends(validated_archive)) -> ArchiveM
     status_code=HTTPStatus.NO_CONTENT,
 )
 async def update_archive(
-    archive_request: ArchiveRequest,
+    archive_request: ArchiveConfigRequest,
     archive: Archive = Depends(validated_archive),
     session: Session = Depends(gen_session),
 ):
@@ -147,6 +150,48 @@ def validate_illustration_image(upload_file: UploadFile):
     upload_file.file.seek(0)
 
 
+def validate_main_logo_image(upload_file: UploadFile):
+    """
+    Validates the main_logo image to ensure it meets the requirements.
+
+    Args:
+        upload_file (UploadFile): The uploaded illustration image.
+
+    Raises:
+        HTTPException: If the illustration is invalid,
+                       the illustration is empty,
+                       illustration is not a png image.
+    """
+    filename = upload_file.filename
+
+    if not filename:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Filename is invalid."
+        )  # pragma: no cover
+
+    size = calculate_file_size(upload_file.file)
+
+    if size == 0:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Empty file.")
+
+    # using same quota as illustration
+    if size > constants.illustration_quota:
+        raise HTTPException(
+            status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            detail="Illustration is too large.",
+        )
+
+    mimetype = filesystem.get_content_mimetype(upload_file.file.read(2048))
+
+    if "image/" not in mimetype:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Illustration is not a valid image.",
+        )
+
+    upload_file.file.seek(0)
+
+
 @router.post(
     "/{project_id}/archives/{archive_id}/illustration",
     status_code=HTTPStatus.CREATED,
@@ -186,6 +231,37 @@ async def upload_illustration(
         session.execute(stmt)
 
 
+@router.post(
+    "/{project_id}/archives/{archive_id}/main_logo",
+    status_code=HTTPStatus.CREATED,
+)
+async def upload_main_logo(
+    uploaded_logo: UploadFile,
+    archive: Archive = Depends(validated_archive),
+    session: Session = Depends(gen_session),
+):
+    """Upload an illustration of a archive."""
+    validate_main_logo_image(uploaded_logo)
+
+    src = io.BytesIO()
+    for chunk in read_file_in_chunks(uploaded_logo.file):
+        src.write(chunk)
+    dst = io.BytesIO()
+    try:
+        zimscraperlib.image.convert_image(
+            src, dst, fmt="PNG"  # pyright: ignore [reportGeneralTypeIssues]
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Illustration cannot be converted to PNG",
+        ) from exc
+
+    archive.config.main_logo = base64.b64encode(dst.getvalue()).decode("utf-8")
+    stmt = update(Archive).filter_by(id=archive.id).values(config=archive.config)
+    session.execute(stmt)
+
+
 def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO, str]:
     collection = []
     # project = get_project_by_id(project_id)
@@ -214,22 +290,22 @@ def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO
     return collection, file, digest
 
 
-def get_collection_key(project_id: UUID, collection_hash: str) -> str:
-    # using .json suffix (for now) so we can debug live URLs in-browser
-    return f"{s3_file_key(project_id=project_id, file_hash=collection_hash)}.json"
+def get_file_key(project_id: UUID, file_hash: str, suffix: str) -> str:
+    # suffix useful to debug live URLs in-browser
+    return f"{s3_file_key(project_id=project_id, file_hash=file_hash)}{suffix}"
 
 
-def upload_collection_to_s3(project: Project, collection_file: BinaryIO, s3_key: str):
+def upload_file_to_s3(project: Project, file: BinaryIO, s3_key: str):
 
     try:
         if s3_storage.storage.has_object(s3_key):
             logger.debug(f"Object `{s3_key}` already in S3… weird but OK")
             return
-        logger.debug(f"Uploading collection to `{s3_key}`")
-        s3_storage.storage.upload_fileobj(fileobj=collection_file, key=s3_key)
+        logger.debug(f"Uploading file to `{s3_key}`")
+        s3_storage.storage.upload_fileobj(fileobj=file, key=s3_key)
         s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
     except Exception as exc:
-        logger.error(f"Collection failed to upload to s3 `{s3_key}`: {exc}")
+        logger.error(f"File failed to upload to s3 `{s3_key}`: {exc}")
         raise exc
 
 
@@ -237,10 +313,15 @@ def upload_collection_to_s3(project: Project, collection_file: BinaryIO, s3_key:
     "/{project_id}/archives/{archive_id}/request", status_code=HTTPStatus.CREATED
 )
 async def request_archive(
+    archive_request: ArchiveRequest,
     archive: Archive = Depends(validated_archive),
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ):
+    # update archive email
+    stmt = update(Archive).filter_by(id=archive.id).values(email=archive_request.email)
+    session.execute(stmt)
+
     if archive.status != ArchiveStatus.PENDING:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
@@ -260,18 +341,37 @@ async def request_archive(
             detail="Project is not ready (no archive or no files)",
         )
 
+    # upload illustration
+    illustration = io.BytesIO(base64.b64decode(archive.config.illustration))
+    illus_key = get_file_key(
+        project_id=archive.project_id,
+        file_hash=generate_file_hash(illustration),
+        suffix=".png",
+    )
+    illustration.seek(0)
+    # upload it to S3
+    upload_file_to_s3(project=project, file=illustration, s3_key=illus_key)
+
+    # upload main-logo
+    if archive.config.main_logo:
+        main_logo = io.BytesIO(base64.b64decode(archive.config.main_logo))
+        main_logo_key = get_file_key(
+            project_id=archive.project_id,
+            file_hash=generate_file_hash(main_logo),
+            suffix=".png",
+        )
+        main_logo.seek(0)
+        # upload it to S3
+        upload_file_to_s3(project=project, file=main_logo, s3_key=main_logo_key)
+
     # gen collection and stream
     collection, collection_file, collection_hash = gen_collection_for(project=project)
-    collection_key = get_collection_key(
-        project_id=archive.project_id, collection_hash=collection_hash
+    collection_key = get_file_key(
+        project_id=archive.project_id, file_hash=collection_hash, suffix=".json"
     )
 
     # upload it to S3
-    upload_collection_to_s3(
-        project=project,
-        collection_file=collection_file,
-        s3_key=collection_key,
-    )
+    upload_file_to_s3(project=project, file=collection_file, s3_key=collection_key)
 
     # Everything's on S3, prepare and submit a ZF request
     request_def = RequestSchema(
@@ -284,11 +384,18 @@ async def request_archive(
         creator=archive.config.creator,
         publisher=archive.config.publisher,
         tags=archive.config.tags,
-        main_logo_url=None,
-        illustration_url=f"{constants.download_url}/{collection_key}",
+        main_logo_url=(
+            f"{constants.download_url}/{main_logo_key}"
+            if archive.config.main_logo
+            else ""
+        ),
+        illustration_url=f"{constants.download_url}/{illus_key}",
     )
     task_id = request_task(
-        archive_id=archive.id, request_def=request_def, email=archive.email
+        project_id=project.id,
+        archive_id=archive.id,
+        request_def=request_def,
+        email=archive.email,
     )
 
     # temporarily recording Archive filesize as the sum of its content
