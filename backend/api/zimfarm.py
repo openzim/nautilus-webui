@@ -299,6 +299,7 @@ def request_task(
         payload={
             "schedule_names": [schedule_name],
             "worker": constants.zimfarm_task_worker,
+            "priority": "6",
         },
     )
     if not success:
