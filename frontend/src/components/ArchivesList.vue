@@ -27,28 +27,28 @@
 
 <script setup lang="ts">
 import LatestArchive from '@/components/LatestArchive.vue'
-import { ArchiveStatus } from '@/constants'
+import { ArchiveStatus, type Archive } from '@/constants'
 import { useProjectStore } from '@/stores/stores'
-import { ref, computed } from 'vue'
+import { ref, type Ref, computed } from 'vue'
 
 const isActive = ref(false)
 const isShowed = ref(true)
 const isShowingAllPrevious = ref(false)
 
 const storeProject = useProjectStore()
-const previousArchives: Array<Archive> = computed(() =>
+const previousArchives: Ref<Array<Archive>> = computed(() =>
   storeProject.lastProjectArchives.filter((item) => item.status != ArchiveStatus.PENDING)
 )
-const lastPreviousArchive: Archive = computed(
+const lastPreviousArchive: Ref<Archive> = computed(
   () => previousArchives.value[previousArchives.value.length - 1]
 )
-const additionalPreviousArchives: Array<Archive> = computed(() =>
+const additionalPreviousArchives: Ref<Array<Archive>> = computed(() =>
   previousArchives.value.filter((item) => item.id != lastPreviousArchive.value.id)
 )
-const hasAdditionalPrevious: boolean = computed(() => additionalPreviousArchives.value.length > 0)
+const hasAdditionalPrevious: Ref<boolean> = computed(() => additionalPreviousArchives.value.length > 0)
 
-function showAllPrevious(e) {
-  e.preventDefault()
+function showAllPrevious(event: Event) {
+  event.preventDefault()
   isShowingAllPrevious.value = true
 }
 </script>

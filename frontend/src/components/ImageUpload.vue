@@ -10,29 +10,28 @@
 
 <script setup lang="ts">
 import { useAppStore } from '@/stores/stores'
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 
 const props = defineProps<{
   value?: string
   enforced_format?: string
-  enforced_dimensions?: { width: int; height: int }
+  enforced_dimensions?: { width: number; height: number }
 }>()
 
 const emit = defineEmits<{
   change: [data: string]
 }>()
-const image_file_field = ref(null)
-const image_img_field = ref(null)
+const image_file_field: Ref<HTMLInputElement | null> = ref(null)
+const image_img_field: Ref<HTMLImageElement | null> = ref(null)
 
 const storeApp = useAppStore()
 
 function openFilePicker() {
-  console.log('openFilePicker YO')
-  console.log('openFilePicker', image_file_field.value)
-  image_file_field.value.click()
+  if (image_file_field.value !== null)
+    image_file_field.value.click()
 }
 
-const imageDimensions = (dataUrl) =>
+const imageDimensions = (dataUrl: string) =>
   new Promise((resolve, reject) => {
     const img = new Image()
 
@@ -50,9 +49,15 @@ const imageDimensions = (dataUrl) =>
     img.src = dataUrl
   })
 
-function updateImage(ev) {
-  console.debug('updateImage')
-  const file = ev.target.files[0]
+function updateImage(event: Event) {
+  if (event.target === null)
+    return
+
+  const target = (event.target as HTMLInputElement)
+  if (target.files === null)
+    return
+
+  const file = target.files[0]
   const reader = new FileReader()
   if (!file) {
     console.error('updateImage failed without file')
@@ -72,7 +77,13 @@ function updateImage(ev) {
     }
     error_message += 'Image'
 
-    let [prefix, bytes] = reader.result.split(',', 2)
+    if (reader.result instanceof ArrayBuffer) {
+      storeApp.alertsError(`${error_message} (no result)`)
+      return
+    }
+    let result: string = reader.result!
+
+    let [prefix, bytes] = result.split(',', 2)
     let mimetype = prefix.replace(RegExp('^data:(.+);base64$'), '$1')
     if (props.enforced_format && mimetype != `image/${props.enforced_format}`) {
       console.error(error_message, mimetype)
@@ -83,11 +94,11 @@ function updateImage(ev) {
     if (props.enforced_dimensions) {
       // load on DOM to get dimensions
       const dimensions = { width: 0, height: 0 }
-      await imageDimensions(reader.result)
-        .then(function (dim) {
+      await imageDimensions(result)
+        .then(function (dim: any) {
           ;(dimensions.width = dim.width), (dimensions.height = dim.height)
         })
-        .catch(function () {
+        .catch(function (error: string) {
           console.error('Image could not be loaded as image', error)
           storeApp.alertsError(`${error_message} (failed to load)`)
         })
@@ -104,10 +115,9 @@ function updateImage(ev) {
       }
     }
 
-    // props.value = bytes
-    image_img_field.value.src = 'data:image/png;base64,' + bytes
-    // archiveMetadataFormModal.value.illustration = bytes
-    console.info('updated image data:', reader.result)
+    if (image_img_field.value)
+      image_img_field.value.src = 'data:image/png;base64,' + bytes
+
     emit('change', bytes)
   }
   reader.readAsDataURL(file)

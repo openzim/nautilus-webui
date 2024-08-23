@@ -114,7 +114,7 @@
             editable
             inputPlaceholder="ZIM Tags"
             :default-tags="archiveMetadataFormModal.tags"
-            :onChanged="(results) => (archiveMetadataFormModal.tags = results)"
+            :onChanged="(results: string[]) => (archiveMetadataFormModal.tags = results)"
             :allowPaste="{ delimiter: ',' }"
             :allowDuplicates="false"
           />
@@ -185,6 +185,7 @@ import { type ArchiveMetadataFormType, DEFAULT_ILLUSTRATION, DEFAULT_MAIN_LOGO }
 import { useAppStore, useModalStore, useProjectStore } from '@/stores/stores'
 import { refreshArchives } from '@/utils'
 import { getLastPreviousArchive } from '@/commons'
+// @ts-ignore
 import { SmartTagz } from 'smart-tagz'
 import 'smart-tagz/dist/smart-tagz.css'
 import ImageUpload from '@/components/ImageUpload.vue'
@@ -196,8 +197,8 @@ const { lastProjectPendingArchive } = storeToRefs(storeProject)
 
 let inMetadataEditMode = ref(false)
 
-function eatEvent(e) {
-  e.preventDefault()
+function eatEvent(event: Event) {
+  event.preventDefault()
 }
 
 function formModalFromArchive() {
@@ -216,7 +217,7 @@ function formModalFromArchive() {
       illustration: lastPreviousArchive.config.illustration,
       main_logo: lastPreviousArchive.config.main_logo,
       filename: lastPreviousArchive.config.filename,
-      email: lastPreviousArchive.email
+      email: lastPreviousArchive.email ? lastPreviousArchive.email : ''
     }
   }
 
@@ -226,7 +227,7 @@ function formModalFromArchive() {
   return {
     title: storeProject.lastProjectPendingArchive.config.title || '',
     description: storeProject.lastProjectPendingArchive.config.description || '',
-    name: storeProject.lastProjectPendingArchive.config.name || `${storeProject.lastProject.name}`,
+    name: storeProject.lastProjectPendingArchive.config.name || (storeProject.lastProject === null) ? '' : `${storeProject.lastProject.name}`,
     publisher: storeProject.lastProjectPendingArchive.config.publisher || 'nautilus by openZIM',
     creator: storeProject.lastProjectPendingArchive.config.creator || '',
     languages: storeProject.lastProjectPendingArchive.config.languages || 'eng',
@@ -236,15 +237,17 @@ function formModalFromArchive() {
     main_logo: storeProject.lastProjectPendingArchive.config.main_logo || DEFAULT_MAIN_LOGO,
     filename:
       storeProject.lastProjectPendingArchive.config.filename ||
-      `${storeProject.lastProject.name}.zim`,
+      `nautilus.zim`,
     email: storeProject.lastProjectPendingArchive.config.email || ''
   }
 }
 
+// @ts-ignore
 const archiveMetadataFormModal: Ref<ArchiveMetadataFormType> = ref(formModalFromArchive())
 
 watch(lastProjectPendingArchive, async () => {
   console.debug('archive update in store, updating form')
+  // @ts-ignore
   archiveMetadataFormModal.value = formModalFromArchive()
 })
 
@@ -266,6 +269,8 @@ async function actuallyUpdateMetadata() {
     }
   }
   try {
+    if (storeProject.lastProjectId === null || storeProject.lastProjectPendingArchive === null)
+      throw("missing IDs")
     const response = await storeApp.axiosInstance.patch<string>(
       `/projects/${storeProject.lastProjectId}/archives/${storeProject.lastProjectPendingArchive.id}`,
       archivePatchData
@@ -284,6 +289,8 @@ async function requestZIM() {
   console.log('lets GO!')
   const archivePostData = { email: archiveMetadataFormModal.value.email || '' }
   try {
+    if (storeProject.lastProjectId === null || storeProject.lastProjectPendingArchive === null)
+      throw("missing IDs")
     const response = await storeApp.axiosInstance.post<string>(
       `/projects/${storeProject.lastProjectId}/archives/${storeProject.lastProjectPendingArchive.id}/request`,
       archivePostData
@@ -307,7 +314,8 @@ async function exitMetadataEditModeHandler() {
     actuallyUpdateMetadata,
     async () => {
       inMetadataEditMode.value = false
-    }
+    },
+    []
   )
 }
 

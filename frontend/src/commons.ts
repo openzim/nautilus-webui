@@ -1,5 +1,5 @@
 import { useProjectStore } from '@/stores/stores'
-import { ArchiveStatus } from '@/constants'
+import { ArchiveStatus, type Archive } from '@/constants'
 
 export function getpreviousArchives(): Array<Archive> {
   const storeProject = useProjectStore()

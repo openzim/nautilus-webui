@@ -20,7 +20,7 @@ export interface Archive {
   project_id: string
   status: string
   email?: string
-  filesize?: int
+  filesize?: number
   created_on: string
   requested_on?: string
   completed_on?: string
@@ -39,6 +39,7 @@ export interface ArchiveConfig {
   illustration: string
   filename: string
   main_logo: string
+  email: string
 }
 
 export interface User {
@@ -194,9 +195,12 @@ export type ArchiveMetadataFormType = {
   name: string
   creator: string
   publisher: string
-  language: string
+  languages: string
   filename: string
   tags: string[]
+  illustration: string
+  main_logo: string
+  email: string
 }
 
 export enum ArchiveStatus {

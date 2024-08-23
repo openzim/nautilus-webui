@@ -12,23 +12,24 @@
         >[Download {{ props.archive.config.filename }} ({{ archiveFileSize }} of files]</span
       >
       <br />
-      <span>requested on {{ formattedDate(archive.requested_on) }}</span>
+      <span>requested on {{ humanRequestedOn }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ArchiveStatus, humanifyFileSize } from '@/constants'
-import { computed } from 'vue'
+import { ArchiveStatus, type Archive, humanifyFileSize } from '@/constants'
+import { computed, type Ref } from 'vue'
 import { DateTime } from 'luxon'
 
 const props = defineProps<{ archive: Archive }>()
 
-const canBeDownloaded: boolean = computed(() => props.archive.status == ArchiveStatus.READY)
-const archiveFileSize: int = computed(() => humanifyFileSize(props.archive.filesize))
+const canBeDownloaded: Ref<boolean> = computed(() => props.archive.status == ArchiveStatus.READY)
+const archiveFileSize: Ref<string> = computed(() => humanifyFileSize(props.archive.filesize!))
+const humanRequestedOn: Ref<string> = computed(() => (props.archive.requested_on) ? formattedDate(props.archive.requested_on) : '-')
 
 function formattedDate(date: string): string {
-  return new DateTime(date).toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)
+  return DateTime.fromISO(date).toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)
 }
 </script>
 
