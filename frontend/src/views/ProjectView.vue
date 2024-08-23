@@ -1,5 +1,4 @@
 <template>
-
   <ArchivesList />
 
   <div

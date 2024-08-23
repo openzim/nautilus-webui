@@ -67,7 +67,9 @@ export async function refreshArchives() {
   const storeProject = useProjectStore()
   const storeApp = useAppStore()
   try {
-    const response = await storeApp.axiosInstance.get<Archive[]>(`/projects/${storeProject.lastProjectId}/archives`)
+    const response = await storeApp.axiosInstance.get<Archive[]>(
+      `/projects/${storeProject.lastProjectId}/archives`
+    )
     console.debug(response.data)
     storeProject.setLastProjectArchives(response.data)
   } catch (error: unknown) {

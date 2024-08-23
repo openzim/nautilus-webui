@@ -24,13 +24,15 @@ export const useProjectStore = defineStore(
     function setProjects(newIds: Project[]) {
       projects.value = newIds
       if (lastProjectId.value) {
-        lastProject.value = projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
+        lastProject.value =
+          projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
       }
     }
 
     function setLastProjectId(newId: string) {
       lastProjectId.value = newId
-      lastProject.value = projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
+      lastProject.value =
+        projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
     }
 
     function clearLastProjectId() {
@@ -40,7 +42,8 @@ export const useProjectStore = defineStore(
 
     function setLastProjectArchives(archives: Archive[]) {
       lastProjectArchives.value = archives
-      lastProjectPendingArchive.value = lastProjectArchives.value.filter((ark) => ark.status == "PENDING").at(0) || null
+      lastProjectPendingArchive.value =
+        lastProjectArchives.value.filter((ark) => ark.status == 'PENDING').at(0) || null
     }
 
     function clearLastProjectArchives() {
@@ -48,7 +51,18 @@ export const useProjectStore = defineStore(
       lastProjectPendingArchive.value = null
     }
 
-    return { projects, lastProjectId, lastProject, lastProjectArchives, lastProjectPendingArchive, setLastProjectId, clearLastProjectId, setProjects, setLastProjectArchives, clearLastProjectArchives }
+    return {
+      projects,
+      lastProjectId,
+      lastProject,
+      lastProjectArchives,
+      lastProjectPendingArchive,
+      setLastProjectId,
+      clearLastProjectId,
+      setProjects,
+      setLastProjectArchives,
+      clearLastProjectArchives
+    }
   },
   {
     persist: true
