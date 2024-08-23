@@ -24,7 +24,7 @@ from api.files import (
     normalize_filename,
     read_file_in_chunks,
 )
-from api.routes import validated_project
+from api.routes import userless_validated_project, validated_project
 from api.s3 import s3_file_key, s3_storage
 from api.zimfarm import RequestSchema, WebhookPayload, request_task
 
@@ -61,6 +61,19 @@ class ArchiveModel(BaseModel):
 def validated_archive(
     archive_id: UUID,
     project: Project = Depends(validated_project),
+    session: Session = Depends(gen_session),
+) -> Archive:
+    """Depends()-able archive from request, ensuring it exists"""
+    stmt = select(Archive).filter_by(id=archive_id).filter_by(project_id=project.id)
+    archive = session.execute(stmt).scalar()
+    if not archive:
+        raise HTTPException(HTTPStatus.NOT_FOUND, f"Archive not found: {archive_id}")
+    return archive
+
+
+def userless_validated_archive(
+    archive_id: UUID,
+    project: Project = Depends(userless_validated_project),
     session: Session = Depends(gen_session),
 ) -> Archive:
     """Depends()-able archive from request, ensuring it exists"""
@@ -420,7 +433,7 @@ async def request_archive(
 @router.post("/{project_id}/archives/{archive_id}/hook", status_code=HTTPStatus.CREATED)
 async def record_task_feedback(
     payload: WebhookPayload,
-    archive: Archive = Depends(validated_archive),
+    archive: Archive = Depends(userless_validated_archive),
     session: Session = Depends(gen_session),
     token: str = "",
     target: str = "",
