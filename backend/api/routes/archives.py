@@ -457,6 +457,8 @@ async def record_task_feedback(
     stmt: ExecutableStatement | None = None
     if payload.status == "succeeded":
         try:
+            if not payload.files:
+                raise OSError("No files in payload")
             # should we check for file["status"] == "uploaded"?
             file: dict = next(iter(payload.files.values()))
             filesize = file["size"]

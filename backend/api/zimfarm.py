@@ -46,6 +46,7 @@ class WebhookPayload(BaseModel):
     original_schedule_name: str
     updated_at: str
 
+
 class TokenData:
     """In-memory persistence of ZF credentials"""
 
