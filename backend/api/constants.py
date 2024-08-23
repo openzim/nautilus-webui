@@ -9,6 +9,8 @@ from pathlib import Path
 import humanfriendly
 from rq import Retry
 
+logging.basicConfig()
+
 
 def determine_mandatory_environment_variables():
     for variable in ("POSTGRES_URI", "S3_URL_WITH_CREDENTIALS", "PRIVATE_SALT"):
@@ -59,14 +61,16 @@ class BackendConf:
 
     # Deployment
     public_url: str = os.getenv("PUBLIC_URL") or "http://localhost"
+    # /!\ this must match the region/bucket on s3 credentials
     download_url: str = (
         os.getenv("DOWNLOAD_URL")
-        or "https://s3.us-west-1.wasabisys.com/org-kiwix-zimit/zim"
+        or "https://s3.eu-west-2.wasabisys.com/org-kiwix-nautilus"
     )
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
         "http://localhost",
     ).split("|")
+    debug: bool = bool(os.getenv("DEBUG") or "")
 
     # Zimfarm (3rd party API creating ZIMs and calling back with feedback)
     zimfarm_api_url: str = (
@@ -80,10 +84,16 @@ class BackendConf:
     zimfarm_task_cpu: int = int(os.getenv("ZIMFARM_TASK_CPU") or "3")
     zimfarm_task_memory: int = 0
     zimfarm_task_disk: int = 0
-    zimfarm_callback_base_url = os.getenv("ZIMFARM_CALLBACK_BASE_URL", "")
+    zimfarm_callback_base_url = (
+        os.getenv("ZIMFARM_CALLBACK_BASE_URL") or "https://api.nautilus.openzim.org/v1"
+    )
     zimfarm_callback_token = os.getenv("ZIMFARM_CALLBACK_TOKEN", uuid.uuid4().hex)
-    zimfarm_task_worker: str = os.getenv("ZIMFARM_TASK_WORKDER") or "-"
+    zimfarm_task_worker: str = os.getenv("ZIMFARM_TASK_WORKER") or "-"
     zimfarm_request_timeout_sec: int = 10
+    zim_download_url: str = (
+        os.getenv("ZIM_DOWNLOAD_URL")
+        or "https://s3.us-west-1.wasabisys.com/org-kiwix-zimit"
+    )
 
     # Mailgun (3rd party API to send emails)
     mailgun_api_url: str = os.getenv("MAILGUN_API_URL") or ""
@@ -95,6 +105,7 @@ class BackendConf:
 
     def __post_init__(self):
         self.logger = logging.getLogger(Path(__file__).parent.name)
+        self.logger.setLevel(logging.DEBUG if self.debug else logging.INFO)
         self.transient_storage_path.mkdir(exist_ok=True)
         self.job_retry = Retry(max=self.s3_max_tries, interval=int(self.s3_retry_wait))
 
@@ -118,9 +129,6 @@ class BackendConf:
         self.zimfarm_task_disk = humanfriendly.parse_size(
             os.getenv("ZIMFARM_TASK_DISK") or "200MiB"
         )
-
-        if not self.zimfarm_callback_base_url:
-            self.zimfarm_callback_base_url = f"{self.zimfarm_api_url}/requests/hook"
 
 
 constants = BackendConf()

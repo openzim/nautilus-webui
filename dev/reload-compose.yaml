@@ -1,10 +1,11 @@
+name: nautwebui-reload
 services:
   database:
     image: postgres:15.3-bullseye
-    container_name: nautilus-database
+    container_name: nautilus-reload-db
     restart: always
     volumes:
-      - pg_data_nautilus:/var/lib/postgresql/data
+      - nautilus-postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=nautilus
       - POSTGRES_PASSWORD=nautilus
@@ -18,10 +19,10 @@ services:
       retries: 10
   redis:
     image: redis:7.2
-    container_name: nautilus-redis
+    container_name: nautilus-reload-redis
     restart: always
     volumes:
-      - pg_data_redis:/data
+      - nautilus-reload-redis:/data
     ports:
       - 6379:6379
     healthcheck:
@@ -33,9 +34,9 @@ services:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
     volumes:
-      - backend_storage:/storage
+      - nautilus-reload-storage:/storage
       - ../backend:/app
-    container_name: nautilus-backend-worker
+    container_name: nautilus-reload-backend-worker
     environment:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
@@ -43,18 +44,19 @@ services:
       - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
+      - DEBUG=1
     entrypoint: ''
     command: ["rq-worker"]
     depends_on:
-      - backend-dev
-  frontend-dev:
+      - backend
+  frontend:
     build:
       dockerfile: ../dev/frontend-tools/Dockerfile
       context: ../frontend
-    container_name: nautilus-frontend-dev
+    container_name: nautilus-reload-frontend
     volumes:
-      - ../frontend/public:/src/public
-      - ../frontend/src:/src/src
+      - ../frontend/public:/work/public
+      - ../frontend/src:/work/src
     ports:
       - 8082:80
     environment:
@@ -62,16 +64,17 @@ services:
       - NAUTILUS_FILE_QUOTA=${NAUTILUS_FILE_QUOTA}
       - NAUTILUS_PROJECT_QUOTA=${NAUTILUS_PROJECT_QUOTA}
       - NAUTILUS_FILE_REFRESH_EVERY_MS=${NAUTILUS_FILE_REFRESH_EVERY_MS}
+      - DEBUG=1
     depends_on:
-      - backend-dev
-  backend-dev:
+      - backend
+  backend:
     build:
       dockerfile: ../dev/backend-tools-tests/Dockerfile
       context: ../backend
     volumes:
-      - backend_storage:/storage
+      - nautilus-reload-storage:/storage
       - ../backend:/app
-    container_name: nautilus-backend-dev
+    container_name: nautilus-reload-backend
     command: fastapi dev --host 0.0.0.0 --port 80 api/entrypoint.py
     ports:
       - 8083:80
@@ -84,12 +87,22 @@ services:
       - CHANNEL_NAME=${CHANNEL_NAME}
       - ALLOWED_ORIGINS=http://localhost:8081|http://localhost:8082
       - RUN_DB_MIGRATIONS=y
+      - ZIMFARM_API_USERNAME=${ZIMFARM_API_USERNAME}
+      - ZIMFARM_API_PASSWORD=${ZIMFARM_API_PASSWORD}
+      - ZIMFARM_TASK_WORKER=${ZIMFARM_TASK_WORKER}
+      - ZIMFARM_CALLBACK_BASE_URL=${ZIMFARM_CALLBACK_BASE_URL}
+      - DOWNLOAD_URL=${DOWNLOAD_URL}
+      - DEBUG=1
+      - ZIMFARM_CALLBACK_TOKEN=${ZIMFARM_CALLBACK_TOKEN}
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_API_URL=${MAILGUN_API_URL}
+      - MAILGUN_FROM=${MAILGUN_FROM}
     depends_on:
       database:
         condition: service_healthy
       redis:
         condition: service_healthy
 volumes:
-  pg_data_nautilus:
-  pg_data_redis:
-  backend_storage:
+  nautilus-postgres:
+  nautilus-reload-redis:
+  nautilus-reload-storage:

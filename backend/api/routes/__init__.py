@@ -53,3 +53,15 @@ async def validated_project(
     if not project:
         raise HTTPException(HTTPStatus.NOT_FOUND, f"Project not found: {project_id}")
     return project
+
+
+async def userless_validated_project(
+    project_id: UUID,
+    session: Session = Depends(gen_session),
+) -> Project:
+    """Depends()-able Project from request, ensuring it exists"""
+    stmt = select(Project).filter_by(id=project_id)
+    project = session.execute(stmt).scalar()
+    if not project:
+        raise HTTPException(HTTPStatus.NOT_FOUND, f"Project not found: {project_id}")
+    return project

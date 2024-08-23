@@ -1,4 +1,6 @@
 <template>
+  <ArchivesList />
+
   <div
     class="card m-5"
     :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }"
@@ -91,11 +93,16 @@
       </UploadFilesComponent>
     </div>
   </div>
+  <div class="m-5">
+    <ZIMMetadataComponent @update-archive-metadata="updateArchiveMetadata" />
+  </div>
 </template>
 <script setup lang="ts">
 import UploadFilesComponent from '@/components/UploadFilesComponent.vue'
 import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
+import ZIMMetadataComponent from '@/components/ZIMMetadataComponent.vue'
+import ArchivesList from '@/components/ArchivesList.vue'
 import {
   FileStatus,
   type File,
@@ -109,7 +116,7 @@ import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } fro
 import axios from 'axios'
 import { ref, type Ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { updateProjects } from '@/utils'
+import { refreshArchives, updateProjects } from '@/utils'
 
 const isActive = ref(false)
 const inEditMode = ref(false)
@@ -137,6 +144,7 @@ const beUpdatedFile: Ref<Map<string, { fileId: string; metadata: FileMetadataFor
 
 watch(lastProjectId, async () => {
   await refreshFiles()
+  await refreshArchives()
 })
 
 if (storeInitialFileStore.initialFiles.length == 0) {
@@ -442,7 +450,12 @@ async function updateSingleFileMetadata(
   files.value.get(renderId)!.file.filename = newMetaData.filename
 }
 
+async function updateArchiveMetadata(value) {
+  console.log('updateArchiveMetadata!!', value)
+}
+
 refreshFileStatus()
+refreshArchives()
 </script>
 
 <style scoped>

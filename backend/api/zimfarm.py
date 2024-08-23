@@ -32,7 +32,7 @@ class RequestSchema:
     creator: str
     publisher: str
     tags: list[str]
-    main_logo_url: str | None
+    main_logo_url: str
     illustration_url: str
 
 
@@ -41,21 +41,10 @@ class WebhookPayload(BaseModel):
 
     _id: str
     status: str
-    timestamp: dict
-    schedule_name: str
-    worker_name: str
-    updated_at: str
     config: dict
+    files: dict[str, dict] | None
     original_schedule_name: str
-    events: list[dict]
-    debug: dict
-    requested_by: str
-    canceled_by: str
-    container: str
-    priority: int
-    notification: dict
-    files: dict[str, dict]
-    upload: dict
+    updated_at: str
 
 
 class TokenData:
@@ -130,7 +119,7 @@ def authenticate(*, force: bool = False):
         )
     except Exception:
         TokenData.ACCESS_TOKEN = TokenData.REFRESH_TOKEN = ""
-        TokenData.ACCESS_TOKEN_EXPIRY = datetime.datetime = datetime.datetime(
+        TokenData.ACCESS_TOKEN_EXPIRY = datetime.datetime(
             2000, 1, 1, tzinfo=datetime.UTC
         )
     else:
@@ -213,7 +202,7 @@ def test_connection():
 
 
 def request_task(
-    archive_id: UUID, request_def: RequestSchema, email: str | None
+    project_id: UUID, archive_id: UUID, request_def: RequestSchema, email: str | None
 ) -> UUID:
     ident = uuid4().hex
 
@@ -221,16 +210,17 @@ def request_task(
         "collection": request_def.collection_url,
         "name": request_def.name,
         "output": "/output",
-        "zim_file": f"nautilus_{archive_id}_{ident}.zim",
+        "zim-file": f"nautilus_{archive_id}_{ident}.zim",
         "language": request_def.language,
         "title": request_def.title,
         "description": request_def.description,
         "creator": request_def.creator,
         "publisher": request_def.publisher,
-        "tags": request_def.tags,
-        "main_logo": request_def.main_logo_url,
+        "tags": ";".join(request_def.tags),
         "favicon": request_def.illustration_url,
     }
+    if request_def.main_logo_url:
+        flags.update({"main-logo": request_def.main_logo_url})
 
     config = {
         "task_name": "nautilus",
@@ -266,6 +256,7 @@ def request_task(
     if email:
         url = (
             f"{constants.zimfarm_callback_base_url}"
+            f"/projects/{project_id}/archives/{archive_id}/hook"
             f"?token={constants.zimfarm_callback_token}&target={email}"
         )
         payload.update(
@@ -297,6 +288,7 @@ def request_task(
         payload={
             "schedule_names": [schedule_name],
             "worker": constants.zimfarm_task_worker,
+            "priority": "6",
         },
     )
     if not success:

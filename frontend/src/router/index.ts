@@ -1,5 +1,5 @@
-import StartView from '@/views/StartView.vue'
 import CollectionsView from '@/views/CollectionsView.vue'
+import StartView from '@/views/StartView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import NotFoundView from '@/views/NotFoundView.vue'
 import StaticStartView from '@/views/StaticStartView.vue'

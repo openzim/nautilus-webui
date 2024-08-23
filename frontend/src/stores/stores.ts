@@ -6,7 +6,8 @@ import {
   type AlertMessage,
   type Environ,
   AlertType,
-  type Project
+  type Project,
+  type Archive
 } from '@/constants'
 import { v4 as uuid } from 'uuid'
 import axios from 'axios'
@@ -16,20 +17,52 @@ export const useProjectStore = defineStore(
   () => {
     const lastProjectId: Ref<string | null> = ref(null)
     const projects: Ref<Project[]> = ref([])
+    const lastProject: Ref<Project | null> = ref(null)
+    const lastProjectArchives: Ref<Archive[]> = ref([])
+    const lastProjectPendingArchive: Ref<Archive | null> = ref(null)
 
     function setProjects(newIds: Project[]) {
       projects.value = newIds
+      if (lastProjectId.value) {
+        lastProject.value =
+          projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
+      }
     }
 
     function setLastProjectId(newId: string) {
       lastProjectId.value = newId
+      lastProject.value =
+        projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
     }
 
     function clearLastProjectId() {
       lastProjectId.value = null
+      lastProject.value = null
     }
 
-    return { projects, lastProjectId, setLastProjectId, clearLastProjectId, setProjects }
+    function setLastProjectArchives(archives: Archive[]) {
+      lastProjectArchives.value = archives
+      lastProjectPendingArchive.value =
+        lastProjectArchives.value.filter((ark) => ark.status == 'PENDING').at(0) || null
+    }
+
+    function clearLastProjectArchives() {
+      lastProjectArchives.value = []
+      lastProjectPendingArchive.value = null
+    }
+
+    return {
+      projects,
+      lastProjectId,
+      lastProject,
+      lastProjectArchives,
+      lastProjectPendingArchive,
+      setLastProjectId,
+      clearLastProjectId,
+      setProjects,
+      setLastProjectArchives,
+      clearLastProjectArchives
+    }
   },
   {
     persist: true
