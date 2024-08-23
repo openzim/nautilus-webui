@@ -41,22 +41,10 @@ class WebhookPayload(BaseModel):
 
     _id: str
     status: str
-    timestamp: dict
-    schedule_name: str
-    worker_name: str
-    updated_at: str
     config: dict
+    files: dict[str, dict] | None
     original_schedule_name: str
-    events: list[dict]
-    debug: dict
-    requested_by: str
-    canceled_by: str
-    container: str
-    priority: int
-    notification: dict
-    files: dict[str, dict]
-    upload: dict
-
+    updated_at: str
 
 class TokenData:
     """In-memory persistence of ZF credentials"""
