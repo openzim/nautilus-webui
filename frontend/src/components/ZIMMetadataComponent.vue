@@ -227,7 +227,10 @@ function formModalFromArchive() {
   return {
     title: storeProject.lastProjectPendingArchive.config.title || '',
     description: storeProject.lastProjectPendingArchive.config.description || '',
-    name: storeProject.lastProjectPendingArchive.config.name || (storeProject.lastProject === null) ? '' : `${storeProject.lastProject.name}`,
+    name:
+      storeProject.lastProjectPendingArchive.config.name || storeProject.lastProject === null
+        ? ''
+        : `${storeProject.lastProject.name}`,
     publisher: storeProject.lastProjectPendingArchive.config.publisher || 'nautilus by openZIM',
     creator: storeProject.lastProjectPendingArchive.config.creator || '',
     languages: storeProject.lastProjectPendingArchive.config.languages || 'eng',
@@ -235,9 +238,7 @@ function formModalFromArchive() {
     illustration:
       storeProject.lastProjectPendingArchive.config.illustration || DEFAULT_ILLUSTRATION,
     main_logo: storeProject.lastProjectPendingArchive.config.main_logo || DEFAULT_MAIN_LOGO,
-    filename:
-      storeProject.lastProjectPendingArchive.config.filename ||
-      `nautilus.zim`,
+    filename: storeProject.lastProjectPendingArchive.config.filename || `nautilus.zim`,
     email: storeProject.lastProjectPendingArchive.config.email || ''
   }
 }
@@ -270,7 +271,7 @@ async function actuallyUpdateMetadata() {
   }
   try {
     if (storeProject.lastProjectId === null || storeProject.lastProjectPendingArchive === null)
-      throw("missing IDs")
+      throw 'missing IDs'
     const response = await storeApp.axiosInstance.patch<string>(
       `/projects/${storeProject.lastProjectId}/archives/${storeProject.lastProjectPendingArchive.id}`,
       archivePatchData
@@ -290,7 +291,7 @@ async function requestZIM() {
   const archivePostData = { email: archiveMetadataFormModal.value.email || '' }
   try {
     if (storeProject.lastProjectId === null || storeProject.lastProjectPendingArchive === null)
-      throw("missing IDs")
+      throw 'missing IDs'
     const response = await storeApp.axiosInstance.post<string>(
       `/projects/${storeProject.lastProjectId}/archives/${storeProject.lastProjectPendingArchive.id}/request`,
       archivePostData

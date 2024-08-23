@@ -45,7 +45,9 @@ const lastPreviousArchive: Ref<Archive> = computed(
 const additionalPreviousArchives: Ref<Array<Archive>> = computed(() =>
   previousArchives.value.filter((item) => item.id != lastPreviousArchive.value.id)
 )
-const hasAdditionalPrevious: Ref<boolean> = computed(() => additionalPreviousArchives.value.length > 0)
+const hasAdditionalPrevious: Ref<boolean> = computed(
+  () => additionalPreviousArchives.value.length > 0
+)
 
 function showAllPrevious(event: Event) {
   event.preventDefault()

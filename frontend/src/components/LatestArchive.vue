@@ -26,7 +26,9 @@ const props = defineProps<{ archive: Archive }>()
 
 const canBeDownloaded: Ref<boolean> = computed(() => props.archive.status == ArchiveStatus.READY)
 const archiveFileSize: Ref<string> = computed(() => humanifyFileSize(props.archive.filesize!))
-const humanRequestedOn: Ref<string> = computed(() => (props.archive.requested_on) ? formattedDate(props.archive.requested_on) : '-')
+const humanRequestedOn: Ref<string> = computed(() =>
+  props.archive.requested_on ? formattedDate(props.archive.requested_on) : '-'
+)
 
 function formattedDate(date: string): string {
   return DateTime.fromISO(date).toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)

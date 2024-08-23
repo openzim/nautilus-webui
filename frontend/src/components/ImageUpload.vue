@@ -27,8 +27,7 @@ const image_img_field: Ref<HTMLImageElement | null> = ref(null)
 const storeApp = useAppStore()
 
 function openFilePicker() {
-  if (image_file_field.value !== null)
-    image_file_field.value.click()
+  if (image_file_field.value !== null) image_file_field.value.click()
 }
 
 const imageDimensions = (dataUrl: string) =>
@@ -50,12 +49,10 @@ const imageDimensions = (dataUrl: string) =>
   })
 
 function updateImage(event: Event) {
-  if (event.target === null)
-    return
+  if (event.target === null) return
 
-  const target = (event.target as HTMLInputElement)
-  if (target.files === null)
-    return
+  const target = event.target as HTMLInputElement
+  if (target.files === null) return
 
   const file = target.files[0]
   const reader = new FileReader()
@@ -115,8 +112,7 @@ function updateImage(event: Event) {
       }
     }
 
-    if (image_img_field.value)
-      image_img_field.value.src = 'data:image/png;base64,' + bytes
+    if (image_img_field.value) image_img_field.value.src = 'data:image/png;base64,' + bytes
 
     emit('change', bytes)
   }
