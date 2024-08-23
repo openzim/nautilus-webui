@@ -267,7 +267,7 @@ def request_task(
     if email:
         url = (
             f"{constants.zimfarm_callback_base_url}"
-            f"/{project_id}/archives/{archive_id}/hook"
+            f"/projects/{project_id}/archives/{archive_id}/hook"
             f"?token={constants.zimfarm_callback_token}&target={email}"
         )
         payload.update(
