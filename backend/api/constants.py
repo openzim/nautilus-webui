@@ -90,6 +90,10 @@ class BackendConf:
     zimfarm_callback_token = os.getenv("ZIMFARM_CALLBACK_TOKEN", uuid.uuid4().hex)
     zimfarm_task_worker: str = os.getenv("ZIMFARM_TASK_WORKER") or "-"
     zimfarm_request_timeout_sec: int = 10
+    zim_download_url: str = (
+        os.getenv("ZIM_DOWNLOAD_URL")
+        or "https://s3.us-west-1.wasabisys.com/org-kiwix-zimit"
+    )
 
     # Mailgun (3rd party API to send emails)
     mailgun_api_url: str = os.getenv("MAILGUN_API_URL") or ""

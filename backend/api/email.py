@@ -11,7 +11,7 @@ from api.constants import constants, logger
 from api.database.models import Archive
 
 jinja_env = Environment(
-    loader=FileSystemLoader("templates"),
+    loader=FileSystemLoader(Path(__file__).parent.joinpath("templates")),
     autoescape=select_autoescape(["html", "txt"]),
 )
 jinja_env.filters["short_id"] = lambda value: str(value)[:5]
@@ -69,7 +69,8 @@ def get_context(task: dict[str, Any], archive: Archive):
     """Jinja context dict for email notifications"""
     return {
         "base_url": constants.public_url,
-        "download_url": constants.download_url,
+        "zim_download_url": constants.zim_download_url,
         "task": task,
+        "file": next(iter(task["files"].values())) if task.get("files") else None,
         "archive": archive,
     }

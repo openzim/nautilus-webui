@@ -6,6 +6,7 @@ from http import HTTPStatus
 from typing import Any, BinaryIO
 from uuid import UUID
 
+import dateutil.parser
 import zimscraperlib.image
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from pydantic import BaseModel, ConfigDict, TypeAdapter
@@ -459,9 +460,9 @@ async def record_task_feedback(
             # should we check for file["status"] == "uploaded"?
             file: dict = next(iter(payload.files.values()))
             filesize = file["size"]
-            completed_on = datetime.datetime.fromisoformat(file["uploaded_timestamp"])
+            completed_on = dateutil.parser.parse(file["uploaded_timestamp"])
             download_url = (
-                f"{constants.download_url}/"
+                f"{constants.zim_download_url}"
                 f"{payload.config['warehouse_path']}/"
                 f"{file['name']}"
             )
@@ -480,6 +481,7 @@ async def record_task_feedback(
                     status=status,
                 )
             )
+
     if payload.status in ("failed", "canceled"):
         stmt = (
             update(Archive).filter_by(id=archive.id).values(status=ArchiveStatus.FAILED)
@@ -487,7 +489,6 @@ async def record_task_feedback(
     if stmt is not None:
         try:
             session.execute(stmt)
-            session.commit()
         except Exception as exc:
             logger.error(
                 "Failed to update Archive with FAILED status {archive.id}: {exc!s}"
@@ -501,6 +502,6 @@ async def record_task_feedback(
     context = get_context(task=payload.model_dump(), archive=archive)
     subject = jinja_env.get_template("email_subject.txt").render(**context)
     body = jinja_env.get_template("email_body.html").render(**context)
-    send_email_via_mailgun(target, subject, body)
+    send_email_via_mailgun([target], subject, body)
 
     return {"status": "success"}

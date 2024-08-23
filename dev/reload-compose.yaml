@@ -93,6 +93,10 @@ services:
       - ZIMFARM_CALLBACK_BASE_URL=${ZIMFARM_CALLBACK_BASE_URL}
       - DOWNLOAD_URL=${DOWNLOAD_URL}
       - DEBUG=1
+      - ZIMFARM_CALLBACK_TOKEN=${ZIMFARM_CALLBACK_TOKEN}
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_API_URL=${MAILGUN_API_URL}
+      - MAILGUN_FROM=${MAILGUN_FROM}
     depends_on:
       database:
         condition: service_healthy
