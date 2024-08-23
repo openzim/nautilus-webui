@@ -275,7 +275,7 @@ def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO
             entry["authors"] = ", ".join(file.authors)
         entry["files"] = [
             {
-                "uri": f"{constants.download_url}/{s3_file_key(project.id, file.hash)}",
+                "url": f"{constants.download_url}/{s3_file_key(project.id, file.hash)}",
                 "filename": file.filename,
             }
         ]
