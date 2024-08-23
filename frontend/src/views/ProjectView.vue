@@ -94,7 +94,7 @@
     </div>
   </div>
   <div class="m-5">
-    <ZIMMetadataComponent @update-archive-metadata="updateArchiveMetadata" />
+    <ZIMMetadataComponent />
   </div>
 </template>
 <script setup lang="ts">
@@ -448,10 +448,6 @@ async function updateSingleFileMetadata(
   files.value.get(renderId)!.file.description = newMetaData.description
   files.value.get(renderId)!.file.authors = newMetaData.authors
   files.value.get(renderId)!.file.filename = newMetaData.filename
-}
-
-async function updateArchiveMetadata(value) {
-  console.log('updateArchiveMetadata!!', value)
 }
 
 refreshFileStatus()

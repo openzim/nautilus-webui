@@ -16,12 +16,12 @@ export const useProjectStore = defineStore(
   'projectId',
   () => {
     const lastProjectId: Ref<string | null> = ref(null)
-    const projects: Ref<Project[]> = ref([])
+    const projects: Ref<Array<Project>> = ref([])
     const lastProject: Ref<Project | null> = ref(null)
-    const lastProjectArchives: Ref<Archive[]> = ref([])
+    const lastProjectArchives: Ref<Array<Archive>> = ref([])
     const lastProjectPendingArchive: Ref<Archive | null> = ref(null)
 
-    function setProjects(newIds: Project[]) {
+    function setProjects(newIds: Array<Project>) {
       projects.value = newIds
       if (lastProjectId.value) {
         lastProject.value =
