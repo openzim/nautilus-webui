@@ -224,7 +224,8 @@ def test_upload_illustration_without_wrong_authorization(
 async def test_request_archive_not_ready(alogged_in_client, project_id, archive_id):
     response = await alogged_in_client.post(
         f"{constants.api_version_prefix}/projects/"
-        f"{project_id}/archives/{archive_id}/request"
+        f"{project_id}/archives/{archive_id}/request",
+        json={"email": ""},
     )
     assert response.status_code == HTTPStatus.CONFLICT
 
@@ -242,6 +243,7 @@ async def test_request_archive_ready(
 
     response = await alogged_in_client.post(
         f"{constants.api_version_prefix}/projects/"
-        f"{expiring_project_id}/archives/{expiring_archive_id}/request"
+        f"{expiring_project_id}/archives/{expiring_archive_id}/request",
+        json={"email": ""},
     )
     assert response.status_code == HTTPStatus.CREATED
