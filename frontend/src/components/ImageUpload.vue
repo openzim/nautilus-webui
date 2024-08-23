@@ -9,9 +9,8 @@
 </template>
 
 <script setup lang="ts">
-import { ArchiveStatus, humanifyFileSize } from '@/constants'
 import { useAppStore } from '@/stores/stores'
-import { ref, type Ref, computed, reactive, watch } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   value?: string
@@ -61,7 +60,7 @@ function updateImage(ev) {
   }
   console.debug('file', file)
 
-  reader.onload = async (e) => {
+  reader.onload = async () => {
     console.log('onload')
 
     let error_message = 'Image must be '
@@ -88,7 +87,7 @@ function updateImage(ev) {
         .then(function (dim) {
           ;(dimensions.width = dim.width), (dimensions.height = dim.height)
         })
-        .catch(function (err) {
+        .catch(function () {
           console.error('Image could not be loaded as image', error)
           storeApp.alertsError(`${error_message} (failed to load)`)
         })

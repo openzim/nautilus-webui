@@ -17,7 +17,9 @@
         <a href="#" @click="showAllPrevious">View previous ZIM files</a>
       </p>
       <ul v-if="hasAdditionalPrevious && isShowingAllPrevious">
-        <li v-for="archive in additionalPreviousArchives">{{ archive.config.filename }}</li>
+        <li v-for="archive in additionalPreviousArchives" v-bind:key="archive.id">
+          {{ archive.config.filename }}
+        </li>
       </ul>
     </div>
   </div>
@@ -25,9 +27,9 @@
 
 <script setup lang="ts">
 import LatestArchive from '@/components/LatestArchive.vue'
-import { ArchiveStatus, humanifyFileSize } from '@/constants'
+import { ArchiveStatus } from '@/constants'
 import { useProjectStore } from '@/stores/stores'
-import { ref, type Ref, computed, reactive, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 const isActive = ref(false)
 const isShowed = ref(true)

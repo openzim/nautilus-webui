@@ -104,7 +104,6 @@ import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import ZIMMetadataComponent from '@/components/ZIMMetadataComponent.vue'
 import ArchivesList from '@/components/ArchivesList.vue'
 import {
-  ArchiveStatus,
   FileStatus,
   type File,
   NautilusFile,
@@ -115,7 +114,7 @@ import {
 } from '@/constants'
 import { useAppStore, useProjectStore, useInitialFilesStore, useModalStore } from '@/stores/stores'
 import axios from 'axios'
-import { ref, type Ref, computed, reactive, watch } from 'vue'
+import { ref, type Ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { refreshArchives, updateProjects } from '@/utils'
 

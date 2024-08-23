@@ -19,8 +19,7 @@
 
 <script setup lang="ts">
 import { ArchiveStatus, humanifyFileSize } from '@/constants'
-import { useProjectStore } from '@/stores/stores'
-import { ref, type Ref, computed, reactive, watch } from 'vue'
+import { computed } from 'vue'
 import { DateTime } from 'luxon'
 
 const props = defineProps<{ archive: Archive }>()

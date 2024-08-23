@@ -154,6 +154,7 @@
           Tags:
           <span
             v-for="tag in archiveMetadataFormModal.tags"
+            v-bind:key="tag"
             class="badge rounded-pill text-bg-secondary me-1"
             >{{ tag }}</span
           >
@@ -178,11 +179,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { type ArchiveMetadataFormType, DEFAULT_ILLUSTRATION, DEFAULT_MAIN_LOGO } from '@/constants'
 import { useAppStore, useModalStore, useProjectStore } from '@/stores/stores'
-import { refreshArchives, updateProjects } from '@/utils'
+import { refreshArchives } from '@/utils'
 import { getLastPreviousArchive } from '@/commons'
 import { SmartTagz } from 'smart-tagz'
 import 'smart-tagz/dist/smart-tagz.css'
@@ -194,8 +195,6 @@ const storeModal = useModalStore()
 const { lastProjectPendingArchive } = storeToRefs(storeProject)
 
 let inMetadataEditMode = ref(false)
-let tag: string = ''
-let tags = []
 
 function eatEvent(e) {
   e.preventDefault()
@@ -243,25 +242,11 @@ function formModalFromArchive() {
 }
 
 const archiveMetadataFormModal: Ref<ArchiveMetadataFormType> = ref(formModalFromArchive())
-const email: Ref<string> = ref('')
 
 watch(lastProjectPendingArchive, async () => {
   console.debug('archive update in store, updating form')
   archiveMetadataFormModal.value = formModalFromArchive()
 })
-
-const emit = defineEmits<{
-  updateArchiveMetadata: [MetadataEditorFormType]
-}>()
-
-// watch(
-//   archiveMetadataFormModal,
-//   async (newValue) => {
-//     console.debug("!!form update", newValue)
-//     emit('updateArchiveMetadata', newValue)
-//   },
-//   { deep: true }
-// )
 
 async function actuallyUpdateMetadata() {
   // online stuff

@@ -1,11 +1,5 @@
-import { ref, type computed } from 'vue'
 import { useProjectStore } from '@/stores/stores'
 import { ArchiveStatus } from '@/constants'
-
-// const previousArchives: Array<Archive> = computed(() => storeProject.lastProjectArchives.filter((item) => item.status != ArchiveStatus.PENDING))
-// const lastPreviousArchive: Archive = computed(() => previousArchives.value[previousArchives.value.length - 1])
-// const additionalPreviousArchives: Array<Archive> = computed(() => previousArchives.value.filter((item) => item.id != lastPreviousArchive.value.id ))
-// const hasAdditionalPrevious: boolean = computed(() => additionalPreviousArchives.value.length > 0)
 
 export function getpreviousArchives(): Array<Archive> {
   const storeProject = useProjectStore()
