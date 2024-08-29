@@ -168,9 +168,8 @@ export const EmptyConstants = new Constants({
   NAUTILUS_FILE_REFRESH_EVERY_MS: 1000
 })
 
-// We use jedec, rather than the default iec to make the file size display more readable.
-// After using jedec, the file will display MB instead of MiB
-export const humanifyFileSize = partial({ standard: 'jedec', output: 'string' })
+// using iec to be consistent accross tools (MiB): jedec renders MiB as MB
+export const humanifyFileSize = partial({ standard: 'iec', output: 'string' })
 
 export type CompareFunctionType = (
   a: [string, ClientVisibleFile],

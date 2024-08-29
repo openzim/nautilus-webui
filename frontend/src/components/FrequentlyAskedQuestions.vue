@@ -67,11 +67,9 @@ const faqs = ref([
   {
     title: 'Why can not I create a Zim file of any size?',
     content: `<p>
-      Due to the nature of the tool, we cannot allow it to create files of arbitrary size. 
-      This could be detrimental to our infrastructure. 
-      We currently enforce a limit: ${humanifyFileSize(
+      Due to technical constraints, we currently enforce a limit at ${humanifyFileSize(
         storeApp.constants.env.NAUTILUS_PROJECT_QUOTA
-      )} files.
+      )} of uploadable files.
       </p>`,
     toggle: false
   },
