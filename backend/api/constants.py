@@ -5,6 +5,7 @@ import tempfile
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
+from uuid import UUID
 
 import humanfriendly
 from rq import Retry
@@ -30,6 +31,9 @@ class BackendConf:
     chunk_size: int = 1024  # reading/writing received files
     illustration_quota: int = 0
     api_version_prefix: str = "/v1"  # our API
+
+    # single-user mode (Kiwix only)
+    single_user_id: str = os.getenv("SINGLE_USER_ID", "").strip() or ""
 
     # Database
     postgres_uri: str = os.getenv("POSTGRES_URI") or "nodb"
@@ -129,6 +133,10 @@ class BackendConf:
         self.zimfarm_task_disk = humanfriendly.parse_size(
             os.getenv("ZIMFARM_TASK_DISK") or "200MiB"
         )
+
+    @property
+    def single_user(self) -> UUID:
+        return UUID(self.single_user_id)
 
 
 constants = BackendConf()

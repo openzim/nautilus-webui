@@ -64,6 +64,7 @@ services:
       - NAUTILUS_FILE_QUOTA=${NAUTILUS_FILE_QUOTA}
       - NAUTILUS_PROJECT_QUOTA=${NAUTILUS_PROJECT_QUOTA}
       - NAUTILUS_FILE_REFRESH_EVERY_MS=${NAUTILUS_FILE_REFRESH_EVERY_MS}
+      - NAUTILUS_IS_SINGLE_USER=1
       - DEBUG=1
     depends_on:
       - backend
@@ -97,6 +98,7 @@ services:
       - MAILGUN_API_KEY=${MAILGUN_API_KEY}
       - MAILGUN_API_URL=${MAILGUN_API_URL}
       - MAILGUN_FROM=${MAILGUN_FROM}
+      - SINGLE_USER_ID=ec7c62b2-65f5-46d0-be28-51c5e6d206ea
     depends_on:
       database:
         condition: service_healthy
