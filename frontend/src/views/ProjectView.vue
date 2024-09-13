@@ -1,5 +1,5 @@
 <template>
-  <ArchivesList />
+  <ArchivesList v-if="!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER" />
 
   <div
     class="card m-5"
@@ -93,7 +93,7 @@
       </UploadFilesComponent>
     </div>
   </div>
-  <div class="m-5">
+  <div class="m-5" v-if="!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER">
     <ZIMMetadataComponent />
   </div>
 </template>
