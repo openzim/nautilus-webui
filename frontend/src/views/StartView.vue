@@ -1,6 +1,9 @@
 <template>
   <div class="d-flex flex-column vh-100">
     <div class="flex-shrink-1">
+      <div v-if="storeApp.constants.env.NAUTILUS_IS_SINGLE_USER">
+        <SingleUserHome />
+      </div>
       <Suspense>
         <CollectionsView v-if="isValidProjectId" />
         <HomeView v-else />
@@ -11,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import SingleUserHome from '@/views/SingleUserHome.vue'
 import FooterComponent from '@/components/FooterComponent.vue'
 import CollectionsView from './CollectionsView.vue'
 import HomeView from '@/views/HomeView.vue'

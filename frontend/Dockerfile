@@ -15,6 +15,7 @@ COPY entrypoint.sh /app/
 RUN ls /app
 
 ENV NAUTILUS_WEB_API http://localhost:8080/v1
+ENV NAUTILUS_IS_SINGLE_USER ""
 EXPOSE 80
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

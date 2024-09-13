@@ -7,12 +7,17 @@ from fastapi.responses import RedirectResponse
 
 from api import __description__, __titile__, __version__
 from api.constants import constants, determine_mandatory_environment_variables
+from api.database.utils import ensure_user_with
 from api.routes import archives, files, projects, users, utils
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     determine_mandatory_environment_variables()
+
+    if constants.single_user_id:
+        # make sure said user is present in DB (creates otherwise)
+        ensure_user_with(id_=constants.single_user)
     yield
 
 

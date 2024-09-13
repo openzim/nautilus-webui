@@ -133,6 +133,7 @@ export interface Environ {
   NAUTILUS_FILE_QUOTA: number
   NAUTILUS_PROJECT_QUOTA: number
   NAUTILUS_FILE_REFRESH_EVERY_MS: number
+  NAUTILUS_IS_SINGLE_USER: boolean
 }
 
 export interface AlertMessage {
@@ -165,7 +166,8 @@ export const EmptyConstants = new Constants({
   NAUTILUS_WEB_API: 'noapi',
   NAUTILUS_FILE_QUOTA: 100000000,
   NAUTILUS_PROJECT_QUOTA: 100000000,
-  NAUTILUS_FILE_REFRESH_EVERY_MS: 1000
+  NAUTILUS_FILE_REFRESH_EVERY_MS: 1000,
+  NAUTILUS_IS_SINGLE_USER: false
 })
 
 // using iec to be consistent accross tools (MiB): jedec renders MiB as MB
