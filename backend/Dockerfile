@@ -25,7 +25,8 @@ ENV RUN_DB_MIGRATIONS ""
 VOLUME [ "/storage" ]
 
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends libmagic1 \
+    && apt-get install -y libcairo2 libmagic1 libtiff5-dev libjpeg-dev libopenjp2-7-dev zlib1g-dev \
+        libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev libxcb1-dev gifsicle \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml README.md tasks.py entrypoint.sh /app/

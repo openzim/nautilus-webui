@@ -14,20 +14,21 @@ classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
 dependencies = [
-  "fastapi==0.111.0",
-  "uvicorn[standard]==0.29.0",
-  "httpx==0.27.0",
-  "SQLAlchemy==2.0.30",
-  "alembic==1.13.1",
-  "psycopg[binary,pool]==3.1.18",
-  "pymongo==4.7.1",
+  "fastapi[standard]==0.114.2",
+  "uvicorn[standard]==0.29.0",#30.6
+  "httpx==0.27.2",
+  "SQLAlchemy==2.0.35",
+  "alembic==1.13.2",
+  "psycopg[binary,pool]==3.2.2",
+  "pymongo==4.8.0",
   "python-dateutil==2.9.0.post0",
   "kiwixstorage==0.9.0",
   "python-multipart==0.0.9",
-  "zimscraperlib==3.3.2",
+  "zimscraperlib==4.0.0",
   "humanfriendly==10.0",
   "rq==1.16.2",
-  "werkzeug==3.0.3",
+  "werkzeug==3.0.4",
+  "webdav4==0.10.0",
 ]
 dynamic = ["authors", "license", "version", "urls"]
 
@@ -36,22 +37,22 @@ scripts = [
   "invoke==2.2.0",
 ]
 lint = [
-  "black==24.4.2",
-  "ruff==0.4.3",
+  "black==24.8.0",
+  "ruff==0.6.5",
 ]
 check = [
-  "pyright==1.1.367",
-  "pytest == 8.2.0",  # import pytest in tests
+  "pyright==1.1.380",
+  "pytest == 8.3.3",  # import pytest in tests
 ]
 test = [
-  "pytest==8.2.0",
-  "coverage==7.5.1",
+  "pytest==8.3.3",
+  "coverage==7.6.1",
   "pytest-mock==3.14.0",
-  "trio == 0.25.1"
+  "trio == 0.26.2"
 ]
 dev = [
-  "ipython==8.25.0",
-  "pre-commit==3.7.0",
+  "ipython==8.27.0",
+  "pre-commit==3.8.0",
   "nautilus-api[scripts]",
   "nautilus-api[lint]",
   "nautilus-api[test]",

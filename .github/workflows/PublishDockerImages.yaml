@@ -7,9 +7,9 @@ on:
 
 jobs:
   api:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build and push Docker image
       uses: openzim/docker-publish-action@v10
       with:
@@ -27,9 +27,9 @@ jobs:
         repo_overview: auto
 
   frontend:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build and push Docker image
       uses: openzim/docker-publish-action@v10
       with:
@@ -48,7 +48,7 @@ jobs:
 
   deploy:
     needs: [api,frontend]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Restart live webapp
       uses: actions-hub/kubectl@master
