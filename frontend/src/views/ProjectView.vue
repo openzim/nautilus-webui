@@ -1,7 +1,10 @@
 <template>
   <ArchivesList v-if="!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER" />
 
+  <SaveWebDAVPathComponent v-if="requiresWebdavPath" />
+  <ReloadWebDAVPathComponent v-if="!requiresWebdavPath && canSetWebdavPath" />
   <div
+    v-show="!requiresWebdavPath"
     class="card m-5"
     :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }"
   >
@@ -103,6 +106,9 @@ import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import ZIMMetadataComponent from '@/components/ZIMMetadataComponent.vue'
 import ArchivesList from '@/components/ArchivesList.vue'
+import SaveWebDAVPathComponent from '@/components/SaveWebDAVPathComponent.vue'
+import ReloadWebDAVPathComponent from '@/components/ReloadWebDAVPathComponent.vue'
+
 import {
   FileStatus,
   type File,
@@ -125,6 +131,7 @@ const storeApp = useAppStore()
 const storeProject = useProjectStore()
 const storeModal = useModalStore()
 const { lastProjectId } = storeToRefs(storeProject)
+const { lastProject } = storeToRefs(storeProject)
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, ClientVisibleFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
@@ -141,6 +148,15 @@ const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
 const beUpdatedFile: Ref<Map<string, { fileId: string; metadata: FileMetadataForm }>> = ref(
   new Map()
 )
+const canSetWebdavPath = computed(function() {
+  return storeApp.constants.env.NAUTILUS_IS_SINGLE_USER
+})
+const requiresWebdavPath = computed(function() {
+  if (!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER){
+    return false
+  }
+  return lastProject.value && lastProject.value.webdav_path === null
+})
 
 watch(lastProjectId, async () => {
   await refreshFiles()
@@ -161,7 +177,7 @@ async function refreshFiles() {
 
 async function refreshFileStatus() {
   for (const [renderId, clientFile] of files.value.entries()) {
-    if (clientFile.file.status != FileStatus.S3 && clientFile.file.status != FileStatus.FAILURE) {
+    if (clientFile.file.status != FileStatus.STORAGE && clientFile.file.status != FileStatus.FAILURE) {
       const newFile = await getSpecificFile(clientFile.file.project_id, clientFile.file.id)
       if (!newFile) {
         break

@@ -13,6 +13,7 @@ export interface Project {
   name: string
   created_on: string
   expire_on?: string
+  webdav_path?: string
 }
 
 export interface Archive {
@@ -116,7 +117,7 @@ export class NautilusFile implements File {
   }
 
   get isEditable(): boolean {
-    return this.status == FileStatus.S3
+    return this.status == FileStatus.STORAGE
   }
 }
 
@@ -124,7 +125,7 @@ export enum FileStatus {
   UPLOADING = 'UPLOADING',
   PROCESSING = 'PROCESSING',
   LOCAL = 'LOCAL',
-  S3 = 'S3',
+  STORAGE = 'STORAGE',
   FAILURE = 'FAILURE'
 }
 
@@ -134,6 +135,7 @@ export interface Environ {
   NAUTILUS_PROJECT_QUOTA: number
   NAUTILUS_FILE_REFRESH_EVERY_MS: number
   NAUTILUS_IS_SINGLE_USER: boolean
+  NAUTILUS_STORAGE_URL: string
 }
 
 export interface AlertMessage {
@@ -167,7 +169,8 @@ export const EmptyConstants = new Constants({
   NAUTILUS_FILE_QUOTA: 100000000,
   NAUTILUS_PROJECT_QUOTA: 100000000,
   NAUTILUS_FILE_REFRESH_EVERY_MS: 1000,
-  NAUTILUS_IS_SINGLE_USER: false
+  NAUTILUS_IS_SINGLE_USER: false,
+  NAUTILUS_STORAGE_URL: 'notset',
 })
 
 // using iec to be consistent accross tools (MiB): jedec renders MiB as MB

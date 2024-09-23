@@ -165,6 +165,8 @@ class Project(Base):
 
     user: Mapped[User] = relationship(back_populates="projects", init=False)
 
+    webdav_path: Mapped[str | None]
+
     files: Mapped[list["File"]] = relationship(cascade="all, delete-orphan")
     archives: Mapped[list["Archive"]] = relationship(cascade="all, delete-orphan")
 

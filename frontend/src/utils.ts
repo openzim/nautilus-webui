@@ -77,3 +77,21 @@ export async function refreshArchives() {
     storeApp.alertsError('Unable to retrieve archives info')
   }
 }
+
+
+export async function set_project_webdav_path(webdav_path: string) {
+  console.debug(`Setting WebDAV path to ${webdav_path}`)
+  const storeProject = useProjectStore()
+  const storeApp = useAppStore()
+  const requestData = {'webdav_path': webdav_path}
+  storeApp.axiosInstance
+    .post<File>(`/projects/${storeProject.lastProjectId}.dav`, requestData)
+    .then((response) => {
+      storeProject.replaceProject(response.data)
+      storeApp.alertsSuccess(`Successfuly retrieved WebDAV info.`)
+    })
+    .catch((error) => {
+      console.error(error)
+      storeApp.alertsError(`Unable to get/set WebDAV info`)
+    })
+}

@@ -94,7 +94,7 @@ async function updateProjectName(projectId: string, newName: string) {
   try {
     await storeApp.axiosInstance.patch<Project>(`/projects/${projectId}`, projectRequestData)
   } catch (error: any) {
-    console.log('Unable to update project name.', error, projectId)
+    console.error('Unable to update project name.', error, projectId)
     storeApp.alertsError(`Unable to update project name, project id: ${projectId}`)
     editingProjectName.value = projectName.value
   }

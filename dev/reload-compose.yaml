@@ -31,7 +31,7 @@ services:
       retries: 10
   worker:
     build:
-      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      dockerfile: ../backend/Dockerfile
       context: ../backend
     volumes:
       - nautilus-reload-storage:/storage
@@ -41,6 +41,7 @@ services:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
+      - WEBDAV_URL_WITH_CREDENTIALS=${WEBDAV_URL_WITH_CREDENTIALS}
       - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
@@ -70,7 +71,7 @@ services:
       - backend
   backend:
     build:
-      dockerfile: ../dev/backend-tools-tests/Dockerfile
+      dockerfile: ../backend/Dockerfile
       context: ../backend
     volumes:
       - nautilus-reload-storage:/storage
@@ -83,6 +84,7 @@ services:
       - POSTGRES_URI=${POSTGRES_URI}
       - REDIS_URI=${REDIS_URI}
       - S3_URL_WITH_CREDENTIALS=${S3_URL_WITH_CREDENTIALS}
+      - WEBDAV_URL_WITH_CREDENTIALS=${WEBDAV_URL_WITH_CREDENTIALS}
       - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}

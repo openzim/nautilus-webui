@@ -13,6 +13,7 @@ import requests
 from httpx import AsyncClient
 from starlette.testclient import TestClient
 
+from api import storage
 from api.database import Session
 from api.database.models import (
     Archive,
@@ -24,7 +25,6 @@ from api.database.models import (
 )
 from api.entrypoint import app
 from api.files import save_file
-from api.s3 import s3_storage
 
 pytestmark = pytest.mark.asyncio(scope="package")
 
@@ -168,6 +168,7 @@ def project_id(test_project_name, user_id):
         name=test_project_name,
         created_on=now,
         expire_on=None,
+        webdav_path=None,
         files=[],
         archives=[],
     )
@@ -193,6 +194,7 @@ def expiring_project_id(test_expiring_project_name, user_id):
         name=test_expiring_project_name,
         created_on=now,
         expire_on=now + datetime.timedelta(minutes=30),
+        webdav_path=None,
         files=[],
         archives=[],
     )
@@ -295,22 +297,19 @@ class SuccessStorage:
 
     def upload_fileobj(*args, **kwargs): ...
 
-    def set_object_autodelete_on(*args, **kwargs): ...
+    def set_autodelete_on(*args, **kwargs): ...
 
-    def has_object(*args, **kwargs):
+    def has(*args, **kwargs):
         return True
 
-    def check_credentials(*args, **kwargs):
-        return True
-
-    def delete_object(*args, **kwargs): ...
+    def delete(*args, **kwargs): ...
 
 
 @pytest.fixture
-def successful_s3_upload_file(monkeypatch):
+def successful_storage_upload_file(monkeypatch):
     """Requests.get() mocked to return {'mock_key':'mock_response'}."""
 
-    monkeypatch.setattr(s3_storage, "_storage", SuccessStorage())
+    monkeypatch.setattr(storage, "storage", SuccessStorage())
     yield True
 
 
