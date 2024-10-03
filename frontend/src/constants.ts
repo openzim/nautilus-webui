@@ -170,7 +170,7 @@ export const EmptyConstants = new Constants({
   NAUTILUS_PROJECT_QUOTA: 100000000,
   NAUTILUS_FILE_REFRESH_EVERY_MS: 1000,
   NAUTILUS_IS_SINGLE_USER: false,
-  NAUTILUS_STORAGE_URL: 'notset',
+  NAUTILUS_STORAGE_URL: 'notset'
 })
 
 // using iec to be consistent accross tools (MiB): jedec renders MiB as MB

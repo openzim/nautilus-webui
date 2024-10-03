@@ -193,7 +193,8 @@ def expiring_project_id(test_expiring_project_name, user_id):
     new_project = Project(
         name=test_expiring_project_name,
         created_on=now,
-        expire_on=now + datetime.timedelta(minutes=30),
+        # so test on actual S3 can accomodate a 1d bucket compliance
+        expire_on=now + datetime.timedelta(hours=25),
         webdav_path=None,
         files=[],
         archives=[],

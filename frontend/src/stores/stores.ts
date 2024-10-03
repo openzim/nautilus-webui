@@ -29,15 +29,18 @@ export const useProjectStore = defineStore(
     }
 
     function setLastProjectId(newId: string) {
-      console.debug(`Switching to project #${newId} from`, lastProject.value ? lastProject.value.id : null)
+      console.debug(
+        `Switching to project: ${lastProject.value ? lastProject.value.id : null} -> #${newId}`
+      )
       lastProjectId.value = newId
-      lastProject.value = projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
+      lastProject.value =
+        projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
     }
 
     function replaceProject(project: Project) {
-      for (let idx: int = 0; idx <= projects.value.length; idx++) {
+      for (let idx: number = 0; idx <= projects.value.length; idx++) {
         if (projects.value[idx].id == project.id) {
-          projects.value[idx] = project
+          projects.value[idx].webdav_path = project.webdav_path
           return
         }
       }
@@ -84,9 +87,19 @@ export const useAppStore = defineStore('app', () => {
   const alertMessages: Ref<Map<string, AlertMessage>> = ref(new Map())
   const constants: Ref<Constants> = ref(EmptyConstants)
   const axiosInstance = ref(axios.create())
+  let timeout: number = -1
 
   function alertsSuccess(message: string) {
-    alertMessages.value.set(uuid(), { type: AlertType.SUCCESS, message: `SUCCESS: ${message}` })
+    const mid = uuid()
+    timeout = setTimeout(
+      () => {
+        clearTimeout(timeout)
+        clearError(mid)
+      },
+      2000,
+      mid
+    )
+    alertMessages.value.set(mid, { type: AlertType.SUCCESS, message: `SUCCESS: ${message}` })
   }
 
   function alertsInfo(message: string) {
@@ -119,13 +132,14 @@ export const useAppStore = defineStore('app', () => {
     }
 
     try {
-      await axiosInstance.value.get(`/config`)
-      .then((response) => {
-        constants.value.env.NAUTILUS_STORAGE_URL = response.data.NAUTILUS_STORAGE_URL
-      })
-      .catch((error) => {
-        console.error(`Unable to get STORAGE URL`, error)
-      })
+      await axiosInstance.value
+        .get(`/config`)
+        .then((response) => {
+          constants.value.env.NAUTILUS_STORAGE_URL = response.data.NAUTILUS_STORAGE_URL
+        })
+        .catch((error) => {
+          console.error(`Unable to get STORAGE URL`, error)
+        })
     } catch (error: unknown) {
       console.log('Error retrieving storage URL', error)
     }

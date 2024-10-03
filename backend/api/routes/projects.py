@@ -1,16 +1,17 @@
 import datetime
+import re
 from http import HTTPStatus
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import unquote, urljoin
 from uuid import UUID, uuid4
 
 import requests
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from api.constants import constants, logger
+from api.constants import StorageType, constants, logger
 from api.database import Session as DBSession
 from api.database import gen_session
 from api.database.models import (
@@ -22,6 +23,7 @@ from api.database.models import (
     User,
 )
 from api.routes import validated_project, validated_user
+from api.routes.archives import gen_collection_for, upload_file_to_storage
 from api.routes.files import FileStatus, validate_project_quota
 from api.storage import storage
 
@@ -123,12 +125,20 @@ async def update_project_webdav(
     project: Project = Depends(validated_project),
     session: Session = Depends(gen_session),
 ):
-    """Update a specific project by its id."""
-    stmt = (
-        update(Project)
-        .filter_by(id=project.id)
-        .values(webdav_path=project_request.webdav_path)
+    """Update a project's WebDAV path and update its Files accordingly"""
+
+    if constants.storage_type != StorageType.WEBDAV:
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Storage is not WebDAV")
+
+    # store decoded URL, removing leading and trailing slashes
+    webdav_path = re.sub(
+        r"/$", "", re.sub(r"^/", "", unquote(project_request.webdav_path))
     )
+
+    if ".." in webdav_path:
+        raise HTTPException(HTTPStatus.FORBIDDEN, "Directory traversal not allowed")
+
+    stmt = update(Project).filter_by(id=project.id).values(webdav_path=webdav_path)
     session.execute(stmt)
     session.refresh(project)
 
@@ -284,3 +294,26 @@ async def update_project_files_from_webdav(session: Session, project: Project):
         file = session.execute(stmt).scalar()
         if file:
             session.delete(file)
+
+
+@router.post("/{project_id}.json", response_model=ProjectModel)
+async def update_project_json_collection(project: Project = Depends(validated_project)):
+    """Request the update of the WebDAV-enable project's JSON collection"""
+
+    if constants.storage_type != StorageType.WEBDAV:
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Storage is not WebDAV")
+
+    if not constants.single_user_id:
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "API is not in single-user mode")
+
+    collection, collection_file, collection_hash = gen_collection_for(project=project)
+    collection_key = storage.get_companion_file_path(
+        project=project, file_hash=collection_hash, suffix="collection.json"
+    )
+
+    # upload it to Storage
+    upload_file_to_storage(
+        project=project, file=collection_file, storage_path=collection_key
+    )
+
+    return ProjectModel.model_validate(project)

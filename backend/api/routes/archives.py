@@ -289,8 +289,7 @@ def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO
             entry["authors"] = ", ".join(file.authors)
         entry["files"] = [
             {
-                "url": f"{constants.download_url}/"
-                f"{storage.get_file_path(file=file)}",
+                "url": f"{storage.public_url}{storage.get_file_path(file=file)}",
                 "filename": file.filename,
             }
         ]
@@ -308,11 +307,13 @@ def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO
 def upload_file_to_storage(project: Project, file: BinaryIO, storage_path: str):
 
     try:
-        if storage.has(storage_path):
+        # only in single-user mode are users allowed to overwrite
+        if not constants.single_user_id and storage.has(storage_path):
             logger.debug(f"Object `{storage_path}` already in Storage… weird but OK")
             return
         logger.debug(f"Uploading file to `{storage_path}`")
         storage.upload_fileobj(fileobj=file, path=storage_path)
+        logger.debug(f"Setting autodelete to `{project.expire_on}`")
         storage.set_autodelete_on(storage_path, project.expire_on)
     except Exception as exc:
         logger.error(f"File failed to upload to Storage `{storage_path}`: {exc}")
@@ -389,7 +390,7 @@ async def request_archive(
 
     # Everything's on Storage, prepare and submit a ZF request
     request_def = RequestSchema(
-        collection_url=f"{constants.download_url}/{collection_key}",
+        collection_url=f"{storage.public_url}/{collection_key}",
         name=archive.config.name,
         title=archive.config.title,
         description=archive.config.description,
@@ -399,11 +400,9 @@ async def request_archive(
         publisher=archive.config.publisher,
         tags=archive.config.tags,
         main_logo_url=(
-            f"{constants.download_url}/{main_logo_key}"
-            if archive.config.main_logo
-            else ""
+            f"{storage.public_url}/{main_logo_key}" if archive.config.main_logo else ""
         ),
-        illustration_url=f"{constants.download_url}/{illus_key}",
+        illustration_url=f"{storage.public_url}/{illus_key}",
     )
     task_id = request_task(
         project_id=project.id,

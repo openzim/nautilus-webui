@@ -3,6 +3,7 @@ import hashlib
 from collections.abc import Generator
 from pathlib import Path
 from typing import BinaryIO
+from urllib.parse import parse_qs
 
 from kiwixstorage import KiwixStorage
 
@@ -41,20 +42,18 @@ class S3Storage(StorageInterface):
     @property
     def public_url(self) -> str:
         uri = self.storage.url
-        query_bucket = uri.query.get("bucketName")
-        # TODO: not working
-        uri = (
-            uri._replace(username=None)
-            ._replace(password=None)
-            ._replace(query=None)
-            ._replace(params=None)
-        )
+        port_suffix = f":{uri.port}" if uri.port else ""
+        # replace with same URL but without credentials
+        uri = uri._replace(netloc=f"{uri.hostname}{port_suffix}")
+        query_bucket = parse_qs(uri.query).get("bucketName")
+        # remove extra stuff
+        uri = uri._replace(query=None)._replace(params=None)
         # we know its wasabi, use subdomain
         if query_bucket:
             if uri.hostname.endswith("wasabisys.com") and uri.hostname.startswith(
                 "s3."
             ):
-                uri._replace(hostname=f"{query_bucket}.{uri.hostname}")
+                uri._replace(netloc=f"{query_bucket}.{uri.hostname}{port_suffix}")
             else:
                 uri._replace(path=f"/{query_bucket}{uri.path}")
         return uri.geturl()

@@ -58,7 +58,7 @@ class BackendConf:
         humanfriendly.parse_timespan(os.getenv("S3_RETRY_TIMES") or "10s")
     )
     s3_deletion_delay: datetime.timedelta = datetime.timedelta(
-        hours=int(os.getenv("S3_REMOVE_DELETEDUPLOADING_AFTER_HOURS", "12"))
+        hours=int(os.getenv("S3_REMOVE_DELETEDUPLOADING_AFTER_HOURS", "25"))
     )
     private_salt = os.getenv(
         "PRIVATE_SALT", uuid.uuid4().hex
@@ -79,11 +79,6 @@ class BackendConf:
 
     # Deployment
     public_url: str = os.getenv("PUBLIC_URL") or "http://localhost"
-    # /!\ this must match the region/bucket on s3 credentials
-    download_url: str = (
-        os.getenv("DOWNLOAD_URL")
-        or "https://s3.eu-west-2.wasabisys.com/org-kiwix-nautilus"
-    )
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
         "http://localhost",

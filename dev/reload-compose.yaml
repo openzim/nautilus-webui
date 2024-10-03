@@ -45,6 +45,7 @@ services:
       - PRIVATE_SALT=secrectkey
       - TRANSIENT_STORAGE_PATH=/storage
       - CHANNEL_NAME=${CHANNEL_NAME}
+      - SINGLE_USER_ID=ec7c62b2-65f5-46d0-be28-51c5e6d206ea
       - DEBUG=1
     entrypoint: ''
     command: ["rq-worker"]

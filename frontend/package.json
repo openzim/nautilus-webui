@@ -25,6 +25,7 @@
     "luxon": "^3.5.0",
     "pinia": "^2.0.36",
     "pinia-plugin-persistedstate": "^3.2.0",
+    "sanitize-filename": "^1.6.3",
     "smart-tagz": "^0.4.1",
     "uuid": "^9.0.0",
     "vue": "^3.3.2",

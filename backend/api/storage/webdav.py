@@ -84,7 +84,6 @@ class WebDAVStorage(StorageInterface):
         logger.warning(
             f"requested autodelete for {path} while storage doesnt support it"
         )
-        return
 
     def upload_file(self, fpath: Path, path: str):
         self.storage.upload_file(from_path=fpath, to_path=path, overwrite=True)
@@ -141,13 +140,13 @@ class WebDAVStorage(StorageInterface):
         return f"{project.webdav_path}/{file.filename}"
 
     def get_companion_file_path(
-        self, project: Project, file_hash: str, suffix: str
+        self, project: Project, file_hash: str, suffix: str  # noqa: ARG002
     ) -> str:
         """S3 key for a Project's companion file (not a File)"""
         # using project_id/ pattern to ease browsing bucket for objects
         if project.webdav_path is None:
             raise ValueError("project unconfigured: no webdav_path")
-        return f"{project.webdav_path!s}/{file_hash}_{suffix}"
+        return f"{project.webdav_path!s}/{suffix}"
 
 
 def explode_webdav_credentials(url: str) -> tuple[str, tuple[str, str] | None]:

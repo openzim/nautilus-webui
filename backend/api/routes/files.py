@@ -134,7 +134,7 @@ def upload_file_to_storage(new_file_id: UUID):
     """Update local file to Storage and update file status"""
     new_file = get_file_by_id(new_file_id)
     project = get_project_by_id(new_file.project_id)
-    if not project.expire_on:
+    if not constants.single_user_id and not project.expire_on:
         raise ValueError(f"Project: {project.id} does not have expire date.")
 
     if new_file.status == FileStatus.PROCESSING:
