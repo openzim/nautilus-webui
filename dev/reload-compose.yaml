@@ -47,7 +47,7 @@ services:
       - CHANNEL_NAME=${CHANNEL_NAME}
       - SINGLE_USER_ID=ec7c62b2-65f5-46d0-be28-51c5e6d206ea
       - DEBUG=1
-    entrypoint: ''
+    entrypoint: ""
     command: ["rq-worker"]
     depends_on:
       - backend
@@ -95,7 +95,6 @@ services:
       - ZIMFARM_API_PASSWORD=${ZIMFARM_API_PASSWORD}
       - ZIMFARM_TASK_WORKER=${ZIMFARM_TASK_WORKER}
       - ZIMFARM_CALLBACK_BASE_URL=${ZIMFARM_CALLBACK_BASE_URL}
-      - DOWNLOAD_URL=${DOWNLOAD_URL}
       - DEBUG=1
       - ZIMFARM_CALLBACK_TOKEN=${ZIMFARM_CALLBACK_TOKEN}
       - MAILGUN_API_KEY=${MAILGUN_API_KEY}
