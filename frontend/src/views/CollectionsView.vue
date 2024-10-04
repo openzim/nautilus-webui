@@ -34,8 +34,8 @@ const hasValidProjectId = computed(() => storeProject.lastProjectId != null)
 .sidebar {
   background-color: var(--main-color);
   height: 100vh;
-  width: 25%;
-  max-width: 20em;
+  width: 33%;
+  max-width: 25em;
 }
 
 .content {

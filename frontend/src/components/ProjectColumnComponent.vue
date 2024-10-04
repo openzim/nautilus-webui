@@ -139,6 +139,6 @@ async function clickDeleteProjectButton() {
 
 .project-name {
   cursor: text;
-  max-width: 8em;
+  max-width: 100%;
 }
 </style>
