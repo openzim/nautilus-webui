@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { type Project } from '@/constants'
 import type { User } from '@/constants'
 import { useAppStore, useProjectStore } from '@/stores/stores'
@@ -50,11 +51,15 @@ async function retrieveProjects(): Promise<Project[]> {
   return projects
 }
 
-await restrieveUser()
-const projects = await retrieveProjects()
-storeProject.setProjects(projects)
-if (projects.length) {
-  storeProject.setLastProjectId(projects[projects.length - 1].id)
-}
-router.push('/collections')
+onMounted(() => {
+  restrieveUser().then(() => {
+    retrieveProjects().then((projects) => {
+      storeProject.setProjects(projects)
+      if (projects.length) {
+        storeProject.setLastProjectId(projects[projects.length - 1].id)
+      }
+      router.push('/collections')
+    })
+  })
+})
 </script>
