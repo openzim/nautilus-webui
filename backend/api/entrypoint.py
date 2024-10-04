@@ -2,13 +2,13 @@ import sys
 
 import uvicorn
 
+from api import storage
 from api.main import create_app  # pragma: no cover
-from api.s3 import s3_storage
 
 # dont check S3 credentials URL in tests
 if "pytest" not in sys.modules:
-    # raises should S3 credentials URL be malformed
-    _ = s3_storage.storage
+    # raises should S3 credentials URL be malformed (attempts to use)
+    _ = storage.storage
 app = create_app()  # pragma: no cover
 
 

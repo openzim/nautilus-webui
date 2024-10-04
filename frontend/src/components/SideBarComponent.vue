@@ -35,8 +35,11 @@ const storeProject = useProjectStore()
 await updateProjects()
 
 async function createAndUpdateProject() {
-  await createNewProject('New Project')
-  await updateProjects()
+  let new_project = await createNewProject('New Project')
+  if (new_project) {
+    await updateProjects()
+    storeProject.setLastProjectId(new_project.id)
+  }
 }
 
 function removeProjectFromList(project: Project) {

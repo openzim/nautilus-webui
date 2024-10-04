@@ -142,7 +142,9 @@ class User(Base):
     created_on: Mapped[datetime]
 
     projects: Mapped[list["Project"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="desc(Project.created_on)",
     )
 
 
@@ -165,8 +167,14 @@ class Project(Base):
 
     user: Mapped[User] = relationship(back_populates="projects", init=False)
 
-    files: Mapped[list["File"]] = relationship(cascade="all, delete-orphan")
-    archives: Mapped[list["Archive"]] = relationship(cascade="all, delete-orphan")
+    webdav_path: Mapped[str | None]
+
+    files: Mapped[list["File"]] = relationship(
+        cascade="all, delete-orphan", order_by="File.id"
+    )
+    archives: Mapped[list["Archive"]] = relationship(
+        cascade="all, delete-orphan", order_by="desc(Archive.created_on)"
+    )
 
     @property
     def used_space(self):

@@ -16,7 +16,7 @@ from api.database.models import File, Project
 from api.database.utils import get_file_by_id, get_project_by_id
 from api.files import calculate_file_size, generate_file_hash, save_file
 from api.routes import validated_project
-from api.s3 import s3_file_key, s3_storage
+from api.storage import storage
 from api.store import task_queue
 
 router = APIRouter()
@@ -48,7 +48,7 @@ class FileModel(BaseModel):
 
 class FileStatus(str, Enum):
     LOCAL = "LOCAL"
-    S3 = "S3"
+    STORAGE = "STORAGE"
     FAILURE = "FAILURE"
     PROCESSING = "PROCESSING"
 
@@ -130,11 +130,11 @@ def update_file_path(file: File, path: str):
     update_file_status_and_path(file, file.status, path)
 
 
-def upload_file_to_s3(new_file_id: UUID):
-    """Update local file to S3 storage and update file status"""
+def upload_file_to_storage(new_file_id: UUID):
+    """Update local file to Storage and update file status"""
     new_file = get_file_by_id(new_file_id)
     project = get_project_by_id(new_file.project_id)
-    if not project.expire_on:
+    if not constants.single_user_id and not project.expire_on:
         raise ValueError(f"Project: {project.id} does not have expire date.")
 
     if new_file.status == FileStatus.PROCESSING:
@@ -142,35 +142,38 @@ def upload_file_to_s3(new_file_id: UUID):
     else:
         update_file_status(new_file, FileStatus.PROCESSING)
 
-    s3_key = s3_file_key(new_file.project_id, new_file.hash)
-
     try:
-        if s3_storage.storage.has_object(s3_key):
-            logger.debug(f"Object `{s3_key}` for File {new_file_id} already in S3")
-            update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+        storage_path = storage.get_file_path(file=new_file)
+        if storage.has(storage_path):
+            logger.debug(
+                f"Object `{storage_path}` for File {new_file_id} already in Storage"
+            )
+            update_file_status_and_path(new_file, FileStatus.STORAGE, storage_path)
             return
-        logger.debug(f"Uploading {new_file_id}: `{new_file.local_fpath}` to `{s3_key}`")
-        s3_storage.storage.upload_file(fpath=new_file.local_fpath, key=s3_key)
+        logger.debug(
+            f"Uploading {new_file_id}: `{new_file.local_fpath}` to `{storage_path}`"
+        )
+        storage.upload_file(fpath=new_file.local_fpath, path=storage_path)
         logger.debug(f"Uploaded {new_file_id}. Removing `{new_file.local_fpath}`…")
         new_file.local_fpath.unlink(missing_ok=True)
-        s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
-        update_file_status_and_path(new_file, FileStatus.S3, s3_key)
+        storage.set_autodelete_on(storage_path, project.expire_on)
+        update_file_status_and_path(new_file, FileStatus.STORAGE, storage_path)
     except Exception as exc:
-        logger.error(f"File: {new_file_id} failed to upload to s3: {exc}")
+        logger.error(f"File: {new_file_id} failed to upload to Storage: {exc}")
         update_file_status(new_file, FileStatus.FAILURE)
         raise exc
 
 
-def delete_key_from_s3(s3_file_key: str):
-    """Delete files from S3."""
-    logger.warning(f"File: {s3_file_key} starts deletion from S3")
-    if not s3_storage.storage.has_object(s3_file_key):
-        logger.debug(f"{s3_file_key} does not exist in S3")
+def delete_from_storage(storage_path: str):
+    """Delete files from Storage."""
+    logger.warning(f"File: {storage_path} starts deletion from Storage")
+    if not storage.has(storage_path):
+        logger.debug(f"{storage_path} does not exist in Storage")
         return
     try:
-        s3_storage.storage.delete_object(s3_file_key)
+        storage.delete(storage_path)
     except Exception as exc:
-        logger.error(f"File: {s3_file_key} failed to be deleted from S3")
+        logger.error(f"File: {storage_path} failed to be deleted from Storage")
         logger.exception(exc)
 
 
@@ -239,7 +242,7 @@ async def create_file(
         indep_session.refresh(new_file)
         file_id = str(new_file.id)
     # request file upload by rq-worker
-    task_queue.enqueue(upload_file_to_s3, file_id, retry=constants.job_retry)
+    task_queue.enqueue(upload_file_to_storage, file_id, retry=constants.job_retry)
 
     # fetch File from DB in this session to return it
     file = session.execute(select(File).filter_by(id=file_id)).scalar()
@@ -295,14 +298,12 @@ async def delete_file(
     if number_of_duplicate_files == 1:
         if file.status == FileStatus.LOCAL:
             file.local_fpath.unlink(missing_ok=True)
-        if file.status == FileStatus.S3:
-            task_queue.enqueue(
-                delete_key_from_s3, s3_file_key(file.project_id, file.hash)
-            )
+        if file.status == FileStatus.STORAGE:
+            task_queue.enqueue(delete_from_storage, storage.get_file_path(file=file))
         if file.status == FileStatus.PROCESSING:
             task_queue.enqueue_at(
                 datetime.datetime.now(tz=datetime.UTC) + constants.s3_deletion_delay,
-                delete_key_from_s3,
-                s3_file_key(file.project_id, file.hash),
+                delete_from_storage,
+                storage.get_file_path(file=file),
             )
     session.delete(file)

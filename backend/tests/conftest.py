@@ -24,7 +24,6 @@ from api.database.models import (
 )
 from api.entrypoint import app
 from api.files import save_file
-from api.s3 import s3_storage
 
 pytestmark = pytest.mark.asyncio(scope="package")
 
@@ -168,6 +167,7 @@ def project_id(test_project_name, user_id):
         name=test_project_name,
         created_on=now,
         expire_on=None,
+        webdav_path=None,
         files=[],
         archives=[],
     )
@@ -192,7 +192,9 @@ def expiring_project_id(test_expiring_project_name, user_id):
     new_project = Project(
         name=test_expiring_project_name,
         created_on=now,
-        expire_on=now + datetime.timedelta(minutes=30),
+        # so test on actual S3 can accomodate a 1d bucket compliance
+        expire_on=now + datetime.timedelta(hours=25),
+        webdav_path=None,
         files=[],
         archives=[],
     )
@@ -289,28 +291,78 @@ def expiring_archive_id(test_archive_name, expiring_project_id):
             session.delete(archive)
 
 
-class SuccessStorage:
+class FakeKiwixStorage:
+    def check_credentials(self, *args, **kwargs):
+        print("FAKE::KiwixStorage::check_credentials")
 
-    def upload_file(*args, **kwargs): ...
+    def has_object(self, key):
+        print("FAKE::KiwixStorage::has_object")
+        return False
 
-    def upload_fileobj(*args, **kwargs): ...
+    def upload_file(*args, **kwargs):
+        print("FAKE::KiwixStorage::upload_file")
 
-    def set_object_autodelete_on(*args, **kwargs): ...
+    def upload_fileobj(*args, **kwargs):
+        print("FAKE::KiwixStorage::upload_fileobj")
 
-    def has_object(*args, **kwargs):
-        return True
+    def delete_object(self, key):
+        print("FAKE::KiwixStorage::delete_object")
 
-    def check_credentials(*args, **kwargs):
-        return True
-
-    def delete_object(*args, **kwargs): ...
+    def set_object_autodelete_on(self, key, on):
+        print("FAKE::KiwixStorage::set_object_autodelete_on")
 
 
 @pytest.fixture
-def successful_s3_upload_file(monkeypatch):
-    """Requests.get() mocked to return {'mock_key':'mock_response'}."""
+def successful_storage_upload_file(monkeypatch):
+    @property
+    def fake_public_url(self) -> str:
+        print("FAKE::S3Storage::public_url")
+        return "public_url"
 
-    monkeypatch.setattr(s3_storage, "_storage", SuccessStorage())
+    def fake_upload_file(*args, **kwargs): ...
+
+    def fake_upload_fileobj(*args, **kwargs): ...
+
+    def fake_set_autodelete_on(*args, **kwargs): ...
+
+    def fake_has(*args, **kwargs):
+        print("FAKE::S3Storage::has")
+        return False
+
+    def fake_delete(*args, **kwargs): ...
+
+    def fake_list(self, prefix: str): ...
+
+    def fake_mkdir(
+        self, path: str, *, parents: bool = True, exists_ok: bool = True
+    ): ...
+
+    def fake_get_file_path(self, file: File) -> str:
+        print("FAKE::S3Storage::fake_get_file_path")
+        return file.path
+
+    def fake_get_companion_file_path(
+        self, project: Project, file_hash: str, suffix: str
+    ) -> str:
+        print("FAKE::S3Storage::fake_get_companion_file_path")
+        return suffix
+
+    from api.storage.s3 import S3Storage
+
+    monkeypatch.setattr(S3Storage, "storage", FakeKiwixStorage())
+    monkeypatch.setattr(S3Storage, "public_url", fake_public_url)
+    monkeypatch.setattr(S3Storage, "upload_file", fake_upload_file)
+    monkeypatch.setattr(S3Storage, "upload_fileobj", fake_upload_fileobj)
+    monkeypatch.setattr(S3Storage, "set_autodelete_on", fake_set_autodelete_on)
+    monkeypatch.setattr(S3Storage, "has", fake_has)
+    monkeypatch.setattr(S3Storage, "delete", fake_delete)
+    monkeypatch.setattr(S3Storage, "list", fake_list)
+    monkeypatch.setattr(S3Storage, "mkdir", fake_mkdir)
+    monkeypatch.setattr(S3Storage, "get_file_path", fake_get_file_path)
+    monkeypatch.setattr(
+        S3Storage, "get_companion_file_path", fake_get_companion_file_path
+    )
+
     yield True
 
 

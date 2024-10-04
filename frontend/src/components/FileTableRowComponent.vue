@@ -34,7 +34,7 @@
     </td>
     <td class="align-middle ps-4">
       <ToolTipsComponent
-        v-if="props.clientVisibleFile.file.status == FileStatus.S3"
+        v-if="props.clientVisibleFile.file.status == FileStatus.STORAGE"
         title="File is uploaded"
       >
         <font-awesome-icon class="text-primary fs-5" :icon="['fas', 'check']" />

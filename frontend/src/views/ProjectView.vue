@@ -1,7 +1,12 @@
 <template>
-  <ArchivesList v-if="!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER" />
-
+  <ArchivesList v-show="!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER" />
+  <SaveWebDAVPathComponent v-show="requiresWebdavPath" @updated-webdav="onWebDAVUpdate" />
+  <ReloadWebDAVPathComponent
+    v-show="!requiresWebdavPath && canSetWebdavPath"
+    @updated-webdav="onWebDAVUpdate"
+  />
   <div
+    v-show="!requiresWebdavPath"
     class="card m-5"
     :class="{ border: isActive, 'border-3': isActive, 'drag-active': isActive }"
   >
@@ -103,6 +108,9 @@ import FileTableRowComponent from '@/components/FileTableRowComponent.vue'
 import FileTableHeaderComponent from '@/components/FileTableHeaderComponent.vue'
 import ZIMMetadataComponent from '@/components/ZIMMetadataComponent.vue'
 import ArchivesList from '@/components/ArchivesList.vue'
+import SaveWebDAVPathComponent from '@/components/SaveWebDAVPathComponent.vue'
+import ReloadWebDAVPathComponent from '@/components/ReloadWebDAVPathComponent.vue'
+
 import {
   FileStatus,
   type File,
@@ -125,6 +133,7 @@ const storeApp = useAppStore()
 const storeProject = useProjectStore()
 const storeModal = useModalStore()
 const { lastProjectId } = storeToRefs(storeProject)
+const { lastProject } = storeToRefs(storeProject)
 const storeInitialFileStore = useInitialFilesStore()
 const files: Ref<Map<string, ClientVisibleFile>> = ref(new Map())
 const selectedFiles: Ref<Map<string, boolean>> = ref(new Map())
@@ -141,11 +150,27 @@ const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
 const beUpdatedFile: Ref<Map<string, { fileId: string; metadata: FileMetadataForm }>> = ref(
   new Map()
 )
+const canSetWebdavPath = computed(function () {
+  return storeApp.constants.env.NAUTILUS_IS_SINGLE_USER
+})
+const requiresWebdavPath = computed(function () {
+  if (!storeApp.constants.env.NAUTILUS_IS_SINGLE_USER) {
+    return false
+  }
+  return lastProject.value && lastProject.value.webdav_path === null
+})
 
 watch(lastProjectId, async () => {
   await refreshFiles()
   await refreshArchives()
 })
+
+async function onWebDAVUpdate(webdav_path: string | null) {
+  console.info('onWebDAVUpdate', webdav_path)
+  // lastProject.value.webdav_path = webdav_path
+  // console.debug('lastProject.value.webdav_path', lastProject.value.webdav_path)
+  await refreshFiles()
+}
 
 if (storeInitialFileStore.initialFiles.length == 0) {
   await refreshFiles()
@@ -161,7 +186,10 @@ async function refreshFiles() {
 
 async function refreshFileStatus() {
   for (const [renderId, clientFile] of files.value.entries()) {
-    if (clientFile.file.status != FileStatus.S3 && clientFile.file.status != FileStatus.FAILURE) {
+    if (
+      clientFile.file.status != FileStatus.STORAGE &&
+      clientFile.file.status != FileStatus.FAILURE
+    ) {
       const newFile = await getSpecificFile(clientFile.file.project_id, clientFile.file.id)
       if (!newFile) {
         break
@@ -199,7 +227,7 @@ async function getAllFiles(projectId: string | null) {
       result.push(NautilusFile.fromFile(file))
     }
   } catch (error: any) {
-    console.log('Unable to retrieve the files info', error)
+    console.error('Unable to retrieve the files info', error)
     storeApp.alertsWarning('Unable to retrieve the files info')
   }
   return result
@@ -213,7 +241,7 @@ async function getSpecificFile(projectId: string, fileId: string) {
     )
     result = response.data
   } catch (error: any) {
-    console.log('Unable to retrieve the files info', error)
+    console.error('Unable to retrieve the files info', error)
   }
   return result
 }
@@ -261,7 +289,7 @@ async function uploadFiles(uploadFiles: FileList) {
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.error(error)
           if (axios.isAxiosError(error)) {
             if (files.value.has(newFile.id)) {
               files.value.get(newFile.id)!.statusCode = error.code
@@ -309,7 +337,7 @@ async function deleteFiles() {
 
       deletedFiles.push(file)
     } catch (error: any) {
-      console.log('Unable to delete the file', storeProject.lastProjectId, error)
+      console.error('Unable to delete the file', storeProject.lastProjectId, error)
       storeApp.alertsWarning(`Unable to delete the file: ${file.filename}`)
     }
   }
@@ -441,7 +469,7 @@ async function updateSingleFileMetadata(
       newMetaData
     )
   } catch (error) {
-    console.log("Unable to update file's metadata.", error, fileId)
+    console.error("Unable to update file's metadata.", error, fileId)
     storeApp.alertsError(`Unable to update file's metadata, file id: ${fileId}`)
   }
   files.value.get(renderId)!.file.title = newMetaData.title

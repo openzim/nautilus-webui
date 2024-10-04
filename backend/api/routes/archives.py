@@ -26,7 +26,7 @@ from api.files import (
     read_file_in_chunks,
 )
 from api.routes import userless_validated_project, validated_project
-from api.s3 import s3_file_key, s3_storage
+from api.storage import storage
 from api.zimfarm import RequestSchema, WebhookPayload, request_task
 
 router = APIRouter()
@@ -289,7 +289,7 @@ def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO
             entry["authors"] = ", ".join(file.authors)
         entry["files"] = [
             {
-                "url": f"{constants.download_url}/{s3_file_key(project.id, file.hash)}",
+                "url": f"{storage.public_url}{storage.get_file_path(file=file)}",
                 "filename": file.filename,
             }
         ]
@@ -304,22 +304,19 @@ def gen_collection_for(project: Project) -> tuple[list[dict[str, Any]], BinaryIO
     return collection, file, digest
 
 
-def get_file_key(project_id: UUID, file_hash: str, suffix: str) -> str:
-    # suffix useful to debug live URLs in-browser
-    return f"{s3_file_key(project_id=project_id, file_hash=file_hash)}{suffix}"
-
-
-def upload_file_to_s3(project: Project, file: BinaryIO, s3_key: str):
+def upload_file_to_storage(project: Project, file: BinaryIO, storage_path: str):
 
     try:
-        if s3_storage.storage.has_object(s3_key):
-            logger.debug(f"Object `{s3_key}` already in S3… weird but OK")
+        # only in single-user mode are users allowed to overwrite
+        if not constants.single_user_id and storage.has(storage_path):
+            logger.debug(f"Object `{storage_path}` already in Storage… weird but OK")
             return
-        logger.debug(f"Uploading file to `{s3_key}`")
-        s3_storage.storage.upload_fileobj(fileobj=file, key=s3_key)
-        s3_storage.storage.set_object_autodelete_on(s3_key, project.expire_on)
+        logger.debug(f"Uploading file to `{storage_path}`")
+        storage.upload_fileobj(fileobj=file, path=storage_path)
+        logger.debug(f"Setting autodelete to `{project.expire_on}`")
+        storage.set_autodelete_on(storage_path, project.expire_on)
     except Exception as exc:
-        logger.error(f"File failed to upload to s3 `{s3_key}`: {exc}")
+        logger.error(f"File failed to upload to Storage `{storage_path}`: {exc}")
         raise exc
 
 
@@ -357,39 +354,43 @@ async def request_archive(
 
     # upload illustration
     illustration = io.BytesIO(base64.b64decode(archive.config.illustration))
-    illus_key = get_file_key(
-        project_id=archive.project_id,
+    illus_key = storage.get_companion_file_path(
+        project=project,
         file_hash=generate_file_hash(illustration),
-        suffix=".png",
+        suffix="illustration.png",
     )
     illustration.seek(0)
-    # upload it to S3
-    upload_file_to_s3(project=project, file=illustration, s3_key=illus_key)
+    # upload it to Storage
+    upload_file_to_storage(project=project, file=illustration, storage_path=illus_key)
 
     # upload main-logo
     if archive.config.main_logo:
         main_logo = io.BytesIO(base64.b64decode(archive.config.main_logo))
-        main_logo_key = get_file_key(
-            project_id=archive.project_id,
+        main_logo_key = storage.get_companion_file_path(
+            project=project,
             file_hash=generate_file_hash(main_logo),
-            suffix=".png",
+            suffix="main-logo.png",
         )
         main_logo.seek(0)
-        # upload it to S3
-        upload_file_to_s3(project=project, file=main_logo, s3_key=main_logo_key)
+        # upload it to Storage
+        upload_file_to_storage(
+            project=project, file=main_logo, storage_path=main_logo_key
+        )
 
     # gen collection and stream
     collection, collection_file, collection_hash = gen_collection_for(project=project)
-    collection_key = get_file_key(
-        project_id=archive.project_id, file_hash=collection_hash, suffix=".json"
+    collection_key = storage.get_companion_file_path(
+        project=project, file_hash=collection_hash, suffix="collection.json"
     )
 
-    # upload it to S3
-    upload_file_to_s3(project=project, file=collection_file, s3_key=collection_key)
+    # upload it to Storage
+    upload_file_to_storage(
+        project=project, file=collection_file, storage_path=collection_key
+    )
 
-    # Everything's on S3, prepare and submit a ZF request
+    # Everything's on Storage, prepare and submit a ZF request
     request_def = RequestSchema(
-        collection_url=f"{constants.download_url}/{collection_key}",
+        collection_url=f"{storage.public_url}/{collection_key}",
         name=archive.config.name,
         title=archive.config.title,
         description=archive.config.description,
@@ -399,11 +400,9 @@ async def request_archive(
         publisher=archive.config.publisher,
         tags=archive.config.tags,
         main_logo_url=(
-            f"{constants.download_url}/{main_logo_key}"
-            if archive.config.main_logo
-            else ""
+            f"{storage.public_url}/{main_logo_key}" if archive.config.main_logo else ""
         ),
-        illustration_url=f"{constants.download_url}/{illus_key}",
+        illustration_url=f"{storage.public_url}/{illus_key}",
     )
     task_id = request_task(
         project_id=project.id,

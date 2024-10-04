@@ -24,15 +24,28 @@ export const useProjectStore = defineStore(
     function setProjects(newIds: Array<Project>) {
       projects.value = newIds
       if (lastProjectId.value) {
-        lastProject.value =
-          projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
+        setLastProjectId(lastProjectId.value)
       }
     }
 
     function setLastProjectId(newId: string) {
+      console.debug(
+        `Switching to project: ${lastProject.value ? lastProject.value.id : null} -> #${newId}`
+      )
       lastProjectId.value = newId
       lastProject.value =
         projects.value.filter((project) => project.id == lastProjectId.value).at(0) || null
+    }
+
+    function replaceProject(project: Project) {
+      for (let idx: number = 0; idx <= projects.value.length; idx++) {
+        if (projects.value[idx].id == project.id) {
+          projects.value[idx].webdav_path = project.webdav_path
+          return
+        }
+      }
+      projects.value.push(project)
+      setLastProjectId(project.id)
     }
 
     function clearLastProjectId() {
@@ -58,6 +71,7 @@ export const useProjectStore = defineStore(
       lastProjectArchives,
       lastProjectPendingArchive,
       setLastProjectId,
+      replaceProject,
       clearLastProjectId,
       setProjects,
       setLastProjectArchives,
@@ -73,9 +87,19 @@ export const useAppStore = defineStore('app', () => {
   const alertMessages: Ref<Map<string, AlertMessage>> = ref(new Map())
   const constants: Ref<Constants> = ref(EmptyConstants)
   const axiosInstance = ref(axios.create())
+  let timeout: number = -1
 
   function alertsSuccess(message: string) {
-    alertMessages.value.set(uuid(), { type: AlertType.SUCCESS, message: `SUCCESS: ${message}` })
+    const mid = uuid()
+    timeout = setTimeout(
+      () => {
+        clearTimeout(timeout)
+        clearError(mid)
+      },
+      2000,
+      mid
+    )
+    alertMessages.value.set(mid, { type: AlertType.SUCCESS, message: `SUCCESS: ${message}` })
   }
 
   function alertsInfo(message: string) {
@@ -105,6 +129,19 @@ export const useAppStore = defineStore('app', () => {
     } catch (error: unknown) {
       console.log('Unable to retrieve the environ.json file', error)
       alertsError('Unable to retrieve the environ.json file')
+    }
+
+    try {
+      await axiosInstance.value
+        .get(`/config`)
+        .then((response) => {
+          constants.value.env.NAUTILUS_STORAGE_URL = response.data.NAUTILUS_STORAGE_URL
+        })
+        .catch((error) => {
+          console.error(`Unable to get STORAGE URL`, error)
+        })
+    } catch (error: unknown) {
+      console.log('Error retrieving storage URL', error)
     }
   }
 

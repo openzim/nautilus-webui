@@ -4,6 +4,7 @@ import os
 import tempfile
 import uuid
 from dataclasses import dataclass, field
+from enum import StrEnum
 from pathlib import Path
 from uuid import UUID
 
@@ -17,6 +18,11 @@ def determine_mandatory_environment_variables():
     for variable in ("POSTGRES_URI", "S3_URL_WITH_CREDENTIALS", "PRIVATE_SALT"):
         if not os.getenv(variable):
             raise OSError(f"Please set the {variable} environment variable")
+
+
+class StorageType(StrEnum):
+    WEBDAV = "webdav"
+    S3 = "s3"
 
 
 @dataclass(kw_only=True)
@@ -40,7 +46,7 @@ class BackendConf:
 
     # Scheduler process
     redis_uri: str = os.getenv("REDIS_URI") or "redis://localhost:6379/0"
-    channel_name: str = os.getenv("CHANNEL_NAME") or "s3_upload"
+    channel_name: str = os.getenv("CHANNEL_NAME") or "storage_upload"
 
     # Transient (on host disk) Storage
     transient_storage_path: Path = Path()
@@ -52,11 +58,19 @@ class BackendConf:
         humanfriendly.parse_timespan(os.getenv("S3_RETRY_TIMES") or "10s")
     )
     s3_deletion_delay: datetime.timedelta = datetime.timedelta(
-        hours=int(os.getenv("S3_REMOVE_DELETEDUPLOADING_AFTER_HOURS", "12"))
+        hours=int(os.getenv("S3_REMOVE_DELETEDUPLOADING_AFTER_HOURS", "25"))
     )
     private_salt = os.getenv(
         "PRIVATE_SALT", uuid.uuid4().hex
     )  # used to make S3 keys unguessable
+
+    # WebDAV Storage
+    webdav_url_with_credentials: str = os.getenv("WEBDAV_URL_WITH_CREDENTIALS") or ""
+    # webdav4 uses a single timeout mechanism for all requests,
+    # including the upload (PUT) ones which can be large
+    webdav_request_timeout_sec: int = int(
+        os.getenv("WEBDAV_REQUEST_TIMEOUT_SEC") or "900"
+    )
 
     # Cookies
     cookie_domain = os.getenv("COOKIE_DOMAIN", None)
@@ -65,11 +79,6 @@ class BackendConf:
 
     # Deployment
     public_url: str = os.getenv("PUBLIC_URL") or "http://localhost"
-    # /!\ this must match the region/bucket on s3 credentials
-    download_url: str = (
-        os.getenv("DOWNLOAD_URL")
-        or "https://s3.eu-west-2.wasabisys.com/org-kiwix-nautilus"
-    )
     allowed_origins = os.getenv(
         "ALLOWED_ORIGINS",
         "http://localhost",
@@ -137,6 +146,12 @@ class BackendConf:
     @property
     def single_user(self) -> UUID:
         return UUID(self.single_user_id)
+
+    @property
+    def storage_type(self) -> StorageType:
+        if self.webdav_url_with_credentials:
+            return StorageType.WEBDAV
+        return StorageType.S3
 
 
 constants = BackendConf()

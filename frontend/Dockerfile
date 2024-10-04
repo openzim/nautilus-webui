@@ -16,6 +16,7 @@ RUN ls /app
 
 ENV NAUTILUS_WEB_API http://localhost:8080/v1
 ENV NAUTILUS_IS_SINGLE_USER ""
+ENV NAUTILUS_STORAGE_URL "unknown"
 EXPOSE 80
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

@@ -237,7 +237,7 @@ async def test_request_archive_ready(
     project_id,
     expiring_project_id,
     expiring_archive_id,
-    successful_s3_upload_file,
+    successful_storage_upload_file,
     successful_zimfarm_request_task,
 ):
 
