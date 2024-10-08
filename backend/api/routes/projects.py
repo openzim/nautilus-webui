@@ -154,7 +154,11 @@ class NautilusCollection:
         self.data = data
         self.files_indexes: dict[str, int] = {}
         for index, entry in enumerate(self.data):
-            for filename in entry.get("files", []):
+            for fileentry in entry.get("files", []):
+                if isinstance(fileentry, str):
+                    filename = fileentry
+                else:
+                    filename = fileentry["filename"]
                 self.files_indexes[filename] = index
 
     def __getitem__(self, key: str):
