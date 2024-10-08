@@ -23,6 +23,14 @@
         >
           Re-generate JSON collection on WebDAV
         </button>
+        <button
+          class="btn btn-sm btn-outline-primary ms-2"
+          :disabled="!canRefresh"
+          @click.prevent="copyCollectionUrl"
+          title="Copy JSON Collection URL"
+        >
+          <font-awesome-icon :icon="['fa-regular', 'copy']" />
+        </button>
       </p>
     </div>
   </div>
@@ -31,11 +39,13 @@
 <script setup lang="ts">
 import { ref, computed, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import useClipboard from 'vue-clipboard3'
 import { useAppStore, useProjectStore } from '@/stores/stores'
 import { set_project_webdav_path } from '@/utils'
 import { type Project } from '@/constants'
 
 const emit = defineEmits<{ updatedWebdav: [webdav_path: string | null] }>()
+const { toClipboard } = useClipboard()
 const storeProject = useProjectStore()
 const storeApp = useAppStore()
 const busyRefreshing: Ref<boolean> = ref(false)
@@ -73,6 +83,18 @@ async function request_json_gen() {
     storeApp.alertsError(`Unable to generate or upload JSON collection`)
   }
   busyRefreshing.value = false
+}
+
+async function copyCollectionUrl() {
+  let url: string = `${webdav_url.value}/collection.json`
+  await toClipboard(url).then(
+    function () {
+      storeApp.alertsSuccess(`JSON URL copied to Clipboard`)
+    },
+    function () {
+      storeApp.alertsError(`Unable to copy URL to clipboard 😞`)
+    }
+  )
 }
 </script>
 

@@ -21,7 +21,7 @@ import {
   faFileArrowDown,
   faFileExcel
 } from '@fortawesome/free-solid-svg-icons'
-import { faCircleXmark as farCircleXmark } from '@fortawesome/free-regular-svg-icons'
+import { faCircleXmark as farCircleXmark, faCopy } from '@fortawesome/free-regular-svg-icons'
 
 /* add icons to the library */
 library.add(
@@ -37,7 +37,8 @@ library.add(
   faFile,
   faFileArrowDown,
   farCircleXmark,
-  faFileExcel
+  faFileExcel,
+  faCopy
 )
 
 import App from './App.vue'
