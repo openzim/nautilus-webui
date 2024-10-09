@@ -17,6 +17,7 @@
         placeholder="my-folder/sub-folder"
         v-model="webdav_path"
         aria-describedby="webdavPathHelp"
+        @keyup.enter="set_webdav_path"
       />
       <p class="form-text" id="webdavPathHelp">
         <strong>Note</strong>: empty value is valid (means root folder)
