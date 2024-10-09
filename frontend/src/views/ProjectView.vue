@@ -267,7 +267,8 @@ async function uploadFiles(uploadFiles: FileList) {
       new Date().toISOString(),
       storeApp.constants.fakeHash,
       uploadFile.type,
-      FileStatus.UPLOADING
+      FileStatus.UPLOADING,
+      1
     )
     files.value.set(newFile.id, { file: newFile, uploadedSize: 0 })
 

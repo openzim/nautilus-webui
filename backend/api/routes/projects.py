@@ -179,6 +179,12 @@ class NautilusCollection:
         except KeyError:
             return default
 
+    def index_of(self, path: str) -> int:
+        try:
+            return self.files_indexes[path]
+        except KeyError:
+            return len(self.files_indexes) + 1
+
 
 async def read_remote_collection(url: str):
     resp = requests.get(url, timeout=constants.webdav_request_timeout_sec)
@@ -196,7 +202,6 @@ async def update_project_files_from_webdav(session: Session, project: Project):
 
     logger.debug(f"[project #{project.id}] refreshing from {project.webdav_path}")
 
-    now = datetime.datetime.now(tz=datetime.UTC)
     prefix = Path(project.webdav_path)
 
     # create a folder if this prefix does not exists
@@ -227,12 +232,33 @@ async def update_project_files_from_webdav(session: Session, project: Project):
         else:
             logger.debug(f"[project #{project.id}] collection: {len(collection)} files")
 
+    # first, update DB entries with data from webdav (modified_pn, size)
+    await _update_existing_entries(
+        session=session,
+        project=project,
+        entries={
+            path: entries[path]
+            for path in remote_paths
+            if path not in to_add and path not in to_remove
+        },
+    )
+    # then add new entries
+    await _add_new_entries(
+        project=project,
+        entries={path: entries[path] for path in to_add},
+        collection=collection,
+    )
+    # eventually clean up what's not in WebDAV anymore
+    await _delete_removed_entries(
+        session=session, project=project, paths_to_remove=to_remove
+    )
+
+
+async def _update_existing_entries(session: Session, project: Project, entries: dict):
+
     # update existing Files without removing metadata
     for path, entry in entries.items():
-        if path in to_add or path in to_remove:
-            continue
-
-        logger.debug(f"[project #{project.id}] deleting {path}")
+        logger.debug(f"[project #{project.id}] updating {path}")
         stmt = select(File).filter_by(project_id=project.id).filter_by(path=str(path))
         file = session.execute(stmt).scalar_one()
         file.filesize = entry.size
@@ -241,14 +267,28 @@ async def update_project_files_from_webdav(session: Session, project: Project):
         file.status = FileStatus.STORAGE.value
         session.add(file)
 
+
+async def _add_new_entries(
+    project: Project,
+    entries: dict,
+    collection: NautilusCollection | None,
+):
+    now = datetime.datetime.now(tz=datetime.UTC)
+    prefix = Path(project.webdav_path or "")
+
+    if collection:
+        entries = dict(sorted(entries.items(), key=lambda x: collection.index_of(x[0])))
+
     # add new files
     for path, entry in entries.items():
-        if path not in to_add:
-            continue
-
-        logger.debug(f"[project #{project.id}] adding {path}")
+        order = collection.index_of(path) if collection else 1
+        logger.debug(f"[project #{project.id}] adding {path} ## {order}")
         filepath = Path(entry.path).relative_to(prefix)
         filename = filepath.name
+
+        # dont add collection.json to the project
+        if collection and str(filepath) == "collection.json":
+            continue
 
         # TODO
         validate_project_quota(entry.size, project)
@@ -285,14 +325,20 @@ async def update_project_files_from_webdav(session: Session, project: Project):
                 path=str(filepath),
                 type=entry.mimetype,
                 status=FileStatus.STORAGE.value,
+                order=order,
             )
             project_.files.append(new_file)
             indep_session.add(new_file)
             indep_session.flush()
             indep_session.refresh(new_file)
 
+
+async def _delete_removed_entries(
+    session: Session, project: Project, paths_to_remove: list[str]
+):
+
     # delete those that dont exist anymore
-    for path in to_remove:
+    for path in paths_to_remove:
         logger.debug(f"[project #{project.id}] deleting {path}")
         stmt = select(File).filter_by(path=path).filter_by(project_id=project.id)
         file = session.execute(stmt).scalar()

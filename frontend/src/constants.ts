@@ -117,7 +117,7 @@ export class NautilusFile implements File {
       file.hash,
       file.type,
       file.status,
-      file.order,
+      file.order
     )
   }
 

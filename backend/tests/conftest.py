@@ -118,6 +118,7 @@ def file_id(project_id, test_file, test_file_hash):
         path=str(location.resolve()),
         type="image/png",
         status="LOCAL",
+        order=1
     )
     with Session.begin() as session:
         project = session.get(Project, project_id)

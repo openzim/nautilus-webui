@@ -236,7 +236,7 @@ async def create_file(
             path=str(fpath),
             type=mimetype,
             status=FileStatus.LOCAL.value,
-            order=1
+            order=1,
         )
         project_.files.append(new_file)
         indep_session.add(new_file)
