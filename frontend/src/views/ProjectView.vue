@@ -141,8 +141,12 @@ const totalSize = computed(() =>
   Array.from(files.value.values()).reduce((pre, element) => pre + element.file.filesize, 0)
 )
 const toBeDeletedFiles: Ref<Map<string, NautilusFile>> = ref(new Map())
+// sorting files by uploaded_on DESC
+// const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
+//   a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
+// )
 const compareFunction: Ref<CompareFunctionType> = ref((a, b) =>
-  a[1].file.uploaded_on > b[1].file.uploaded_on ? 1 : -1
+  a[1].file.order > b[1].file.order ? 1 : -1
 )
 const sortedFiles: Ref<Map<string, ClientVisibleFile>> = computed(() =>
   sortFiles(files.value, compareFunction.value)
