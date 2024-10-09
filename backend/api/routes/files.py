@@ -42,6 +42,7 @@ class FileModel(BaseModel):
     hash: str
     type: str
     status: str
+    order: int
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -235,6 +236,7 @@ async def create_file(
             path=str(fpath),
             type=mimetype,
             status=FileStatus.LOCAL.value,
+            order=1
         )
         project_.files.append(new_file)
         indep_session.add(new_file)

@@ -170,7 +170,7 @@ class Project(Base):
     webdav_path: Mapped[str | None]
 
     files: Mapped[list["File"]] = relationship(
-        cascade="all, delete-orphan", order_by="File.id"
+        cascade="all, delete-orphan", order_by="File.order"
     )
     archives: Mapped[list["Archive"]] = relationship(
         cascade="all, delete-orphan", order_by="desc(Archive.created_on)"
@@ -205,6 +205,7 @@ class File(Base):
     path: Mapped[str]
     type: Mapped[str]
     status: Mapped[str]
+    order: Mapped[int] = mapped_column(server_default=text("1"))
 
     @property
     def local_fpath(self):

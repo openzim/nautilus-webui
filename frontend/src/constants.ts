@@ -60,6 +60,7 @@ export interface File {
   hash: string
   type: string
   status: FileStatus
+  order: number
 }
 export class NautilusFile implements File {
   id: string
@@ -73,6 +74,7 @@ export class NautilusFile implements File {
   hash: string
   type: string
   status: FileStatus
+  order: number
 
   public constructor(
     id: string,
@@ -85,7 +87,8 @@ export class NautilusFile implements File {
     uploaded_on: string,
     hash: string,
     type: string,
-    status: FileStatus
+    status: FileStatus,
+    order: number
   ) {
     this.id = id
     this.project_id = project_id
@@ -98,6 +101,7 @@ export class NautilusFile implements File {
     this.hash = hash
     this.type = type
     this.status = status
+    this.order = order
   }
 
   public static fromFile(file: File): NautilusFile {
@@ -112,7 +116,8 @@ export class NautilusFile implements File {
       file.uploaded_on,
       file.hash,
       file.type,
-      file.status
+      file.status,
+      file.order,
     )
   }
 
